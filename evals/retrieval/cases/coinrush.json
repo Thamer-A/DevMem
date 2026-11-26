@@ -1,0 +1,158 @@
+[
+  {
+    "id": "cr-A1", "kind": "direct",
+    "task": "Add a RequestRespawn remote: pressing R on the client fires it, and the server then respawns that player after a configurable delay.",
+    "sessions_required": [], "sessions_optional": ["f4fde737"],
+    "files_required": ["src/shared/Remotes.luau", "src/shared/Config.luau", "src/client/controllers/InputController.luau"],
+    "files_optional": ["src/server/Main.server.luau", "src/client/Main.client.luau", "src/server/services/RoundService.luau"],
+    "verbatim": [],
+    "why": "Dev task A1 (bench/tasks/P1). Code-only task: remotes are defined in Remotes.luau, tunables in Config.luau, key input in InputController; the purchase session shows a remote handler pattern (optional)."
+  },
+  {
+    "id": "cr-A2", "kind": "direct",
+    "task": "Add a Coin Magnet item to the shop for 150 coins.",
+    "sessions_required": [], "sessions_optional": ["02b7ac77"],
+    "files_required": ["src/shared/ItemCatalog.luau"],
+    "files_optional": ["src/server/services/ShopService.luau", "src/shared/Config.luau", "src/server/services/CoinPickupService.luau", "src/shared/Types.luau"],
+    "verbatim": [],
+    "why": "Dev task A2. Items live in ItemCatalog.luau. The inventory-ids session (02b7ac77) is background (items are numeric ids) but not strictly required."
+  },
+  {
+    "id": "cr-B1", "kind": "followup_early_req",
+    "task": "Implement the daily reward we planned last session.",
+    "sessions_required": ["17c7cb15"], "sessions_optional": [],
+    "files_required": ["src/server/services/CurrencyService.luau", "src/shared/Config.luau", "src/server/services/DataService.luau"],
+    "files_optional": ["src/server/Main.server.luau", "src/shared/Types.luau"],
+    "verbatim": ["daily_reward", "00:00 UTC", "20 coins plus 10 per streak day", "Config.DailyStreakCap = 7", "resets the streak to 1"],
+    "why": "Dev task B1. All five decisions exist only in the planning session 17c7cb15."
+  },
+  {
+    "id": "cr-B2", "kind": "followup_early_req",
+    "task": "Add an admin command to gift an item to a player.",
+    "sessions_required": ["02b7ac77"], "sessions_optional": ["81b597c9"],
+    "files_required": ["src/server/services/AdminService.luau", "src/shared/ItemCatalog.luau"],
+    "files_optional": ["src/server/services/DataService.luau", "src/server/services/ShopService.luau"],
+    "verbatim": ["inventories must store numeric ItemCatalog ids, never names"],
+    "why": "Dev task B2. Gifting must store a numeric id, per the decision in 02b7ac77; /help (81b597c9) shows how admin commands are registered (optional)."
+  },
+  {
+    "id": "cr-C1", "kind": "stale_memory",
+    "task": "Make the Brute enemy deal 35 damage.",
+    "sessions_required": ["68c540e0"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.luau", "src/server/services/EnemyService.luau"],
+    "files_optional": [],
+    "verbatim": [],
+    "why": "Dev task C1. The Grunt-damage session (68c540e0) is the relevant memory but its edit location is stale (damage moved to Config.Enemies); the file Config.luau is where the change belongs now. Whether the stale flag appears is not scored here."
+  },
+  {
+    "id": "cr-C2", "kind": "stale_memory",
+    "task": "Add a confirmation dialog before the client sends a shop purchase to the server.",
+    "sessions_required": ["f4fde737"], "sessions_optional": [],
+    "files_required": ["src/client/controllers/ShopController.luau"],
+    "files_optional": ["src/shared/Remotes.luau", "src/client/controllers/UIController.luau"],
+    "verbatim": [],
+    "why": "Dev task C2. The Buy-button session (f4fde737) changed ShopController and mentions the (since renamed) remote."
+  },
+  {
+    "id": "cr-D1", "kind": "untouched_file",
+    "task": "Add a MathUtil.lerp(a, b, t) function that clamps t to the range [0, 1].",
+    "sessions_required": [], "sessions_optional": [],
+    "files_required": ["src/shared/MathUtil.luau"],
+    "files_optional": [],
+    "verbatim": [],
+    "why": "Dev task D1, unrelated to every session; no session touched MathUtil.luau. Any session in the pack is off-label."
+  },
+  {
+    "id": "cr-D2", "kind": "untouched_file",
+    "task": "Document how to use `rojo serve` for live sync in the README.",
+    "sessions_required": [], "sessions_optional": [],
+    "files_required": ["README.md"],
+    "files_optional": ["default.project.json"],
+    "verbatim": [],
+    "why": "Dev task D2, unrelated to every session; no session touched README.md."
+  },
+  {
+    "id": "cr-11", "kind": "terse_bug",
+    "task": "Items vanish from the inventory after we rename them.",
+    "sessions_required": ["02b7ac77"], "sessions_optional": [],
+    "files_required": ["src/server/services/DataService.luau"],
+    "files_optional": ["src/shared/ItemCatalog.luau", "src/shared/Types.luau"],
+    "verbatim": ["inventories must store numeric ItemCatalog ids, never names"],
+    "why": "This is the exact bug 02b7ac77 fixed; the report omits the decision and the migration."
+  },
+  {
+    "id": "cr-12", "kind": "followup_early_req",
+    "task": "Grunts still feel weak, raise their damage a bit more.",
+    "sessions_required": ["68c540e0"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.luau"],
+    "files_optional": ["src/server/services/EnemyService.luau"],
+    "verbatim": ["Raise Grunt damage from 10 to 12"],
+    "why": "The previous raise (10 to 12) is in 68c540e0; current damage values are in Config.Enemies."
+  },
+  {
+    "id": "cr-13", "kind": "paraphrase",
+    "task": "Give people something nice every day they come back, bigger the longer their run of consecutive days.",
+    "sessions_required": ["17c7cb15"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.luau", "src/server/services/DataService.luau"],
+    "files_optional": ["src/server/services/CurrencyService.luau"],
+    "verbatim": ["reward is 20 coins plus 10 per streak day"],
+    "why": "Paraphrase of the daily login reward with streaks (no words reward, daily, login or streak); decisions in 17c7cb15."
+  },
+  {
+    "id": "cr-14", "kind": "followup_early_req",
+    "task": "Raise the cap on consecutive days to 10.",
+    "sessions_required": ["17c7cb15"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.luau"],
+    "files_optional": [],
+    "verbatim": ["the streak caps at 7 days", "Config.DailyStreakCap = 7"],
+    "why": "The cap (7, Config.DailyStreakCap) is decided only in 17c7cb15; the prompt calls it 'cap on consecutive days'."
+  },
+  {
+    "id": "cr-15", "kind": "non_english",
+    "task": "نفّذ مكافأة تسجيل الدخول اليومية التي خططنا لها",
+    "sessions_required": ["17c7cb15"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.luau"],
+    "files_optional": ["src/server/services/CurrencyService.luau", "src/server/services/DataService.luau"],
+    "verbatim": ["daily_reward"],
+    "why": "Arabic: 'implement the daily login reward we planned'; same target as B1."
+  },
+  {
+    "id": "cr-16", "kind": "non_english",
+    "task": "أضف تأكيدًا قبل إرسال عملية الشراء إلى الخادم",
+    "sessions_required": ["f4fde737"], "sessions_optional": [],
+    "files_required": ["src/client/controllers/ShopController.luau"],
+    "files_optional": ["src/client/controllers/UIController.luau"],
+    "verbatim": [],
+    "why": "Arabic: 'add a confirmation before sending the purchase to the server'; same target as C2."
+  },
+  {
+    "id": "cr-17", "kind": "followup_early_req",
+    "task": "Make /help also print an example for each admin command.",
+    "sessions_required": ["81b597c9"], "sessions_optional": [],
+    "files_required": ["src/server/services/AdminService.luau"],
+    "files_optional": [],
+    "verbatim": ["lists the available admin commands"],
+    "why": "/help was added in 81b597c9."
+  },
+  {
+    "id": "cr-18", "kind": "trivial", "task": "ok, go ahead",
+    "sessions_required": [], "sessions_optional": [], "files_required": [], "files_optional": [], "verbatim": [],
+    "expect_empty": true,
+    "why": "Confirmation; nothing to retrieve."
+  },
+  {
+    "id": "cr-19", "kind": "trivial", "task": "thanks",
+    "sessions_required": [], "sessions_optional": [], "files_required": [], "files_optional": [], "verbatim": [],
+    "expect_empty": true,
+    "why": "Thanks; nothing to retrieve."
+  },
+  {
+    "id": "cr-20", "kind": "terse_bug",
+    "task": "I can still buy things twice if I mash the button.",
+    "sessions_required": ["f4fde737"], "sessions_optional": [],
+    "files_required": ["src/server/services/ShopService.luau", "src/client/controllers/ShopController.luau"],
+    "files_optional": [],
+    "verbatim": ["rejects purchases during the cooldown"],
+    "why": "The double-purchase fix and its requirement (server rejects during cooldown, client disables the button) are in f4fde737."
+  }
+]

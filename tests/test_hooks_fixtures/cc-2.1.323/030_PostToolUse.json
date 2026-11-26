@@ -1,0 +1,27 @@
+{
+ "session_id": "4a014bc1-dc45-4a0c-9e7a-ab4dec5491d8",
+ "transcript_path": "{TRANSCRIPT}",
+ "cwd": "{PROJECT}",
+ "prompt_id": "ca2a0eac-26f2-4067-96ee-af45b3454745",
+ "permission_mode": "acceptEdits",
+ "effort": {
+  "level": "medium"
+ },
+ "hook_event_name": "PostToolUse",
+ "tool_name": "Read",
+ "tool_input": {
+  "file_path": "{PROJECT}\\farewell.py"
+ },
+ "tool_response": {
+  "type": "text",
+  "file": {
+   "filePath": "{PROJECT}/farewell.py",
+   "content": "def bye(name):\n    return \"bye \" + name\n",
+   "numLines": 3,
+   "startLine": 1,
+   "totalLines": 3
+  }
+ },
+ "tool_use_id": "toolu_01A59z5ek5oGCvEFckTQKYdR",
+ "duration_ms": 24
+}

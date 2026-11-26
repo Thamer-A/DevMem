@@ -1,0 +1,21 @@
+{
+ "session_id": "4a014bc1-dc45-4a0c-9e7a-ab4dec5491d8",
+ "transcript_path": "{TRANSCRIPT}",
+ "cwd": "{PROJECT}",
+ "prompt_id": "f101623f-e5b1-4791-8d98-7cab74a120b8",
+ "permission_mode": "acceptEdits",
+ "effort": {
+  "level": "medium"
+ },
+ "hook_event_name": "PostToolBatch",
+ "tool_calls": [
+  {
+   "tool_name": "Read",
+   "tool_input": {
+    "file_path": "{PROJECT}/greet.py"
+   },
+   "tool_use_id": "toolu_01PgEyW5A2QUPD57CvgjNyUR",
+   "tool_response": "1\tdef greet(name):\n2\t    return \"hello \" + name\n3\t"
+  }
+ ]
+}

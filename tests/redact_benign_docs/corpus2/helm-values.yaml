@@ -1,0 +1,20 @@
+# Default values for web.
+replicaCount: 2
+image:
+  repository: example/web
+  tag: "1.4.2"
+auth:
+  # existingSecret: name of a Secret holding the password; leave empty to generate one
+  existingSecret: ""
+  passwordKey: password
+  tokenTtl: 3600
+  apiKeySecretName: web-api-key
+extraEnv:
+  - name: TOKEN_LIMIT
+    value: "200000"
+  - name: KEY_PREFIX
+    value: "web"
+  - name: SECRET_ROTATION
+    value: "monthly"
+  - name: PASSWORD_RESET_URL
+    value: "https://example.invalid/reset"

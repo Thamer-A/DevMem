@@ -1,0 +1,2374 @@
+{
+ "cases": [
+  {
+   "decisions": 2,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 2,
+   "file_mention_hits": 2,
+   "file_total": 2,
+   "files_found": [
+    "src/client/ShopUi.client.lua",
+    "src/server/Coins.lua",
+    "src/server/Shop.lua",
+    "src/shared/Config.lua"
+   ],
+   "id": "bs-01",
+   "items": 9,
+   "kind": "followup_early_req",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/server/Coins.lua"
+   ],
+   "offlabel_items": 3,
+   "offlabel_sessions": [
+    "9e11ad14",
+    "c976dd00"
+   ],
+   "project": "blade-swarm",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "3e2bb0e2",
+    "9e11ad14",
+    "c976dd00",
+    "dbf18bb2",
+    "e695866c"
+   ],
+   "tokens": 1353,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/client/BladeOrbit.client.lua",
+    "src/server/Blades.server.lua",
+    "src/server/Zombies.server.lua",
+    "src/shared/BladeMath.lua",
+    "src/shared/Config.lua"
+   ],
+   "id": "bs-02",
+   "items": 8,
+   "kind": "terse_bug",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/server/Zombies.server.lua",
+    "src/shared/BladeMath.lua"
+   ],
+   "offlabel_items": 4,
+   "offlabel_sessions": [
+    "172a5388",
+    "e695866c"
+   ],
+   "project": "blade-swarm",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "172a5388",
+    "9e11ad14",
+    "e695866c"
+   ],
+   "tokens": 1004,
+   "verbatim_hits": 2,
+   "verbatim_missing": [],
+   "verbatim_total": 2
+  },
+  {
+   "decisions": 3,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/server/Coins.lua",
+    "src/server/Zombies.server.lua",
+    "src/shared/Config.lua"
+   ],
+   "id": "bs-03",
+   "items": 9,
+   "kind": "followup_early_req",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/server/Coins.lua"
+   ],
+   "offlabel_items": 5,
+   "offlabel_sessions": [
+    "9e11ad14",
+    "c976dd00",
+    "d9c19cbb",
+    "dbf18bb2"
+   ],
+   "project": "blade-swarm",
+   "session_hits": 2,
+   "session_total": 2,
+   "sessions_found": [
+    "172a5388",
+    "9e11ad14",
+    "c976dd00",
+    "d9c19cbb",
+    "dbf18bb2",
+    "ff58317f"
+   ],
+   "tokens": 1465,
+   "verbatim_hits": 2,
+   "verbatim_missing": [],
+   "verbatim_total": 2
+  },
+  {
+   "decisions": 2,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/server/Zombies.server.lua",
+    "src/shared/Config.lua"
+   ],
+   "id": "bs-04",
+   "items": 6,
+   "kind": "followup_early_req",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 1,
+   "offlabel_sessions": [
+    "9e11ad14"
+   ],
+   "project": "blade-swarm",
+   "session_hits": 2,
+   "session_total": 2,
+   "sessions_found": [
+    "172a5388",
+    "9e11ad14",
+    "d9c19cbb",
+    "ff58317f"
+   ],
+   "tokens": 1084,
+   "verbatim_hits": 2,
+   "verbatim_missing": [],
+   "verbatim_total": 2
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/client/ShopUi.client.lua",
+    "src/server/Shop.lua",
+    "src/shared/Config.lua",
+    "src/shared/Remotes.lua"
+   ],
+   "id": "bs-05",
+   "items": 5,
+   "kind": "direct",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/shared/Remotes.lua"
+   ],
+   "offlabel_items": 1,
+   "offlabel_sessions": [],
+   "project": "blade-swarm",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "dbf18bb2"
+   ],
+   "tokens": 796,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 2,
+   "file_total": 2,
+   "files_found": [
+    "src/client/CombatFx.client.lua",
+    "src/server/Zombies.server.lua"
+   ],
+   "id": "bs-06",
+   "items": 3,
+   "kind": "paraphrase",
+   "missing_files": [
+    "src/shared/Config.lua"
+   ],
+   "missing_sessions": [
+    "d9c19cbb"
+   ],
+   "offlabel_files": [
+    "src/client/CombatFx.client.lua"
+   ],
+   "offlabel_items": 2,
+   "offlabel_sessions": [
+    "3e2bb0e2"
+   ],
+   "project": "blade-swarm",
+   "session_hits": 0,
+   "session_total": 1,
+   "sessions_found": [
+    "3e2bb0e2"
+   ],
+   "tokens": 377,
+   "verbatim_hits": 0,
+   "verbatim_missing": [
+    "each wave adds 4 more"
+   ],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/shared/Config.lua"
+   ],
+   "id": "bs-07",
+   "items": 4,
+   "kind": "paraphrase",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 2,
+   "offlabel_sessions": [
+    "172a5388",
+    "46816b28"
+   ],
+   "project": "blade-swarm",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "172a5388",
+    "46816b28",
+    "9e11ad14"
+   ],
+   "tokens": 912,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 2,
+   "file_mention_hits": 2,
+   "file_total": 2,
+   "files_found": [
+    "src/client/ShopUi.client.lua",
+    "src/server/Shop.lua",
+    "src/server/Zombies.server.lua",
+    "src/shared/Remotes.lua"
+   ],
+   "id": "bs-08",
+   "items": 7,
+   "kind": "terse_bug",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 1,
+   "offlabel_sessions": [
+    "3e2bb0e2"
+   ],
+   "project": "blade-swarm",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "3e2bb0e2",
+    "dbf18bb2",
+    "e516187c"
+   ],
+   "tokens": 1114,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/server/Zombies.server.lua",
+    "src/shared/Remotes.lua"
+   ],
+   "id": "bs-09",
+   "items": 4,
+   "kind": "terse_bug",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/shared/Remotes.lua"
+   ],
+   "offlabel_items": 1,
+   "offlabel_sessions": [],
+   "project": "blade-swarm",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "1ba52bf8",
+    "ff58317f"
+   ],
+   "tokens": 565,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/client/Hud.client.lua",
+    "src/client/ShopUi.client.lua",
+    "src/client/UiKit.lua",
+    "src/server/Zombies.server.lua",
+    "src/shared/Config.lua",
+    "src/shared/Remotes.lua"
+   ],
+   "id": "bs-10",
+   "items": 9,
+   "kind": "followup_early_req",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/client/ShopUi.client.lua",
+    "src/server/Zombies.server.lua",
+    "src/shared/Remotes.lua"
+   ],
+   "offlabel_items": 5,
+   "offlabel_sessions": [
+    "9e11ad14",
+    "b2bdd465"
+   ],
+   "project": "blade-swarm",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "3e2bb0e2",
+    "9e11ad14",
+    "b2bdd465"
+   ],
+   "tokens": 1140,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/client/CombatFx.client.lua",
+    "src/server/Zombies.server.lua",
+    "src/shared/Config.lua"
+   ],
+   "id": "bs-11",
+   "items": 6,
+   "kind": "followup_early_req",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/client/CombatFx.client.lua"
+   ],
+   "offlabel_items": 3,
+   "offlabel_sessions": [
+    "172a5388",
+    "b2bdd465"
+   ],
+   "project": "blade-swarm",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "172a5388",
+    "b2bdd465",
+    "d9c19cbb"
+   ],
+   "tokens": 977,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "README.md"
+   ],
+   "id": "bs-12",
+   "items": 3,
+   "kind": "untouched_file",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 2,
+   "offlabel_sessions": [
+    "46816b28",
+    "9e11ad14"
+   ],
+   "project": "blade-swarm",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [
+    "46816b28",
+    "9e11ad14"
+   ],
+   "tokens": 561,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "default.project.json",
+    "src/shared/Config.lua",
+    "src/shared/Remotes.lua"
+   ],
+   "id": "bs-13",
+   "items": 5,
+   "kind": "untouched_file",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/shared/Config.lua",
+    "src/shared/Remotes.lua"
+   ],
+   "offlabel_items": 4,
+   "offlabel_sessions": [
+    "46816b28",
+    "9e11ad14"
+   ],
+   "project": "blade-swarm",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [
+    "46816b28",
+    "9e11ad14"
+   ],
+   "tokens": 649,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": true,
+   "error": null,
+   "expect_empty": true,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 0,
+   "files_found": [],
+   "id": "bs-14",
+   "items": 0,
+   "kind": "trivial",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "blade-swarm",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": true,
+   "error": null,
+   "expect_empty": true,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 0,
+   "files_found": [],
+   "id": "bs-15",
+   "items": 0,
+   "kind": "trivial",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "blade-swarm",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": true,
+   "error": null,
+   "expect_empty": true,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 0,
+   "files_found": [],
+   "id": "bs-16",
+   "items": 0,
+   "kind": "trivial",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "blade-swarm",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 1,
+   "files_found": [],
+   "id": "bs-17",
+   "items": 0,
+   "kind": "non_english",
+   "missing_files": [
+    "src/shared/Config.lua"
+   ],
+   "missing_sessions": [
+    "d9c19cbb"
+   ],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "blade-swarm",
+   "session_hits": 0,
+   "session_total": 1,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [
+    "each wave adds 4 more"
+   ],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 1,
+   "files_found": [],
+   "id": "bs-18",
+   "items": 0,
+   "kind": "non_english",
+   "missing_files": [
+    "src/shared/Config.lua"
+   ],
+   "missing_sessions": [
+    "dbf18bb2"
+   ],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "blade-swarm",
+   "session_hits": 0,
+   "session_total": 1,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [
+    "Rerolling the offers costs 10 coins"
+   ],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 1,
+   "files_found": [],
+   "id": "bs-19",
+   "items": 0,
+   "kind": "non_english",
+   "missing_files": [
+    "src/shared/Config.lua"
+   ],
+   "missing_sessions": [
+    "3e2bb0e2"
+   ],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "blade-swarm",
+   "session_hits": 0,
+   "session_total": 1,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [
+    "Common = gray, Rare = blue, Epic = purple"
+   ],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 1,
+   "files_found": [],
+   "id": "bs-20",
+   "items": 0,
+   "kind": "non_english",
+   "missing_files": [
+    "src/shared/Config.lua"
+   ],
+   "missing_sessions": [
+    "dbf18bb2"
+   ],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "blade-swarm",
+   "session_hits": 0,
+   "session_total": 1,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [
+    "Rerolling the offers costs 10 coins"
+   ],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 1,
+   "files_found": [],
+   "id": "bs-21",
+   "items": 0,
+   "kind": "non_english",
+   "missing_files": [
+    "src/shared/Config.lua"
+   ],
+   "missing_sessions": [
+    "d9c19cbb"
+   ],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "blade-swarm",
+   "session_hits": 0,
+   "session_total": 1,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [
+    "20 second break between waves"
+   ],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 1,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/server/Coins.lua",
+    "src/server/Shop.lua",
+    "src/server/Zombies.server.lua",
+    "src/shared/Config.lua",
+    "src/shared/Remotes.lua"
+   ],
+   "id": "bs-22",
+   "items": 8,
+   "kind": "direct",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/server/Zombies.server.lua",
+    "src/shared/Remotes.lua"
+   ],
+   "offlabel_items": 4,
+   "offlabel_sessions": [
+    "172a5388",
+    "9e11ad14"
+   ],
+   "project": "blade-swarm",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "172a5388",
+    "9e11ad14",
+    "dbf18bb2"
+   ],
+   "tokens": 1087,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/client/CombatFx.client.lua",
+    "src/server/Zombies.server.lua",
+    "src/shared/Config.lua"
+   ],
+   "id": "bs-23",
+   "items": 5,
+   "kind": "direct",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/server/Zombies.server.lua"
+   ],
+   "offlabel_items": 2,
+   "offlabel_sessions": [
+    "172a5388"
+   ],
+   "project": "blade-swarm",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "172a5388",
+    "c976dd00"
+   ],
+   "tokens": 676,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": true,
+   "error": null,
+   "expect_empty": true,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 0,
+   "files_found": [],
+   "id": "bs-24",
+   "items": 0,
+   "kind": "trivial",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "blade-swarm",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 2,
+   "file_mention_hits": 2,
+   "file_total": 3,
+   "files_found": [
+    "src/client/controllers/ShopController.luau",
+    "src/server/services/CurrencyService.luau",
+    "src/server/services/DataService.luau",
+    "src/server/services/RoundService.luau",
+    "src/shared/Config.luau",
+    "src/shared/Remotes.luau"
+   ],
+   "id": "cr-A1",
+   "items": 8,
+   "kind": "direct",
+   "missing_files": [
+    "src/client/controllers/InputController.luau"
+   ],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/client/controllers/ShopController.luau",
+    "src/server/services/CurrencyService.luau",
+    "src/server/services/DataService.luau"
+   ],
+   "offlabel_items": 4,
+   "offlabel_sessions": [
+    "02b7ac77"
+   ],
+   "project": "coinrush",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [
+    "02b7ac77",
+    "f4fde737"
+   ],
+   "tokens": 1252,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/client/controllers/InventoryController.luau",
+    "src/client/controllers/ShopController.luau",
+    "src/server/services/DataService.luau",
+    "src/server/services/ShopService.luau",
+    "src/shared/ItemCatalog.luau"
+   ],
+   "id": "cr-A2",
+   "items": 8,
+   "kind": "direct",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/client/controllers/InventoryController.luau",
+    "src/client/controllers/ShopController.luau",
+    "src/server/services/DataService.luau"
+   ],
+   "offlabel_items": 5,
+   "offlabel_sessions": [
+    "17c7cb15",
+    "f4fde737"
+   ],
+   "project": "coinrush",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [
+    "02b7ac77",
+    "17c7cb15",
+    "f4fde737"
+   ],
+   "tokens": 1248,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 2,
+   "file_total": 3,
+   "files_found": [
+    "src/server/services/DataService.luau"
+   ],
+   "id": "cr-B1",
+   "items": 2,
+   "kind": "followup_early_req",
+   "missing_files": [
+    "src/server/services/CurrencyService.luau",
+    "src/shared/Config.luau"
+   ],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "coinrush",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "17c7cb15"
+   ],
+   "tokens": 470,
+   "verbatim_hits": 5,
+   "verbatim_missing": [],
+   "verbatim_total": 5
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 2,
+   "files_found": [
+    "src/server/services/AdminService.luau",
+    "src/shared/Config.luau"
+   ],
+   "id": "cr-B2",
+   "items": 5,
+   "kind": "followup_early_req",
+   "missing_files": [
+    "src/shared/ItemCatalog.luau"
+   ],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/shared/Config.luau"
+   ],
+   "offlabel_items": 2,
+   "offlabel_sessions": [
+    "f4fde737"
+   ],
+   "project": "coinrush",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "02b7ac77",
+    "81b597c9",
+    "f4fde737"
+   ],
+   "tokens": 925,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 2,
+   "file_mention_hits": 2,
+   "file_total": 2,
+   "files_found": [
+    "src/server/services/EnemyService.luau",
+    "src/shared/Config.luau"
+   ],
+   "id": "cr-C1",
+   "items": 3,
+   "kind": "stale_memory",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "coinrush",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "68c540e0"
+   ],
+   "tokens": 419,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/client/controllers/ShopController.luau",
+    "src/server/services/CurrencyService.luau",
+    "src/server/services/DataService.luau",
+    "src/server/services/ShopService.luau"
+   ],
+   "id": "cr-C2",
+   "items": 5,
+   "kind": "stale_memory",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/server/services/CurrencyService.luau",
+    "src/server/services/DataService.luau",
+    "src/server/services/ShopService.luau"
+   ],
+   "offlabel_items": 3,
+   "offlabel_sessions": [],
+   "project": "coinrush",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "f4fde737"
+   ],
+   "tokens": 656,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/shared/MathUtil.luau"
+   ],
+   "id": "cr-D1",
+   "items": 1,
+   "kind": "untouched_file",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "coinrush",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [],
+   "tokens": 109,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "README.md"
+   ],
+   "id": "cr-D2",
+   "items": 1,
+   "kind": "untouched_file",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "coinrush",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [],
+   "tokens": 62,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/client/controllers/InventoryController.luau",
+    "src/client/controllers/ShopController.luau",
+    "src/server/services/DataService.luau",
+    "src/server/services/ShopService.luau",
+    "src/shared/ItemCatalog.luau",
+    "src/shared/Remotes.luau"
+   ],
+   "id": "cr-11",
+   "items": 8,
+   "kind": "terse_bug",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/client/controllers/InventoryController.luau",
+    "src/client/controllers/ShopController.luau",
+    "src/server/services/ShopService.luau",
+    "src/shared/Remotes.luau"
+   ],
+   "offlabel_items": 5,
+   "offlabel_sessions": [
+    "f4fde737"
+   ],
+   "project": "coinrush",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "02b7ac77",
+    "f4fde737"
+   ],
+   "tokens": 1141,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/server/services/EnemyService.luau",
+    "src/shared/Config.luau"
+   ],
+   "id": "cr-12",
+   "items": 3,
+   "kind": "followup_early_req",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "coinrush",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "68c540e0"
+   ],
+   "tokens": 386,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 2,
+   "files_found": [
+    "src/shared/ItemCatalog.luau"
+   ],
+   "id": "cr-13",
+   "items": 2,
+   "kind": "paraphrase",
+   "missing_files": [
+    "src/server/services/DataService.luau",
+    "src/shared/Config.luau"
+   ],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/shared/ItemCatalog.luau"
+   ],
+   "offlabel_items": 1,
+   "offlabel_sessions": [],
+   "project": "coinrush",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "17c7cb15"
+   ],
+   "tokens": 355,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/shared/Config.luau",
+    "src/shared/MathUtil.luau"
+   ],
+   "id": "cr-14",
+   "items": 4,
+   "kind": "followup_early_req",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "src/shared/MathUtil.luau"
+   ],
+   "offlabel_items": 2,
+   "offlabel_sessions": [
+    "68c540e0"
+   ],
+   "project": "coinrush",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "17c7cb15",
+    "68c540e0"
+   ],
+   "tokens": 606,
+   "verbatim_hits": 2,
+   "verbatim_missing": [],
+   "verbatim_total": 2
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 1,
+   "files_found": [],
+   "id": "cr-15",
+   "items": 0,
+   "kind": "non_english",
+   "missing_files": [
+    "src/shared/Config.luau"
+   ],
+   "missing_sessions": [
+    "17c7cb15"
+   ],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "coinrush",
+   "session_hits": 0,
+   "session_total": 1,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [
+    "daily_reward"
+   ],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 1,
+   "files_found": [],
+   "id": "cr-16",
+   "items": 0,
+   "kind": "non_english",
+   "missing_files": [
+    "src/client/controllers/ShopController.luau"
+   ],
+   "missing_sessions": [
+    "f4fde737"
+   ],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "coinrush",
+   "session_hits": 0,
+   "session_total": 1,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "src/server/services/AdminService.luau"
+   ],
+   "id": "cr-17",
+   "items": 2,
+   "kind": "followup_early_req",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "coinrush",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "81b597c9"
+   ],
+   "tokens": 340,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": true,
+   "error": null,
+   "expect_empty": true,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 0,
+   "files_found": [],
+   "id": "cr-18",
+   "items": 0,
+   "kind": "trivial",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "coinrush",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": true,
+   "error": null,
+   "expect_empty": true,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 0,
+   "files_found": [],
+   "id": "cr-19",
+   "items": 0,
+   "kind": "trivial",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "coinrush",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 2,
+   "files_found": [
+    "src/client/controllers/ShopController.luau"
+   ],
+   "id": "cr-20",
+   "items": 2,
+   "kind": "terse_bug",
+   "missing_files": [
+    "src/server/services/ShopService.luau"
+   ],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "coinrush",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "f4fde737"
+   ],
+   "tokens": 370,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 2,
+   "file_mention_hits": 2,
+   "file_total": 2,
+   "files_found": [
+    "public/app.js",
+    "public/index.html",
+    "public/style.css",
+    "server.js"
+   ],
+   "id": "tb-01",
+   "items": 7,
+   "kind": "followup_early_req",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "server.js"
+   ],
+   "offlabel_items": 2,
+   "offlabel_sessions": [
+    "5876b7ae"
+   ],
+   "project": "taskboard",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "4644d1f4",
+    "5876b7ae",
+    "c2fabc15"
+   ],
+   "tokens": 862,
+   "verbatim_hits": 3,
+   "verbatim_missing": [],
+   "verbatim_total": 3
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "server.js"
+   ],
+   "id": "tb-02",
+   "items": 3,
+   "kind": "direct",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 1,
+   "offlabel_sessions": [
+    "fc6e80d7"
+   ],
+   "project": "taskboard",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "c2fabc15",
+    "fc6e80d7"
+   ],
+   "tokens": 573,
+   "verbatim_hits": 2,
+   "verbatim_missing": [],
+   "verbatim_total": 2
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 2,
+   "file_total": 2,
+   "files_found": [
+    "public/app.js"
+   ],
+   "id": "tb-03",
+   "items": 3,
+   "kind": "terse_bug",
+   "missing_files": [
+    "server.js"
+   ],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 1,
+   "offlabel_sessions": [
+    "fc6e80d7"
+   ],
+   "project": "taskboard",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "c2fabc15",
+    "fc6e80d7"
+   ],
+   "tokens": 565,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 0,
+   "file_mention_hits": 2,
+   "file_total": 2,
+   "files_found": [
+    "public/index.html"
+   ],
+   "id": "tb-04",
+   "items": 4,
+   "kind": "followup_early_req",
+   "missing_files": [
+    "public/app.js",
+    "server.js"
+   ],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 2,
+   "offlabel_sessions": [
+    "c2fabc15",
+    "fc6e80d7"
+   ],
+   "project": "taskboard",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "6fd2de0a",
+    "c2fabc15",
+    "fc6e80d7"
+   ],
+   "tokens": 742,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "public/app.js",
+    "public/style.css"
+   ],
+   "id": "tb-05",
+   "items": 3,
+   "kind": "followup_early_req",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "taskboard",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "7edb923c"
+   ],
+   "tokens": 367,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "public/style.css"
+   ],
+   "id": "tb-06",
+   "items": 2,
+   "kind": "followup_early_req",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "taskboard",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "5876b7ae"
+   ],
+   "tokens": 327,
+   "verbatim_hits": 2,
+   "verbatim_missing": [],
+   "verbatim_total": 2
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "public/app.js",
+    "public/index.html",
+    "public/style.css",
+    "server.js"
+   ],
+   "id": "tb-07",
+   "items": 5,
+   "kind": "followup_early_req",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "public/style.css",
+    "server.js"
+   ],
+   "offlabel_items": 2,
+   "offlabel_sessions": [],
+   "project": "taskboard",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "fdb761dd"
+   ],
+   "tokens": 368,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 1,
+   "files_found": [],
+   "id": "tb-08",
+   "items": 0,
+   "kind": "paraphrase",
+   "missing_files": [
+    "server.js"
+   ],
+   "missing_sessions": [
+    "c2fabc15"
+   ],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "taskboard",
+   "session_hits": 0,
+   "session_total": 1,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [
+    "at most 3 cards"
+   ],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 1,
+   "files_found": [],
+   "id": "tb-09",
+   "items": 0,
+   "kind": "paraphrase",
+   "missing_files": [
+    "public/app.js"
+   ],
+   "missing_sessions": [
+    "fdb761dd"
+   ],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "taskboard",
+   "session_hits": 0,
+   "session_total": 1,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "public/app.js",
+    "public/index.html",
+    "public/style.css",
+    "server.js"
+   ],
+   "id": "tb-10",
+   "items": 6,
+   "kind": "terse_bug",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "public/app.js",
+    "server.js"
+   ],
+   "offlabel_items": 3,
+   "offlabel_sessions": [
+    "fc6e80d7"
+   ],
+   "project": "taskboard",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "5876b7ae",
+    "fc6e80d7"
+   ],
+   "tokens": 740,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 2,
+   "files_found": [],
+   "id": "tb-11",
+   "items": 0,
+   "kind": "non_english",
+   "missing_files": [
+    "public/app.js",
+    "public/style.css"
+   ],
+   "missing_sessions": [
+    "4644d1f4"
+   ],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "taskboard",
+   "session_hits": 0,
+   "session_total": 1,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [
+    "#e5484d",
+    "#3e63dd",
+    "#8b8d98"
+   ],
+   "verbatim_total": 3
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 1,
+   "files_found": [],
+   "id": "tb-12",
+   "items": 0,
+   "kind": "non_english",
+   "missing_files": [
+    "server.js"
+   ],
+   "missing_sessions": [
+    "c2fabc15"
+   ],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "taskboard",
+   "session_hits": 0,
+   "session_total": 1,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [
+    "at most 3 cards"
+   ],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 1,
+   "files_found": [],
+   "id": "tb-13",
+   "items": 0,
+   "kind": "non_english",
+   "missing_files": [
+    "public/style.css"
+   ],
+   "missing_sessions": [
+    "7edb923c"
+   ],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "taskboard",
+   "session_hits": 0,
+   "session_total": 1,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [
+    "Overdue cards get a red border"
+   ],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "public/app.js",
+    "server.js"
+   ],
+   "id": "tb-14",
+   "items": 3,
+   "kind": "direct",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "public/app.js"
+   ],
+   "offlabel_items": 1,
+   "offlabel_sessions": [],
+   "project": "taskboard",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [
+    "fc6e80d7"
+   ],
+   "tokens": 391,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": true,
+   "error": null,
+   "expect_empty": true,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 0,
+   "files_found": [],
+   "id": "tb-15",
+   "items": 0,
+   "kind": "trivial",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "taskboard",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": true,
+   "error": null,
+   "expect_empty": true,
+   "file_hits": 0,
+   "file_mention_hits": 0,
+   "file_total": 0,
+   "files_found": [],
+   "id": "tb-16",
+   "items": 0,
+   "kind": "trivial",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 0,
+   "offlabel_sessions": [],
+   "project": "taskboard",
+   "session_hits": 0,
+   "session_total": 0,
+   "sessions_found": [],
+   "tokens": 0,
+   "verbatim_hits": 0,
+   "verbatim_missing": [],
+   "verbatim_total": 0
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 2,
+   "file_mention_hits": 2,
+   "file_total": 2,
+   "files_found": [
+    "public/app.js",
+    "public/index.html",
+    "public/style.css",
+    "server.js"
+   ],
+   "id": "tb-17",
+   "items": 8,
+   "kind": "followup_early_req",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [],
+   "offlabel_items": 3,
+   "offlabel_sessions": [
+    "6fd2de0a",
+    "c2fabc15",
+    "fdb761dd"
+   ],
+   "project": "taskboard",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "4644d1f4",
+    "6fd2de0a",
+    "c2fabc15",
+    "fdb761dd"
+   ],
+   "tokens": 1210,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  },
+  {
+   "decisions": 0,
+   "empty_ok": null,
+   "error": null,
+   "expect_empty": false,
+   "file_hits": 1,
+   "file_mention_hits": 1,
+   "file_total": 1,
+   "files_found": [
+    "public/app.js",
+    "server.js"
+   ],
+   "id": "tb-18",
+   "items": 4,
+   "kind": "terse_bug",
+   "missing_files": [],
+   "missing_sessions": [],
+   "offlabel_files": [
+    "public/app.js"
+   ],
+   "offlabel_items": 1,
+   "offlabel_sessions": [],
+   "project": "taskboard",
+   "session_hits": 1,
+   "session_total": 1,
+   "sessions_found": [
+    "8f180d05",
+    "fc6e80d7"
+   ],
+   "tokens": 686,
+   "verbatim_hits": 1,
+   "verbatim_missing": [],
+   "verbatim_total": 1
+  }
+ ],
+ "config": {
+  "budget": 1500,
+  "mode": "full"
+ },
+ "meta": {
+  "date": "2026-11-13",
+  "git_dirty": true,
+  "git_head": "5c7979d59bb31b91987285b61f0102f4f91ddcbf",
+  "python": "3.13.13"
+ },
+ "schema": 1,
+ "summary": {
+  "by_kind": {
+   "direct": {
+    "cases": 7,
+    "empty_n": 0,
+    "empty_pass_rate": null,
+    "errors": 0,
+    "file_mention_recall": 0.9524,
+    "file_recall": 0.9524,
+    "file_recall_n": 7,
+    "items": 40,
+    "noise_rate": 0.45,
+    "offlabel_items": 18,
+    "session_recall": 1.0,
+    "session_recall_n": 4,
+    "tokens_max": 1252,
+    "tokens_mean": 860.4,
+    "tokens_median": 796,
+    "verbatim_recall": 1.0,
+    "verbatim_recall_n": 3
+   },
+   "followup_early_req": {
+    "cases": 16,
+    "empty_n": 0,
+    "empty_pass_rate": null,
+    "errors": 0,
+    "file_mention_recall": 0.9479,
+    "file_recall": 0.8646,
+    "file_recall_n": 16,
+    "items": 84,
+    "noise_rate": 0.3571,
+    "offlabel_items": 30,
+    "session_recall": 1.0,
+    "session_recall_n": 16,
+    "tokens_max": 1465,
+    "tokens_mean": 788.9,
+    "tokens_median": 802.0,
+    "verbatim_recall": 1.0,
+    "verbatim_recall_n": 16
+   },
+   "non_english": {
+    "cases": 10,
+    "empty_n": 0,
+    "empty_pass_rate": null,
+    "errors": 0,
+    "file_mention_recall": 0.0,
+    "file_recall": 0.0,
+    "file_recall_n": 10,
+    "items": 0,
+    "noise_rate": null,
+    "offlabel_items": 0,
+    "session_recall": 0.0,
+    "session_recall_n": 10,
+    "tokens_max": 0,
+    "tokens_mean": 0,
+    "tokens_median": 0.0,
+    "verbatim_recall": 0.0,
+    "verbatim_recall_n": 9
+   },
+   "paraphrase": {
+    "cases": 5,
+    "empty_n": 0,
+    "empty_pass_rate": null,
+    "errors": 0,
+    "file_mention_recall": 0.4,
+    "file_recall": 0.3,
+    "file_recall_n": 5,
+    "items": 9,
+    "noise_rate": 0.5556,
+    "offlabel_items": 5,
+    "session_recall": 0.4,
+    "session_recall_n": 5,
+    "tokens_max": 912,
+    "tokens_mean": 328.8,
+    "tokens_median": 355,
+    "verbatim_recall": 0.5,
+    "verbatim_recall_n": 4
+   },
+   "stale_memory": {
+    "cases": 2,
+    "empty_n": 0,
+    "empty_pass_rate": null,
+    "errors": 0,
+    "file_mention_recall": 1.0,
+    "file_recall": 1.0,
+    "file_recall_n": 2,
+    "items": 8,
+    "noise_rate": 0.375,
+    "offlabel_items": 3,
+    "session_recall": 1.0,
+    "session_recall_n": 2,
+    "tokens_max": 656,
+    "tokens_mean": 537.5,
+    "tokens_median": 537.5,
+    "verbatim_recall": null,
+    "verbatim_recall_n": 0
+   },
+   "terse_bug": {
+    "cases": 8,
+    "empty_n": 0,
+    "empty_pass_rate": null,
+    "errors": 0,
+    "file_mention_recall": 0.9375,
+    "file_recall": 0.875,
+    "file_recall_n": 8,
+    "items": 42,
+    "noise_rate": 0.381,
+    "offlabel_items": 16,
+    "session_recall": 1.0,
+    "session_recall_n": 8,
+    "tokens_max": 1141,
+    "tokens_mean": 773.1,
+    "tokens_median": 713.0,
+    "verbatim_recall": 1.0,
+    "verbatim_recall_n": 8
+   },
+   "trivial": {
+    "cases": 8,
+    "empty_n": 8,
+    "empty_pass_rate": 1.0,
+    "errors": 0,
+    "file_mention_recall": null,
+    "file_recall": null,
+    "file_recall_n": 0,
+    "items": 0,
+    "noise_rate": null,
+    "offlabel_items": 0,
+    "session_recall": null,
+    "session_recall_n": 0,
+    "tokens_max": 0,
+    "tokens_mean": 0,
+    "tokens_median": 0.0,
+    "verbatim_recall": null,
+    "verbatim_recall_n": 0
+   },
+   "untouched_file": {
+    "cases": 4,
+    "empty_n": 0,
+    "empty_pass_rate": null,
+    "errors": 0,
+    "file_mention_recall": 1.0,
+    "file_recall": 1.0,
+    "file_recall_n": 4,
+    "items": 10,
+    "noise_rate": 0.6,
+    "offlabel_items": 6,
+    "session_recall": null,
+    "session_recall_n": 0,
+    "tokens_max": 649,
+    "tokens_mean": 345.2,
+    "tokens_median": 335.0,
+    "verbatim_recall": null,
+    "verbatim_recall_n": 0
+   }
+  },
+  "by_project": {
+   "blade-swarm": {
+    "cases": 24,
+    "empty_n": 4,
+    "empty_pass_rate": 1.0,
+    "errors": 0,
+    "file_mention_recall": 0.75,
+    "file_recall": 0.725,
+    "file_recall_n": 20,
+    "items": 91,
+    "noise_rate": 0.4396,
+    "offlabel_items": 40,
+    "session_recall": 0.6667,
+    "session_recall_n": 18,
+    "tokens_max": 1465,
+    "tokens_mean": 573.3,
+    "tokens_median": 607.0,
+    "verbatim_recall": 0.6471,
+    "verbatim_recall_n": 17
+   },
+   "coinrush": {
+    "cases": 18,
+    "empty_n": 2,
+    "empty_pass_rate": 1.0,
+    "errors": 0,
+    "file_mention_recall": 0.7083,
+    "file_recall": 0.6875,
+    "file_recall_n": 16,
+    "items": 54,
+    "noise_rate": 0.4074,
+    "offlabel_items": 22,
+    "session_recall": 0.8333,
+    "session_recall_n": 12,
+    "tokens_max": 1252,
+    "tokens_mean": 463.3,
+    "tokens_median": 378.0,
+    "verbatim_recall": 0.8889,
+    "verbatim_recall_n": 9
+   },
+   "taskboard": {
+    "cases": 18,
+    "empty_n": 2,
+    "empty_pass_rate": 1.0,
+    "errors": 0,
+    "file_mention_recall": 0.6875,
+    "file_recall": 0.5938,
+    "file_recall_n": 16,
+    "items": 48,
+    "noise_rate": 0.3333,
+    "offlabel_items": 16,
+    "session_recall": 0.6667,
+    "session_recall_n": 15,
+    "tokens_max": 1210,
+    "tokens_mean": 379.5,
+    "tokens_median": 367.5,
+    "verbatim_recall": 0.7143,
+    "verbatim_recall_n": 14
+   }
+  },
+  "overall": {
+   "cases": 60,
+   "empty_n": 8,
+   "empty_pass_rate": 1.0,
+   "errors": 0,
+   "file_mention_recall": 0.7179,
+   "file_recall": 0.6731,
+   "file_recall_n": 52,
+   "items": 193,
+   "noise_rate": 0.4041,
+   "offlabel_items": 78,
+   "session_recall": 0.7111,
+   "session_recall_n": 45,
+   "tokens_max": 1465,
+   "tokens_mean": 482.2,
+   "tokens_median": 388.5,
+   "verbatim_recall": 0.725,
+   "verbatim_recall_n": 40
+  }
+ },
+ "timing": {
+  "fixture_scan_seconds": {
+   "blade-swarm": 0.185,
+   "coinrush": 0.159,
+   "taskboard": 0.069
+  },
+  "pack": {
+   "max_ms": 118.4,
+   "mean_ms": 12.2,
+   "p50_ms": 6.8,
+   "p95_ms": 16.4
+  },
+  "per_case_ms": {
+   "bs-01": 118.4,
+   "bs-02": 12.6,
+   "bs-03": 15.0,
+   "bs-04": 12.3,
+   "bs-05": 10.8,
+   "bs-06": 8.7,
+   "bs-07": 8.6,
+   "bs-08": 16.4,
+   "bs-09": 10.0,
+   "bs-10": 12.9,
+   "bs-11": 12.1,
+   "bs-12": 7.6,
+   "bs-13": 7.9,
+   "bs-14": 4.0,
+   "bs-15": 4.8,
+   "bs-16": 4.3,
+   "bs-17": 4.4,
+   "bs-18": 4.5,
+   "bs-19": 6.0,
+   "bs-20": 4.7,
+   "bs-21": 5.2,
+   "bs-22": 13.3,
+   "bs-23": 13.2,
+   "bs-24": 4.8,
+   "cr-11": 12.1,
+   "cr-12": 8.9,
+   "cr-13": 6.8,
+   "cr-14": 6.4,
+   "cr-15": 3.5,
+   "cr-16": 3.1,
+   "cr-17": 5.1,
+   "cr-18": 3.0,
+   "cr-19": 3.8,
+   "cr-20": 7.1,
+   "cr-A1": 83.1,
+   "cr-A2": 15.5,
+   "cr-B1": 8.3,
+   "cr-B2": 13.5,
+   "cr-C1": 6.8,
+   "cr-C2": 9.7,
+   "cr-D1": 5.5,
+   "cr-D2": 4.4,
+   "tb-01": 104.8,
+   "tb-02": 6.8,
+   "tb-03": 6.3,
+   "tb-04": 5.8,
+   "tb-05": 7.2,
+   "tb-06": 5.1,
+   "tb-07": 7.6,
+   "tb-08": 3.6,
+   "tb-09": 3.2,
+   "tb-10": 7.3,
+   "tb-11": 3.1,
+   "tb-12": 3.0,
+   "tb-13": 2.9,
+   "tb-14": 6.2,
+   "tb-15": 3.2,
+   "tb-16": 3.1,
+   "tb-17": 12.6,
+   "tb-18": 8.7
+  }
+ }
+}

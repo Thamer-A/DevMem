@@ -1,0 +1,27 @@
+{
+ "session_id": "4a014bc1-dc45-4a0c-9e7a-ab4dec5491d8",
+ "transcript_path": "{TRANSCRIPT}",
+ "cwd": "{PROJECT}",
+ "prompt_id": "f101623f-e5b1-4791-8d98-7cab74a120b8",
+ "permission_mode": "acceptEdits",
+ "effort": {
+  "level": "medium"
+ },
+ "hook_event_name": "PostToolUse",
+ "tool_name": "Read",
+ "tool_input": {
+  "file_path": "{PROJECT}\\greet.py"
+ },
+ "tool_response": {
+  "type": "text",
+  "file": {
+   "filePath": "{PROJECT}/greet.py",
+   "content": "def greet(name):\n    return \"hello \" + name\n",
+   "numLines": 3,
+   "startLine": 1,
+   "totalLines": 3
+  }
+ },
+ "tool_use_id": "toolu_01PgEyW5A2QUPD57CvgjNyUR",
+ "duration_ms": 27
+}

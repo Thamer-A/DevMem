@@ -1,0 +1,113 @@
+users:
+  - password: |
+      $6$rounds=5000$salt0$hashedvaluehashedvalue0
+    name: alice
+    uid: 1000
+    shell: /bin/bash
+    groups:
+      - users
+      - docker
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIaliceexample alice@laptop
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    home: /home/alice
+    lock_passwd: false
+
+  - password: |
+      $6$rounds=5000$salt1$hashedvaluehashedvalue1
+    name: bob
+    uid: 1001
+    shell: /bin/bash
+    groups:
+      - users
+      - docker
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIbobexample bob@laptop
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    home: /home/bob
+    lock_passwd: false
+
+  - password: |
+      $6$rounds=5000$salt2$hashedvaluehashedvalue2
+    name: carol
+    uid: 1002
+    shell: /bin/bash
+    groups:
+      - users
+      - docker
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIcarolexample carol@laptop
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    home: /home/carol
+    lock_passwd: false
+
+  - password: |
+      $6$rounds=5000$salt3$hashedvaluehashedvalue3
+    name: dave
+    uid: 1003
+    shell: /bin/bash
+    groups:
+      - users
+      - docker
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIdaveexample dave@laptop
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    home: /home/dave
+    lock_passwd: false
+
+  - password: |
+      $6$rounds=5000$salt4$hashedvaluehashedvalue4
+    name: erin
+    uid: 1004
+    shell: /bin/bash
+    groups:
+      - users
+      - docker
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIerinexample erin@laptop
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    home: /home/erin
+    lock_passwd: false
+
+  - password: |
+      $6$rounds=5000$salt5$hashedvaluehashedvalue5
+    name: frank
+    uid: 1005
+    shell: /bin/bash
+    groups:
+      - users
+      - docker
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIfrankexample frank@laptop
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    home: /home/frank
+    lock_passwd: false
+
+  - password: |
+      $6$rounds=5000$salt6$hashedvaluehashedvalue6
+    name: grace
+    uid: 1006
+    shell: /bin/bash
+    groups:
+      - users
+      - docker
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIgraceexample grace@laptop
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    home: /home/grace
+    lock_passwd: false
+
+  - password: |
+      $6$rounds=5000$salt7$hashedvaluehashedvalue7
+    name: heidi
+    uid: 1007
+    shell: /bin/bash
+    groups:
+      - users
+      - docker
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIheidiexample heidi@laptop
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    home: /home/heidi
+    lock_passwd: false
+

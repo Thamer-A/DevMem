@@ -1,0 +1,8 @@
+{
+  "version": "3.13.17",
+  "arch": "amd64",
+  "url": "https://www.python.org/ftp/python/3.13.17/python-3.13.17-embed-amd64.zip",
+  "sha256": "9e35319bffedab8b36ad44d8f377cb4f1733bcec257a0b6d04d94f01486ddb38",
+  "size": 11441267,
+  "source": "sha256_sum of 'Windows embeddable package (64-bit)' in https://www.python.org/api/v2/downloads/release_file/?release=1167, the same value as the table on https://www.python.org/downloads/release/python-31317/; the downloaded file was hashed and matched on 2026-11-14"
+}

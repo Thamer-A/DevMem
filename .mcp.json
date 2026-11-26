@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "devmemory": {
+      "type": "stdio",
+      "command": "devmem",
+      "args": [
+        "mcp",
+        "--project",
+        "."
+      ],
+      "env": {}
+    }
+  }
+}

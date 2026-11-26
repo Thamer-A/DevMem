@@ -1,0 +1,21 @@
+usage: tool login [-h] [--username USER] [--password PASSWORD] [--token TOKEN] [--api-key KEY]
+
+Log in to the service.
+
+options:
+  -h, --help            show this help message and exit
+  --username USER       the user name
+  --password PASSWORD   the password (prompted when omitted; avoid passing it on the command line)
+  --token TOKEN         an access token instead of a password
+  --api-key KEY         an API key from the console
+  --token-file PATH     read the token from PATH
+  --max-tokens N        cap the number of tokens (default: 4096)
+  --key-id ID           the id of the key to use
+
+Environment:
+  TOOL_PASSWORD   used when --password is omitted
+  TOOL_TOKEN      used when --token is omitted
+
+Examples:
+  tool login --username alice
+  tool login --token-file ~/.config/tool/token

@@ -1,0 +1,41 @@
+{
+ "session_id": "4a014bc1-dc45-4a0c-9e7a-ab4dec5491d8",
+ "transcript_path": "{TRANSCRIPT}",
+ "cwd": "{PROJECT}",
+ "prompt_id": "f101623f-e5b1-4791-8d98-7cab74a120b8",
+ "permission_mode": "acceptEdits",
+ "effort": {
+  "level": "medium"
+ },
+ "hook_event_name": "PostToolUse",
+ "tool_name": "Edit",
+ "tool_input": {
+  "file_path": "{PROJECT}\\greet.py",
+  "old_string": "    return \"hello \" + name",
+  "new_string": "    return \"hi \" + name",
+  "replace_all": false
+ },
+ "tool_response": {
+  "filePath": "{PROJECT}/greet.py",
+  "oldString": "    return \"hello \" + name",
+  "newString": "    return \"hi \" + name",
+  "originalFile": "def greet(name):\n    return \"hello \" + name\n",
+  "structuredPatch": [
+   {
+    "oldStart": 1,
+    "oldLines": 2,
+    "newStart": 1,
+    "newLines": 2,
+    "lines": [
+     " def greet(name):",
+     "-    return \"hello \" + name",
+     "+    return \"hi \" + name"
+    ]
+   }
+  ],
+  "userModified": false,
+  "replaceAll": false
+ },
+ "tool_use_id": "toolu_016ZPL3o7CYsnPB3wu8QNMqg",
+ "duration_ms": 26
+}

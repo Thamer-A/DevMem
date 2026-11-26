@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Web stack
+Parameters:
+  DBPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 12
+    Description: >
+      The database admin password. Must be 12 characters or more.
+  ApiKeyName:
+    Type: String
+    Default: web-api-key
+    Description: Name of the API key in API Gateway
+  TokenTtl:
+    Type: Number
+    Default: 3600
+Resources:
+  Secret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${AWS::StackName}-db'
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "admin"}'
+        GenerateStringKey: password
+        PasswordLength: 32
+        ExcludeCharacters: '"@/\\'
+  Param:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /web/max_tokens
+      Type: String
+      Value: '4096'

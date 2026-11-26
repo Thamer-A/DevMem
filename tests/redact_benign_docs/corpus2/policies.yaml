@@ -1,0 +1,570 @@
+password_policy_0:
+  description: |
+    Rules for user passwords in tenant 0.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 0.
+  min_length: 8
+token_settings_0:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 300
+secret_rotation_0:
+  message: >
+    Secrets rotate every 30 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_1:
+  description: |
+    Rules for user passwords in tenant 1.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 1.
+  min_length: 9
+token_settings_1:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 600
+secret_rotation_1:
+  message: >
+    Secrets rotate every 31 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_2:
+  description: |
+    Rules for user passwords in tenant 2.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 2.
+  min_length: 10
+token_settings_2:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 900
+secret_rotation_2:
+  message: >
+    Secrets rotate every 32 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_3:
+  description: |
+    Rules for user passwords in tenant 3.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 3.
+  min_length: 11
+token_settings_3:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 1200
+secret_rotation_3:
+  message: >
+    Secrets rotate every 33 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_4:
+  description: |
+    Rules for user passwords in tenant 4.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 4.
+  min_length: 12
+token_settings_4:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 1500
+secret_rotation_4:
+  message: >
+    Secrets rotate every 34 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_5:
+  description: |
+    Rules for user passwords in tenant 5.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 5.
+  min_length: 13
+token_settings_5:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 1800
+secret_rotation_5:
+  message: >
+    Secrets rotate every 35 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_6:
+  description: |
+    Rules for user passwords in tenant 6.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 6.
+  min_length: 8
+token_settings_6:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 2100
+secret_rotation_6:
+  message: >
+    Secrets rotate every 36 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_7:
+  description: |
+    Rules for user passwords in tenant 7.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 7.
+  min_length: 9
+token_settings_7:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 2400
+secret_rotation_7:
+  message: >
+    Secrets rotate every 37 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_8:
+  description: |
+    Rules for user passwords in tenant 8.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 8.
+  min_length: 10
+token_settings_8:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 2700
+secret_rotation_8:
+  message: >
+    Secrets rotate every 38 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_9:
+  description: |
+    Rules for user passwords in tenant 9.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 9.
+  min_length: 11
+token_settings_9:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 3000
+secret_rotation_9:
+  message: >
+    Secrets rotate every 39 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_10:
+  description: |
+    Rules for user passwords in tenant 10.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 10.
+  min_length: 12
+token_settings_10:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 3300
+secret_rotation_10:
+  message: >
+    Secrets rotate every 40 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_11:
+  description: |
+    Rules for user passwords in tenant 11.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 11.
+  min_length: 13
+token_settings_11:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 3600
+secret_rotation_11:
+  message: >
+    Secrets rotate every 41 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_12:
+  description: |
+    Rules for user passwords in tenant 12.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 12.
+  min_length: 8
+token_settings_12:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 3900
+secret_rotation_12:
+  message: >
+    Secrets rotate every 42 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_13:
+  description: |
+    Rules for user passwords in tenant 13.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 13.
+  min_length: 9
+token_settings_13:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 4200
+secret_rotation_13:
+  message: >
+    Secrets rotate every 43 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_14:
+  description: |
+    Rules for user passwords in tenant 14.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 14.
+  min_length: 10
+token_settings_14:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 4500
+secret_rotation_14:
+  message: >
+    Secrets rotate every 44 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_15:
+  description: |
+    Rules for user passwords in tenant 15.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 15.
+  min_length: 11
+token_settings_15:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 4800
+secret_rotation_15:
+  message: >
+    Secrets rotate every 45 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_16:
+  description: |
+    Rules for user passwords in tenant 16.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 16.
+  min_length: 12
+token_settings_16:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 5100
+secret_rotation_16:
+  message: >
+    Secrets rotate every 46 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_17:
+  description: |
+    Rules for user passwords in tenant 17.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 17.
+  min_length: 13
+token_settings_17:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 5400
+secret_rotation_17:
+  message: >
+    Secrets rotate every 47 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_18:
+  description: |
+    Rules for user passwords in tenant 18.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 18.
+  min_length: 8
+token_settings_18:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 5700
+secret_rotation_18:
+  message: >
+    Secrets rotate every 48 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_19:
+  description: |
+    Rules for user passwords in tenant 19.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 19.
+  min_length: 9
+token_settings_19:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 6000
+secret_rotation_19:
+  message: >
+    Secrets rotate every 49 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_20:
+  description: |
+    Rules for user passwords in tenant 20.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 20.
+  min_length: 10
+token_settings_20:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 6300
+secret_rotation_20:
+  message: >
+    Secrets rotate every 50 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_21:
+  description: |
+    Rules for user passwords in tenant 21.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 21.
+  min_length: 11
+token_settings_21:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 6600
+secret_rotation_21:
+  message: >
+    Secrets rotate every 51 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_22:
+  description: |
+    Rules for user passwords in tenant 22.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 22.
+  min_length: 12
+token_settings_22:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 6900
+secret_rotation_22:
+  message: >
+    Secrets rotate every 52 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_23:
+  description: |
+    Rules for user passwords in tenant 23.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 23.
+  min_length: 13
+token_settings_23:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 7200
+secret_rotation_23:
+  message: >
+    Secrets rotate every 53 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_24:
+  description: |
+    Rules for user passwords in tenant 24.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 24.
+  min_length: 8
+token_settings_24:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 7500
+secret_rotation_24:
+  message: >
+    Secrets rotate every 54 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_25:
+  description: |
+    Rules for user passwords in tenant 25.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 25.
+  min_length: 9
+token_settings_25:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 7800
+secret_rotation_25:
+  message: >
+    Secrets rotate every 55 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_26:
+  description: |
+    Rules for user passwords in tenant 26.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 26.
+  min_length: 10
+token_settings_26:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 8100
+secret_rotation_26:
+  message: >
+    Secrets rotate every 56 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_27:
+  description: |
+    Rules for user passwords in tenant 27.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 27.
+  min_length: 11
+token_settings_27:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 8400
+secret_rotation_27:
+  message: >
+    Secrets rotate every 57 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_28:
+  description: |
+    Rules for user passwords in tenant 28.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 28.
+  min_length: 12
+token_settings_28:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 8700
+secret_rotation_28:
+  message: >
+    Secrets rotate every 58 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.
+password_policy_29:
+  description: |
+    Rules for user passwords in tenant 29.
+    Applied on sign-up and on password change.
+  help: >-
+    See the admin guide, chapter 29.
+  min_length: 13
+token_settings_29:
+  title: Token settings
+  usage: |
+    tokens expire after the ttl below
+    refresh them with the refresh endpoint
+  ttl: 9000
+secret_rotation_29:
+  message: >
+    Secrets rotate every 59 days.
+  doc: |
+    https://example.invalid/docs/rotation
+    Rotation is automatic.

@@ -1,0 +1,158 @@
+[
+  {
+    "id": "tb-01", "kind": "followup_early_req",
+    "task": "Someone changed the label colors and now they look wrong. Put the label colors back to exactly what I originally asked for.",
+    "sessions_required": ["4644d1f4"], "sessions_optional": ["c2fabc15"],
+    "files_required": ["public/app.js", "public/style.css"],
+    "files_optional": ["public/index.html"],
+    "verbatim": ["#e5484d", "#3e63dd", "#8b8d98"],
+    "why": "The three hex colours exist only in the labels session (4644d1f4); the same task is used in demo/cross-tool."
+  },
+  {
+    "id": "tb-02", "kind": "direct",
+    "task": "Raise the In Progress limit to 5.",
+    "sessions_required": ["c2fabc15"], "sessions_optional": [],
+    "files_required": ["server.js"],
+    "files_optional": ["public/app.js"],
+    "verbatim": ["at most 3 cards", "HTTP 409"],
+    "why": "The WIP limit rule (3, HTTP 409, toast) was set in c2fabc15; the constant is in server.js."
+  },
+  {
+    "id": "tb-03", "kind": "terse_bug",
+    "task": "Dragging cards into In Progress sometimes silently fails.",
+    "sessions_required": ["c2fabc15"], "sessions_optional": ["8f180d05"],
+    "files_required": ["server.js", "public/app.js"],
+    "files_optional": [],
+    "verbatim": ["at most 3 cards"],
+    "why": "Moves into In Progress are rejected by design once 3 cards are there (c2fabc15); the report omits the rule. Drag/drop (8f180d05) is the mechanism."
+  },
+  {
+    "id": "tb-04", "kind": "followup_early_req",
+    "task": "Add Eve to the team.",
+    "sessions_required": ["6fd2de0a"], "sessions_optional": [],
+    "files_required": ["server.js", "public/app.js"],
+    "files_optional": ["public/index.html"],
+    "verbatim": ["Alice, Bob, Carol and Dan"],
+    "why": "The team list and the assignee field were defined in 6fd2de0a; the allow-list is in server.js."
+  },
+  {
+    "id": "tb-05", "kind": "followup_early_req",
+    "task": "Make overdue cards stand out more.",
+    "sessions_required": ["7edb923c"], "sessions_optional": [],
+    "files_required": ["public/style.css"],
+    "files_optional": ["public/app.js"],
+    "verbatim": ["Overdue cards get a red border and cards due today get an amber border"],
+    "why": "The overdue/today styling rule came from the due-dates session 7edb923c."
+  },
+  {
+    "id": "tb-06", "kind": "followup_early_req",
+    "task": "Switch the violet accent to teal but leave the background alone.",
+    "sessions_required": ["5876b7ae"], "sessions_optional": [],
+    "files_required": ["public/style.css"],
+    "files_optional": [],
+    "verbatim": ["background #0f1115", "violet accent #8b7cf6"],
+    "why": "The theme colours were specified in 5876b7ae and live in the CSS variables."
+  },
+  {
+    "id": "tb-07", "kind": "followup_early_req",
+    "task": "Make the search box match assignee names too.",
+    "sessions_required": ["fdb761dd"], "sessions_optional": ["6fd2de0a"],
+    "files_required": ["public/app.js"],
+    "files_optional": ["public/index.html"],
+    "verbatim": ["filters cards by title"],
+    "why": "Search was built in fdb761dd (title only); assignees came from 6fd2de0a (optional context)."
+  },
+  {
+    "id": "tb-08", "kind": "paraphrase",
+    "task": "People want a ceiling on how many tickets can sit in the middle stage.",
+    "sessions_required": ["c2fabc15"], "sessions_optional": [],
+    "files_required": ["server.js"],
+    "files_optional": ["public/app.js"],
+    "verbatim": ["at most 3 cards"],
+    "why": "Paraphrase of the WIP limit (cards -> tickets, In Progress -> middle stage); c2fabc15 already set it to 3."
+  },
+  {
+    "id": "tb-09", "kind": "paraphrase",
+    "task": "Let me type part of a ticket's name to narrow down what I see.",
+    "sessions_required": ["fdb761dd"], "sessions_optional": [],
+    "files_required": ["public/app.js"],
+    "files_optional": ["public/index.html"],
+    "verbatim": [],
+    "why": "Paraphrase of the existing search box (fdb761dd); the user may be asking for something that already exists, so the pack should surface it."
+  },
+  {
+    "id": "tb-10", "kind": "terse_bug",
+    "task": "The board is unusable on my phone.",
+    "sessions_required": ["5876b7ae"], "sessions_optional": [],
+    "files_required": ["public/style.css"],
+    "files_optional": ["public/index.html"],
+    "verbatim": ["work on a laptop screen and a phone"],
+    "why": "Responsive layout was required in the theme session 5876b7ae; the report states no spec."
+  },
+  {
+    "id": "tb-11", "kind": "non_english",
+    "task": "أرجع ألوان التصنيفات كما طلبتها في البداية",
+    "sessions_required": ["4644d1f4"], "sessions_optional": [],
+    "files_required": ["public/app.js", "public/style.css"],
+    "files_optional": [],
+    "verbatim": ["#e5484d", "#3e63dd", "#8b8d98"],
+    "why": "Arabic version of tb-01: 'put the label colours back as I asked at the start'."
+  },
+  {
+    "id": "tb-12", "kind": "non_english",
+    "task": "أضف حدًا أقصى لعدد البطاقات في عمود قيد التنفيذ",
+    "sessions_required": ["c2fabc15"], "sessions_optional": [],
+    "files_required": ["server.js"],
+    "files_optional": ["public/app.js"],
+    "verbatim": ["at most 3 cards"],
+    "why": "Arabic: 'add a maximum on the number of cards in the In Progress column'; it already exists (c2fabc15)."
+  },
+  {
+    "id": "tb-13", "kind": "non_english",
+    "task": "اجعل البطاقات المتأخرة تظهر بإطار أحمر أثخن",
+    "sessions_required": ["7edb923c"], "sessions_optional": [],
+    "files_required": ["public/style.css"],
+    "files_optional": ["public/app.js"],
+    "verbatim": ["Overdue cards get a red border"],
+    "why": "Arabic: 'make overdue cards show a thicker red border'; border rule from 7edb923c."
+  },
+  {
+    "id": "tb-14", "kind": "direct",
+    "task": "Add a /health endpoint that returns ok.",
+    "sessions_required": [], "sessions_optional": ["fc6e80d7"],
+    "files_required": ["server.js"],
+    "files_optional": [],
+    "verbatim": [],
+    "why": "A new route belongs in server.js; no past decision constrains it (the first session built the API, optional)."
+  },
+  {
+    "id": "tb-15", "kind": "trivial", "task": "yes go ahead",
+    "sessions_required": [], "sessions_optional": [], "files_required": [], "files_optional": [], "verbatim": [],
+    "expect_empty": true,
+    "why": "Confirmation; nothing to retrieve."
+  },
+  {
+    "id": "tb-16", "kind": "trivial", "task": "thanks!",
+    "sessions_required": [], "sessions_optional": [], "files_required": [], "files_optional": [], "verbatim": [],
+    "expect_empty": true,
+    "why": "Thanks; nothing to retrieve."
+  },
+  {
+    "id": "tb-17", "kind": "followup_early_req",
+    "task": "Add a Review label in purple and make the filter bar pick it up.",
+    "sessions_required": ["4644d1f4"], "sessions_optional": [],
+    "files_required": ["server.js", "public/app.js"],
+    "files_optional": ["public/style.css", "public/index.html"],
+    "verbatim": ["stored in the card's `label` field"],
+    "why": "Labels and the filter bar were built in 4644d1f4; the label allow-list is server-side and colours/filter are in app.js."
+  },
+  {
+    "id": "tb-18", "kind": "terse_bug",
+    "task": "Moving a card to a column that doesn't exist crashes the server.",
+    "sessions_required": ["8f180d05"], "sessions_optional": ["fc6e80d7"],
+    "files_required": ["server.js"],
+    "files_optional": [],
+    "verbatim": ["PATCH /api/cards/:id with JSON {column}"],
+    "why": "The move endpoint contract was defined in 8f180d05 (PATCH with {column}); the validation belongs in server.js."
+  }
+]

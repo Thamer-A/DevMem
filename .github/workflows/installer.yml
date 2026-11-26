@@ -1,0 +1,124 @@
+name: windows installer
+
+# Builds DevMem-Setup-<version>.exe (packaging/windows), installs it silently on the runner, tests the installed
+# devmem and app, uninstalls it and checks what is left. A pushed v* tag also attests the build and attaches the
+# installer to a DRAFT release; publishing that release stays a manual step.
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build and test the installer
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: The tag matches the package version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: powershell
+        run: |
+          $init = Get-Content -Raw -Encoding UTF8 plugin\devmem\__init__.py
+          $version = [regex]::Match($init, '(?m)^__version__\s*=\s*"([^"]+)"').Groups[1].Value
+          if ("v$version" -ne $env:GITHUB_REF_NAME) { Write-Host "tag $env:GITHUB_REF_NAME does not match devmem $version"; exit 1 }
+
+      - name: Install Inno Setup 6 (only when ISCC.exe is missing)
+        shell: powershell
+        run: |
+          $iscc = Get-Command ISCC.exe -ErrorAction SilentlyContinue
+          $known = @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path -LiteralPath $_ }
+          if (-not $iscc -and -not $known) {
+            choco install innosetup --version=6.7.1 --no-progress -y
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
+
+      - name: Build the installer (Windows PowerShell 5.1)
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File packaging\windows\build.ps1 -RequireInstaller
+
+      # The hash is checked and the installer uploaded (the release job attests that upload) right after the build,
+      # before any further tool is installed in this job: nothing installed later can change what is shipped.
+      - name: Check the .sha256 file
+        shell: powershell
+        run: |
+          $setup = Get-ChildItem dist\DevMem-Setup-*.exe | Select-Object -First 1
+          $line = (Get-Content -Raw "$($setup.FullName).sha256").Trim()
+          $hash = (Get-FileHash -Algorithm SHA256 $setup.FullName).Hash.ToLowerInvariant()
+          if ($line -ne "$hash  $($setup.Name)") { Write-Host "sha256 file: '$line', actual: $hash"; exit 1 }
+          Write-Host $line
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: devmem-windows-installer
+          path: |
+            dist/DevMem-Setup-*.exe
+            dist/DevMem-Setup-*.exe.sha256
+          if-no-files-found: error
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+
+      - name: Packaging tests with the downloaded embeddable Python
+        shell: pwsh
+        env:
+          PYTHONUTF8: "1"
+        run: |
+          python -m pip install --disable-pip-version-check -q pytest==9.2.0
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          python -m pytest -q -p no:cacheprovider -rs tests/test_windows_installer.py
+          exit $LASTEXITCODE
+
+      - name: Silent install, tests of the installed devmem, silent uninstall
+        shell: powershell
+        run: |
+          $setup = Get-ChildItem dist\DevMem-Setup-*.exe | Select-Object -First 1
+          powershell -NoProfile -ExecutionPolicy Bypass -File packaging\windows\test-installer.ps1 -Installer $setup.FullName -WorkDir "$env:RUNNER_TEMP\devmem-installer-test"
+          exit $LASTEXITCODE
+
+  release:
+    name: attest and attach to a draft release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: devmem-windows-installer
+          path: dist
+
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/DevMem-Setup-*.exe
+
+      - name: Attach to a draft release (never published from here)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if draft=$(gh release view "$TAG" --json isDraft --jq .isDraft 2>/dev/null); then
+            if [ "$draft" != "true" ]; then
+              echo "release $TAG is already published; not changing it"
+              exit 1
+            fi
+            gh release upload "$TAG" dist/DevMem-Setup-*.exe dist/DevMem-Setup-*.exe.sha256 --clobber
+          else
+            gh release create "$TAG" dist/DevMem-Setup-*.exe dist/DevMem-Setup-*.exe.sha256 --draft --verify-tag \
+              --title "DevMem $TAG" \
+              --notes "Windows installer for DevMem $TAG (per-user, no administrator rights). Not code-signed yet: Windows SmartScreen will warn. Check the download against the .sha256 file and with: gh attestation verify DevMem-Setup-<version>.exe --repo $GH_REPO"
+          fi

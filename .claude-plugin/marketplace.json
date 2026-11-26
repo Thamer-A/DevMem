@@ -1,0 +1,14 @@
+{
+  "name": "devmem",
+  "description": "DevMem: local-first project memory for Claude Code sessions.",
+  "owner": {
+    "name": "T-Alhussain"
+  },
+  "plugins": [
+    {
+      "name": "devmem",
+      "source": "./plugin",
+      "description": "Local-first project memory for Claude Code sessions (opt-in per project)."
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+[project]
+name = "dev-memory"   # the name on PyPI; the import package and the command stay `devmem`
+dynamic = ["version"]
+description = "Local-first project memory and task-specific context packs for AI coding sessions"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+# The core stays standard-library only. Anything heavier goes in an optional extra below.
+dependencies = []
+keywords = ["ai", "memory", "context", "claude-code", "mcp", "developer-tools", "local-first"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    # CI runs on Windows and Linux; macOS is untested
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+]
+
+[project.urls]
+Homepage = "https://github.com/Thamer-A/DevMem"
+Repository = "https://github.com/Thamer-A/DevMem"
+Issues = "https://github.com/Thamer-A/DevMem/issues"
+Changelog = "https://github.com/Thamer-A/DevMem/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "build",
+    "ruff",
+]
+# Optional extras. Every feature behind an extra must keep a working stdlib fallback.
+# embeddings: fastembed (verified by the retrieval work; see README).
+embeddings = [
+    "fastembed>=0.9",
+]
+
+[project.scripts]
+devmem = "devmem.cli:main"
+
+[build-system]
+requires = ["setuptools>=77"]  # 77 is the first release that reads the SPDX license field
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = {attr = "devmem.__version__"}   # the one place the version lives
+
+[tool.setuptools.packages.find]
+# The package lives inside the Claude Code plugin folder, so the plugin ships the same code (one copy).
+where = ["plugin"]
+include = ["devmem*"]
+
+[tool.setuptools.package-data]
+# The local app (devmem ui / devmem app) serves these files, so they must ship in the wheel.
+devmem = ["ui/*.html", "ui/*.css", "ui/*.js", "ui/*.svg", "ui/*.png", "ui/*.ico"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["plugin"]   # import the package from the working tree, with no install
+markers = ["packaging: builds a wheel (needs pip and setuptools; skipped when missing)",
+           "stress: slow stress and growth sweeps, skipped by default (run them with -m stress)"]
+addopts = "-m 'not stress'"
+
+[tool.ruff]
+line-length = 140
+target-version = "py310"
+
+[tool.ruff.lint]
+# Only real errors for now (syntax errors, undefined names, unused imports/variables).
+select = ["E9", "F",
+          # literal control characters in source (backspace, SUB, ESC, NUL, zero-width space): a shell heredoc
+          # once turned a regex word boundary into a backspace, and the test using it then checked nothing
+          "PLE2510", "PLE2512", "PLE2513", "PLE2514", "PLE2515",
+          # security checks for the package: exec, permissive chmod, binding all interfaces, temp paths, requests
+          # without timeout, insecure hashes/ciphers/random/deserialisation, shell=True and shell-like calls,
+          # SQL built from strings, wildcard injection, Jinja/markup (S7)
+          "S102", "S103", "S104", "S108", "S113", "S3", "S5", "S602", "S604", "S605", "S606", "S608", "S609",
+          "S61", "S7"]
+
+[tool.ruff.lint.per-file-ignores]
+# tests and evals build temp paths, run subprocesses and use fixed fake values on purpose
+"tests/**" = ["S"]
+"evals/**" = ["S"]
+
+[tool.pyright]
+# Run with `pyright` (pip install pyright, or npm i -g pyright). Only the package is checked: the tests and
+# evals still have about 70 findings (mostly Optional state objects used right after construction).
+include = ["plugin/devmem"]
+# the oldest supported interpreter, so syntax and stdlib APIs newer than 3.10 are reported
+pythonVersion = "3.10"
+typeCheckingMode = "basic"
+# Windows is the primary platform and hooks.py calls Windows-only ctypes APIs behind a platform check the
+# checker cannot follow; without this the same code passes on Windows and fails on a Linux CI runner.
+pythonPlatform = "Windows"

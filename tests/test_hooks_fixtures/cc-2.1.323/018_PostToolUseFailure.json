@@ -1,0 +1,20 @@
+{
+ "session_id": "4a014bc1-dc45-4a0c-9e7a-ab4dec5491d8",
+ "transcript_path": "{TRANSCRIPT}",
+ "cwd": "{PROJECT}",
+ "prompt_id": "f101623f-e5b1-4791-8d98-7cab74a120b8",
+ "permission_mode": "acceptEdits",
+ "effort": {
+  "level": "medium"
+ },
+ "hook_event_name": "PostToolUseFailure",
+ "tool_name": "Bash",
+ "tool_input": {
+  "command": "cd \"{PROJECT}\" && ls does_not_exist_dir",
+  "description": "List nonexistent directory to confirm error"
+ },
+ "tool_use_id": "toolu_01GPdEmQH5g7hQjAGCtbWQ22",
+ "error": "Exit code 2\nls: cannot access 'does_not_exist_dir': No such file or directory",
+ "is_interrupt": false,
+ "duration_ms": 132
+}

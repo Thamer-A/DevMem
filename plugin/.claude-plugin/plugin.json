@@ -1,0 +1,16 @@
+{
+  "name": "devmem",
+  "version": "0.4.0",
+  "description": "Local-first project memory for Claude Code: records your sessions in the project's .devmemory folder and adds a small pack of relevant earlier work to each prompt. Opt-in per project with /devmem:setup. Needs Python 3.10+ on PATH.",
+  "author": {
+    "name": "T-Alhussain"
+  },
+  "repository": "https://github.com/Thamer-A/DevMem",
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "context",
+    "local-first",
+    "sessions"
+  ]
+}

@@ -1,0 +1,404 @@
+{
+    "Parameters": [
+        {
+            "Name": "TOKEN_USAGE",
+            "Type": "Number",
+            "Value": "6624040"
+        },
+        {
+            "Name": "TURKEY",
+            "Type": "Number",
+            "Value": "N/A"
+        },
+        {
+            "Name": "SECRET_COUNT",
+            "Type": "String",
+            "Value": "shard-07"
+        },
+        {
+            "Name": "TOKEN_COUNT",
+            "Type": "Number",
+            "Value": "user_571"
+        },
+        {
+            "Name": "KEY_COUNT",
+            "Type": "Number",
+            "Value": "N/A"
+        },
+        {
+            "Name": "KEYBOARD",
+            "Type": "String",
+            "Value": "Item576Key"
+        },
+        {
+            "Name": "KEYSTROKES",
+            "Type": "int",
+            "Value": "us-east-1"
+        },
+        {
+            "Name": "TURKEY",
+            "Type": "string",
+            "Value": "N/A"
+        },
+        {
+            "Name": "SECRET_COUNT",
+            "Type": "Number",
+            "Value": "N/A"
+        },
+        {
+            "Name": "TOKEN_USAGE",
+            "Type": "int",
+            "Value": "user_609"
+        },
+        {
+            "Name": "CACHE_KEY",
+            "Type": "string",
+            "Value": "shard-57"
+        },
+        {
+            "Name": "KEYSTROKES",
+            "Type": "String",
+            "Value": "created_at"
+        },
+        {
+            "Name": "KEY_COUNT",
+            "Type": "Number",
+            "Value": "shard-21"
+        },
+        {
+            "Name": "HOCKEY",
+            "Type": "int",
+            "Value": "shard-53"
+        },
+        {
+            "Name": "OUTPUT_TOKENS",
+            "Type": "Number",
+            "Value": "Item112Key"
+        },
+        {
+            "Name": "MAX_TOKENS",
+            "Type": "int",
+            "Value": "274ms"
+        },
+        {
+            "Name": "SORT_KEY",
+            "Type": "String",
+            "Value": "shard-50"
+        },
+        {
+            "Name": "PRIMARY_KEY",
+            "Type": "string",
+            "Value": "user_64"
+        },
+        {
+            "Name": "TOKEN_USAGE",
+            "Type": "String",
+            "Value": "1717645"
+        },
+        {
+            "Name": "KEYBOARD",
+            "Type": "Number",
+            "Value": "490ms"
+        },
+        {
+            "Name": "MONKEY",
+            "Type": "String",
+            "Value": "user_870"
+        },
+        {
+            "Name": "SORT_KEY",
+            "Type": "String",
+            "Value": "5748476"
+        },
+        {
+            "Name": "INPUT_TOKENS",
+            "Type": "int",
+            "Value": "user_707"
+        },
+        {
+            "Name": "CACHE_KEY",
+            "Type": "int",
+            "Value": "created_at"
+        },
+        {
+            "Name": "INPUT_TOKENS",
+            "Type": "Number",
+            "Value": "6722369"
+        },
+        {
+            "Name": "PARTITION_KEY",
+            "Type": "int",
+            "Value": "310ms"
+        },
+        {
+            "Name": "KEYSTROKES",
+            "Type": "String",
+            "Value": "Item309Key"
+        },
+        {
+            "Name": "PARTITION_KEY",
+            "Type": "string",
+            "Value": "created_at"
+        },
+        {
+            "Name": "MONKEY",
+            "Type": "Number",
+            "Value": "shard-50"
+        },
+        {
+            "Name": "KEYBOARD",
+            "Type": "Number",
+            "Value": "k4x20"
+        },
+        {
+            "Name": "MONKEY",
+            "Type": "int",
+            "Value": "user_562"
+        },
+        {
+            "Name": "TURKEY",
+            "Type": "Number",
+            "Value": "us-east-1"
+        },
+        {
+            "Name": "TURKEY",
+            "Type": "Number",
+            "Value": "215ms"
+        },
+        {
+            "Name": "PASSWORD_RESETS",
+            "Type": "string",
+            "Value": "Item993Key"
+        },
+        {
+            "Name": "MAX_TOKENS",
+            "Type": "String",
+            "Value": "2513269"
+        },
+        {
+            "Name": "TOKEN_USAGE",
+            "Type": "string",
+            "Value": "1780221"
+        },
+        {
+            "Name": "PRIMARY_KEY",
+            "Type": "string",
+            "Value": "N/A"
+        },
+        {
+            "Name": "TURKEY",
+            "Type": "Number",
+            "Value": "created_at"
+        },
+        {
+            "Name": "TURKEY",
+            "Type": "int",
+            "Value": "shard-53"
+        },
+        {
+            "Name": "PASSWORD_RESETS",
+            "Type": "int",
+            "Value": "us-east-1"
+        },
+        {
+            "Name": "PRIMARY_KEY",
+            "Type": "Number",
+            "Value": "user_147"
+        },
+        {
+            "Name": "API_KEY_COUNT",
+            "Type": "string",
+            "Value": "shard-55"
+        },
+        {
+            "Name": "TOKEN_USAGE",
+            "Type": "string",
+            "Value": "370ms"
+        },
+        {
+            "Name": "HOCKEY",
+            "Type": "string",
+            "Value": "user_721"
+        },
+        {
+            "Name": "PRIMARY_KEY",
+            "Type": "Number",
+            "Value": "k34x35"
+        },
+        {
+            "Name": "SECRET_COUNT",
+            "Type": "int",
+            "Value": "293ms"
+        },
+        {
+            "Name": "KEYBOARD",
+            "Type": "int",
+            "Value": "965135"
+        },
+        {
+            "Name": "KEYBOARD",
+            "Type": "int",
+            "Value": "1404967"
+        },
+        {
+            "Name": "TOKEN_USAGE",
+            "Type": "string",
+            "Value": "k17x6"
+        },
+        {
+            "Name": "CACHE_KEY",
+            "Type": "String",
+            "Value": "Item396Key"
+        },
+        {
+            "Name": "TURKEY",
+            "Type": "Number",
+            "Value": "N/A"
+        },
+        {
+            "Name": "HOCKEY",
+            "Type": "Number",
+            "Value": "Item772Key"
+        },
+        {
+            "Name": "HOCKEY",
+            "Type": "string",
+            "Value": "k89x28"
+        },
+        {
+            "Name": "API_KEY_COUNT",
+            "Type": "int",
+            "Value": "k17x2"
+        },
+        {
+            "Name": "TOKEN_COUNT",
+            "Type": "String",
+            "Value": "created_at"
+        },
+        {
+            "Name": "KEY_COUNT",
+            "Type": "String",
+            "Value": "229ms"
+        },
+        {
+            "Name": "TOKEN_USAGE",
+            "Type": "int",
+            "Value": "183ms"
+        },
+        {
+            "Name": "API_KEY_COUNT",
+            "Type": "String",
+            "Value": "7963199"
+        },
+        {
+            "Name": "KEYBOARD",
+            "Type": "int",
+            "Value": "us-east-1"
+        },
+        {
+            "Name": "KEY_COUNT",
+            "Type": "Number",
+            "Value": "80ms"
+        },
+        {
+            "Name": "MONKEY",
+            "Type": "Number",
+            "Value": "N/A"
+        },
+        {
+            "Name": "SECRET_COUNT",
+            "Type": "Number",
+            "Value": "created_at"
+        },
+        {
+            "Name": "KEYBOARD",
+            "Type": "String",
+            "Value": "Item485Key"
+        },
+        {
+            "Name": "HOCKEY",
+            "Type": "String",
+            "Value": "316095"
+        },
+        {
+            "Name": "PASSWORD_RESETS",
+            "Type": "String",
+            "Value": "Item863Key"
+        },
+        {
+            "Name": "CACHE_KEY",
+            "Type": "String",
+            "Value": "Item857Key"
+        },
+        {
+            "Name": "MONKEY",
+            "Type": "string",
+            "Value": "created_at"
+        },
+        {
+            "Name": "KEYBOARD",
+            "Type": "Number",
+            "Value": "k84x96"
+        },
+        {
+            "Name": "PARTITION_KEY",
+            "Type": "string",
+            "Value": "Item791Key"
+        },
+        {
+            "Name": "KEY_COUNT",
+            "Type": "int",
+            "Value": "user_478"
+        },
+        {
+            "Name": "MONKEY",
+            "Type": "String",
+            "Value": "shard-57"
+        },
+        {
+            "Name": "INPUT_TOKENS",
+            "Type": "Number",
+            "Value": "k12x19"
+        },
+        {
+            "Name": "TURKEY",
+            "Type": "int",
+            "Value": "1890416"
+        },
+        {
+            "Name": "MAX_TOKENS",
+            "Type": "String",
+            "Value": "155ms"
+        },
+        {
+            "Name": "API_KEY_COUNT",
+            "Type": "int",
+            "Value": "shard-43"
+        },
+        {
+            "Name": "PRIMARY_KEY",
+            "Type": "Number",
+            "Value": "shard-47"
+        },
+        {
+            "Name": "API_KEY_COUNT",
+            "Type": "String",
+            "Value": "user_948"
+        },
+        {
+            "Name": "TOKEN_COUNT",
+            "Type": "int",
+            "Value": "262ms"
+        },
+        {
+            "Name": "SECRET_COUNT",
+            "Type": "String",
+            "Value": "shard-10"
+        },
+        {
+            "Name": "PASSWORD_RESETS",
+            "Type": "Number",
+            "Value": "shard-21"
+        }
+    ]
+}

@@ -1,0 +1,11 @@
+{
+ "session_id": "4a014bc1-dc45-4a0c-9e7a-ab4dec5491d8",
+ "transcript_path": "{TRANSCRIPT}",
+ "cwd": "{PROJECT}",
+ "hook_event_name": "SessionStart",
+ "source": "resume",
+ "seconds_since_last_response": 31,
+ "context_tokens": 29945,
+ "prompt_cache_likely_expired": false,
+ "estimated_cache_write_usd": 0.006
+}

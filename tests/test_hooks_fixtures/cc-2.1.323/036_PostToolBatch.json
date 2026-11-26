@@ -1,0 +1,24 @@
+{
+ "session_id": "4a014bc1-dc45-4a0c-9e7a-ab4dec5491d8",
+ "transcript_path": "{TRANSCRIPT}",
+ "cwd": "{PROJECT}",
+ "prompt_id": "ca2a0eac-26f2-4067-96ee-af45b3454745",
+ "permission_mode": "acceptEdits",
+ "effort": {
+  "level": "medium"
+ },
+ "hook_event_name": "PostToolBatch",
+ "tool_calls": [
+  {
+   "tool_name": "Edit",
+   "tool_input": {
+    "replace_all": false,
+    "file_path": "{PROJECT}/farewell.py",
+    "old_string": "    return \"bye \" + name\n",
+    "new_string": "    return \"bye \" + name\n# end\n"
+   },
+   "tool_use_id": "toolu_014BiJ9EtzVJrQZg9Gw1GG9C",
+   "tool_response": "The file {PROJECT}/farewell.py has been updated successfully. (file state is current in your context — no need to Read it back)"
+  }
+ ]
+}

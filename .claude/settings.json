@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-c",
+              "import os,runpy;runpy.run_path(os.path.join(os.environ.get('CLAUDE_PROJECT_DIR') or '.','.claude','hooks','guard_fixtures.py'),run_name='__main__')"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-c",
+              "import os,runpy;runpy.run_path(os.path.join(os.environ.get('CLAUDE_PROJECT_DIR') or '.','.claude','hooks','lint_on_edit.py'),run_name='__main__')"
+            ],
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

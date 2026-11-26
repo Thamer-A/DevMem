@@ -1,0 +1,211 @@
+{
+ "schema": 1,
+ "date": "2026-11-13",
+ "git_head": "68be62726432b5c0b6fc3c492fa82473fee43298",
+ "python": "3.13.13",
+ "platform": "win32",
+ "prompts": [
+  "fix the parsing bug when the input contains unicode characters",
+  "add a timeout option to the network client and document it",
+  "yes go ahead",
+  "refactor the logging code so errors include the file name"
+ ],
+ "results": [
+  {
+   "project": "C:\\Users\\dev\\Documents\\Personal_Projects\\MiskXHumain_Hackathon\\demo\\memory-example\\blade-swarm-race",
+   "files_on_disk": 19,
+   "lines_on_disk": 1474,
+   "cold_scan_s": 0.071,
+   "warm_scan_s": 0.06,
+   "warm_scan_runs_s": [
+    0.061,
+    0.06,
+    0.063
+   ],
+   "map_json_bytes": 10554,
+   "project_md_bytes": 1336,
+   "project_md_tokens_est": 323,
+   "index_db_bytes": null,
+   "files_in_map": 16,
+   "pack": [
+    {
+     "prompt": "fix the parsing bug when the input contains unicode characters",
+     "first_s": 0.015,
+     "best_s": 0.014,
+     "tokens_est": 278,
+     "error": null
+    },
+    {
+     "prompt": "add a timeout option to the network client and document it",
+     "first_s": 0.014,
+     "best_s": 0.014,
+     "tokens_est": 243,
+     "error": null
+    },
+    {
+     "prompt": "yes go ahead",
+     "first_s": 0.013,
+     "best_s": 0.012,
+     "tokens_est": 218,
+     "error": null
+    },
+    {
+     "prompt": "refactor the logging code so errors include the file name",
+     "first_s": 0.015,
+     "best_s": 0.015,
+     "tokens_est": 321,
+     "error": null
+    }
+   ],
+   "pack_first_mean_s": 0.014,
+   "target_got_a_store": false
+  },
+  {
+   "project": "C:\\Users\\dev\\Documents\\Personal_Projects\\MiskXHumain_Hackathon\\demo\\taskboard\\devmemory",
+   "files_on_disk": 6,
+   "lines_on_disk": 592,
+   "cold_scan_s": 0.051,
+   "warm_scan_s": 0.043,
+   "warm_scan_runs_s": [
+    0.043,
+    0.043,
+    0.043
+   ],
+   "map_json_bytes": 851,
+   "project_md_bytes": 362,
+   "project_md_tokens_est": 86,
+   "index_db_bytes": null,
+   "files_in_map": 2,
+   "pack": [
+    {
+     "prompt": "fix the parsing bug when the input contains unicode characters",
+     "first_s": 0.005,
+     "best_s": 0.004,
+     "tokens_est": 106,
+     "error": null
+    },
+    {
+     "prompt": "add a timeout option to the network client and document it",
+     "first_s": 0.004,
+     "best_s": 0.004,
+     "tokens_est": 107,
+     "error": null
+    },
+    {
+     "prompt": "yes go ahead",
+     "first_s": 0.003,
+     "best_s": 0.003,
+     "tokens_est": 74,
+     "error": null
+    },
+    {
+     "prompt": "refactor the logging code so errors include the file name",
+     "first_s": 0.005,
+     "best_s": 0.005,
+     "tokens_est": 132,
+     "error": null
+    }
+   ],
+   "pack_first_mean_s": 0.004,
+   "target_got_a_store": false
+  },
+  {
+   "project": "C:\\Users\\dev\\Documents\\Personal_Projects\\MiskXHumain_Hackathon\\bench\\projects\\P1\\game",
+   "files_on_disk": 27,
+   "lines_on_disk": 2346,
+   "cold_scan_s": 0.063,
+   "warm_scan_s": 0.06,
+   "warm_scan_runs_s": [
+    0.06,
+    0.066,
+    0.07
+   ],
+   "map_json_bytes": 23718,
+   "project_md_bytes": 3997,
+   "project_md_tokens_est": 974,
+   "index_db_bytes": null,
+   "files_in_map": 27,
+   "pack": [
+    {
+     "prompt": "fix the parsing bug when the input contains unicode characters",
+     "first_s": 0.021,
+     "best_s": 0.017,
+     "tokens_est": 438,
+     "error": null
+    },
+    {
+     "prompt": "add a timeout option to the network client and document it",
+     "first_s": 0.02,
+     "best_s": 0.019,
+     "tokens_est": 454,
+     "error": null
+    },
+    {
+     "prompt": "yes go ahead",
+     "first_s": 0.02,
+     "best_s": 0.018,
+     "tokens_est": 408,
+     "error": null
+    },
+    {
+     "prompt": "refactor the logging code so errors include the file name",
+     "first_s": 0.017,
+     "best_s": 0.017,
+     "tokens_est": 548,
+     "error": null
+    }
+   ],
+   "pack_first_mean_s": 0.019,
+   "target_got_a_store": false
+  },
+  {
+   "project": "C:\\Users\\dev\\AppData\\Local\\Temp\\devmem-stdlib-70d5xr79\\stdlib",
+   "files_on_disk": 779,
+   "lines_on_disk": 346686,
+   "cold_scan_s": 1.935,
+   "warm_scan_s": 1.878,
+   "warm_scan_runs_s": [
+    1.975,
+    1.878,
+    1.892
+   ],
+   "map_json_bytes": 712736,
+   "project_md_bytes": 74344,
+   "project_md_tokens_est": 18068,
+   "index_db_bytes": null,
+   "files_in_map": 735,
+   "pack": [
+    {
+     "prompt": "fix the parsing bug when the input contains unicode characters",
+     "first_s": 2.542,
+     "best_s": 2.542,
+     "tokens_est": 688,
+     "error": null
+    },
+    {
+     "prompt": "add a timeout option to the network client and document it",
+     "first_s": 2.838,
+     "best_s": 2.817,
+     "tokens_est": 615,
+     "error": null
+    },
+    {
+     "prompt": "yes go ahead",
+     "first_s": 2.671,
+     "best_s": 2.671,
+     "tokens_est": 485,
+     "error": null
+    },
+    {
+     "prompt": "refactor the logging code so errors include the file name",
+     "first_s": 3.218,
+     "best_s": 2.65,
+     "tokens_est": 703,
+     "error": null
+    }
+   ],
+   "pack_first_mean_s": 2.817,
+   "target_got_a_store": false
+  }
+ ]
+}

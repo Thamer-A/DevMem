@@ -1,0 +1,137 @@
+#!/bin/sh
+# devmem launcher of the Claude Code plugin (POSIX sh; also Git Bash on Windows). It runs the devmem package in
+# the folder above this one with a Python 3.10 or newer found on this machine: nothing is installed with pip.
+#
+#   devmem <command> [args]        the devmem command line (devmem --help)
+#   devmem --plugin-hook <Event>   one Claude Code hook event, hook JSON on stdin. hooks/hooks.json runs this file
+#                                  in that mode. It always ends with exit status 0 and prints nothing but devmem's
+#                                  output (the context pack); problems go to the temp folder's devmem_hook_errors log.
+#
+# A hook in a project without a .devmemory folder returns before any Python starts (Python then also requires the
+# project to be switched on with /devmem:setup). The Python found is kept in $CLAUDE_PLUGIN_DATA/python-path, so
+# later hook events start a single process. A candidate is accepted only when it exits 0 and prints the sentinel
+# `DEVMEM-PY ` followed by the path of an existing executable file (so only a Python 3.10+ that ran the probe
+# qualifies); the cache holds that same line, and a cache line without the sentinel, or naming a file that is gone
+# or not executable, is ignored and Python is searched again. If the cached interpreter does not finish the hook
+# bootstrap (which always exits 0), the cache is deleted and one line logged. Microsoft Store aliases
+# (\WindowsApps\) are skipped; each probe is limited to 5 s where `timeout`
+# exists (Linux, Git Bash). A search that was cut off without finding Python, or that never finished (no `timeout`,
+# for example on macOS, and the hook was killed), stops further searches for 10 minutes. Keep this file POSIX sh
+# (dash): it is also sourced by hooks/hooks.json. The two -c programs are devmem.plugin.HOOK_BOOTSTRAP and
+# CLI_BOOTSTRAP, copied verbatim (tests/test_plugin.py checks that).
+
+_dm_hook=
+if [ "${1-}" = --plugin-hook ]; then
+  _dm_hook=1
+  if [ -n "${CLAUDE_PROJECT_DIR-}" ] && [ ! -d "$CLAUDE_PROJECT_DIR/.devmemory" ]; then exit 0; fi
+  _dm_root=${CLAUDE_PLUGIN_ROOT-}
+else
+  case $0 in */*) _dm_root=${0%/*}/.. ;; *\\*) _dm_root=${0%\\*}/.. ;; *) _dm_root=.. ;; esac
+fi
+
+# The programs this file runs by name (find, date, id, mkdir, rm, mv, timeout) come from absolute PATH entries only:
+# an empty or relative entry is the current folder, which for a hook is the user's project.
+_dm_ifs=$IFS
+_dm_np=
+set -f
+IFS=:
+for _dm_d in $PATH; do
+  case $_dm_d in /*) _dm_np=${_dm_np:+$_dm_np:}$_dm_d ;; esac
+done
+IFS=$_dm_ifs
+set +f
+PATH=$_dm_np
+export PATH
+
+_dm_log() {
+  case ${OS-} in Windows_NT) _dm_f=devmem_hook_errors.log ;; *) _dm_f=devmem_hook_errors_$(id -u 2>/dev/null).log ;; esac
+  _dm_f=${TMPDIR:-${TEMP:-/tmp}}/$_dm_f
+  # a temp folder can be shared: never write through a link, and append only to a regular file of this user (or
+  # create it, private). sh has no O_NOFOLLOW, so a link swapped in between this test and the write still wins;
+  # the Python bootstrap's own log (below) opens with O_NOFOLLOW and checks the owner on the open file.
+  if [ -L "$_dm_f" ] || { [ -e "$_dm_f" ] && { [ ! -f "$_dm_f" ] || [ ! -O "$_dm_f" ]; }; }; then return 0; fi
+  (umask 077; printf '%s devmem plugin hook %s: %s\n' "$(date 2>/dev/null)" "${2-}" "$1" >> "$_dm_f") 2>/dev/null
+  return 0
+}
+
+_dm_py=
+_dm_cache=
+if [ -n "$_dm_hook" ] && [ -n "${CLAUDE_PLUGIN_DATA-}" ]; then
+  _dm_cache=$CLAUDE_PLUGIN_DATA/python-path
+  if [ -f "$_dm_cache" ]; then
+    _dm_x=
+    { read -r _dm_py; read -r _dm_x; } 2>/dev/null < "$_dm_cache"
+    case $_dm_py in "DEVMEM-PY "*) _dm_py=${_dm_py#DEVMEM-PY } ;; *) _dm_py= ;; esac
+    case $_dm_py in *[Ww]indows[Aa]pps*) _dm_py= ;; esac
+    [ -z "$_dm_x" ] && [ -n "$_dm_py" ] && [ -f "$_dm_py" ] && [ -x "$_dm_py" ] || _dm_py=
+  fi
+fi
+if [ -z "$_dm_py" ]; then
+  _dm_stalled=
+  if [ -n "$_dm_cache" ] && [ -f "$_dm_cache.probing" ]; then
+    # a search started less than 10 minutes ago and never finished (a python that hangs, killed with the hook)
+    [ -n "$(find "$_dm_cache.probing" -mmin -10 2>/dev/null)" ] && _dm_stalled=1
+  fi
+  if [ -n "$_dm_stalled" ]; then
+    [ -n "$_dm_hook" ] && _dm_log "an earlier search for Python did not finish (does a python on PATH hang?); not searching again for 10 minutes" "${2-}"
+  else
+    # coreutils/busybox timeout; never Windows' own timeout.exe (a different program)
+    _dm_t=$(command -v timeout 2>/dev/null) || _dm_t=
+    case $_dm_t in */[Ss][Yy][Ss][Tt][Ee][Mm]32/*|*[Ww][Ii][Nn][Dd][Oo][Ww][Ss]/*) _dm_t= ;; esac
+    # the data folder may not exist yet; a failed redirection must print nothing (stderr is redirected first). Files
+    # and the folder made here are private from the start (umask 077: no 0644/0666 window before a chmod)
+    [ -n "$_dm_cache" ] && (umask 077; mkdir -p "$CLAUDE_PLUGIN_DATA"; : > "$_dm_cache.probing") 2>/dev/null
+    _dm_probe="import sys;sys.version_info>=(3,10) and sys.stdout.write('DEVMEM-PY '+sys.executable)"
+    _dm_hung=
+    _dm_ifs=$IFS
+    set -f
+    # every python3, then python, then py on PATH, in PATH order (not only the first of each name, which may be
+    # a shim); empty and relative PATH entries (the current folder: the user's project) are skipped
+    for _dm_c in python3 python py; do
+      IFS=:
+      for _dm_d in $PATH; do
+        IFS=$_dm_ifs
+        case $_dm_d in /*|[A-Za-z]:[\\/]*) ;; *) continue ;; esac
+        _dm_w=$_dm_d/$_dm_c
+        [ -x "$_dm_w" ] && [ ! -d "$_dm_w" ] || continue
+        case $_dm_w in *[Ww]indows[Aa]pps*) continue ;; esac
+        if [ "$_dm_c" = py ]; then
+          _dm_out=$(${_dm_t:+timeout} ${_dm_t:+5} "$_dm_w" -3 -I -c "$_dm_probe" </dev/null 2>/dev/null)
+        else
+          _dm_out=$(${_dm_t:+timeout} ${_dm_t:+5} "$_dm_w" -I -c "$_dm_probe" </dev/null 2>/dev/null)
+        fi
+        _dm_rc=$?
+        [ "$_dm_rc" = 124 ] && _dm_hung=1
+        [ "$_dm_rc" = 0 ] || continue
+        case $_dm_out in *'
+'*) continue ;; "DEVMEM-PY "?*) _dm_out=${_dm_out#DEVMEM-PY } ;; *) continue ;; esac
+        if [ -f "$_dm_out" ] && [ -x "$_dm_out" ]; then _dm_py=$_dm_out; break; fi
+      done
+      IFS=$_dm_ifs
+      [ -n "$_dm_py" ] && break
+    done
+    set +f
+    # a probe cut off by timeout and no Python found: keep the marker, so the next 10 minutes do not wait again
+    [ -n "$_dm_cache" ] && { [ -n "$_dm_py" ] || [ -z "$_dm_hung" ]; } && rm -f "$_dm_cache.probing" 2>/dev/null
+    if [ -n "$_dm_py" ] && [ -n "$_dm_cache" ]; then
+      (umask 077; printf 'DEVMEM-PY %s\n' "$_dm_py" > "$_dm_cache.$$") 2>/dev/null && mv -f "$_dm_cache.$$" "$_dm_cache" 2>/dev/null
+    fi
+  fi
+fi
+
+if [ -n "$_dm_hook" ]; then
+  if [ -z "$_dm_py" ]; then _dm_log "no Python 3.10 or newer found (tried python3, python, py); nothing recorded" "${2-}"; exit 0; fi
+  if [ -z "$_dm_root" ]; then _dm_log "CLAUDE_PLUGIN_ROOT is not set; nothing recorded" "${2-}"; exit 0; fi
+  "$_dm_py" -I -S -c "import sys,os;R=os.path.abspath(sys.argv.pop(1));P=os.path.join(R,'devmem','plugin.py');L='devmem_hook_errors'+('_'+str(os.getuid()) if hasattr(os,'getuid') else '')+'.log';N=getattr(os,'O_NOFOLLOW',0)+getattr(os,'O_NONBLOCK',0);G=hasattr(os,'getuid');exec(chr(10).join(['try:', ' if not os.path.isfile(P):', '  raise ImportError(P)', ' sys.path.insert(0,R)', ' from devmem.plugin import hook_main', ' hook_main(sys.argv[1:])', 'except BaseException as e:', ' try:', '  import tempfile,time,stat', '  p=os.path.join(tempfile.gettempdir(),L)', '  d=os.open(p,os.O_WRONLY+os.O_APPEND+os.O_CREAT+N,384)', '  s=os.fstat(d)', '  if not stat.S_ISREG(s.st_mode) or (G and s.st_uid-os.getuid()):', '   os.close(d)', '   raise OSError(p)', '  f=os.fdopen(d,chr(97))', '  f.write(repr((time.ctime(),R,sys.argv[1:2],e))+chr(10))', '  f.close()', ' except BaseException:', '  pass']));os._exit(0)" "$_dm_root" "${2-}"
+  # the bootstrap always exits 0: anything else means the cached program is not (or no longer) a working Python
+  if [ "$?" != 0 ]; then
+    [ -n "$_dm_cache" ] && rm -f "$_dm_cache" 2>/dev/null
+    _dm_log "$_dm_py did not run the devmem bootstrap; removed from the cache, Python is searched again next time" "${2-}"
+  fi
+  exit 0
+fi
+if [ -z "$_dm_py" ]; then
+  echo "devmem: no Python 3.10 or newer found (tried python3, python, py). Install Python 3.10+ and try again." >&2
+  exit 127
+fi
+exec "$_dm_py" -I -c "import sys,os;R=os.path.abspath(sys.argv.pop(1));os.path.isfile(os.path.join(R,'devmem','cli.py')) or sys.exit('devmem: no devmem package in '+R);sys.path.insert(0,R);os.environ['DEVMEM_PLUGIN_ROOT']=R;from devmem.cli import main;sys.exit(main())" "$_dm_root" "$@"

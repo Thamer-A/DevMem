@@ -1,0 +1,15 @@
+{
+ "session_id": "4a014bc1-dc45-4a0c-9e7a-ab4dec5491d8",
+ "transcript_path": "{TRANSCRIPT}",
+ "cwd": "{PROJECT}",
+ "prompt_id": "ca2a0eac-26f2-4067-96ee-af45b3454745",
+ "permission_mode": "acceptEdits",
+ "effort": {
+  "level": "medium"
+ },
+ "hook_event_name": "Stop",
+ "stop_hook_active": false,
+ "last_assistant_message": "Appended `# end` to farewell.py.",
+ "background_tasks": [],
+ "session_crons": []
+}

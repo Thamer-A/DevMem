@@ -1,0 +1,11 @@
+* text=auto
+*.luau text eol=lf
+*.bat text eol=crlf
+# recorded fixtures are kept byte-for-byte
+fixtures/** -text
+tests/test_hooks_fixtures/** -text
+*.cmd text eol=crlf
+# the plugin's sh launcher runs under sh/bash, which cannot read CRLF
+plugin/bin/devmem text eol=lf
+# binary assets (the installer icon)
+*.ico binary

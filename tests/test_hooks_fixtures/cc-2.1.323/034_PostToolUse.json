@@ -1,0 +1,41 @@
+{
+ "session_id": "4a014bc1-dc45-4a0c-9e7a-ab4dec5491d8",
+ "transcript_path": "{TRANSCRIPT}",
+ "cwd": "{PROJECT}",
+ "prompt_id": "ca2a0eac-26f2-4067-96ee-af45b3454745",
+ "permission_mode": "acceptEdits",
+ "effort": {
+  "level": "medium"
+ },
+ "hook_event_name": "PostToolUse",
+ "tool_name": "Edit",
+ "tool_input": {
+  "file_path": "{PROJECT}\\farewell.py",
+  "old_string": "    return \"bye \" + name\n",
+  "new_string": "    return \"bye \" + name\n# end\n",
+  "replace_all": false
+ },
+ "tool_response": {
+  "filePath": "{PROJECT}/farewell.py",
+  "oldString": "    return \"bye \" + name\n",
+  "newString": "    return \"bye \" + name\n# end\n",
+  "originalFile": "def bye(name):\n    return \"bye \" + name\n",
+  "structuredPatch": [
+   {
+    "oldStart": 1,
+    "oldLines": 2,
+    "newStart": 1,
+    "newLines": 3,
+    "lines": [
+     " def bye(name):",
+     "     return \"bye \" + name",
+     "+# end"
+    ]
+   }
+  ],
+  "userModified": false,
+  "replaceAll": false
+ },
+ "tool_use_id": "toolu_014BiJ9EtzVJrQZg9Gw1GG9C",
+ "duration_ms": 34
+}

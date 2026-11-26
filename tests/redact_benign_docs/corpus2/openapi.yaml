@@ -1,0 +1,108 @@
+openapi: 3.0.3
+info:
+  title: Example API
+  version: 1.2.0
+  description: |
+    The Example API. Authenticate with an API key in the `X-API-Key` header.
+    Tokens are issued by the auth endpoint.
+paths:
+  /items:
+    get:
+      summary: List items
+      parameters:
+        - name: api_key
+          in: query
+          required: false
+          description: The api key parameter.
+          schema:
+            type: string
+          example: sample_api_key
+        - name: token
+          in: query
+          required: false
+          description: The token parameter.
+          schema:
+            type: string
+          example: sample_token
+        - name: page_token
+          in: query
+          required: false
+          description: The page token parameter.
+          schema:
+            type: string
+          example: sample_page_token
+        - name: password
+          in: query
+          required: false
+          description: The password parameter.
+          schema:
+            type: string
+          example: sample_password
+        - name: client_secret
+          in: query
+          required: false
+          description: The client secret parameter.
+          schema:
+            type: string
+          example: sample_client_secret
+        - name: limit
+          in: query
+          required: false
+          description: The limit parameter.
+          schema:
+            type: string
+          example: sample_limit
+        - name: offset
+          in: query
+          required: false
+          description: The offset parameter.
+          schema:
+            type: string
+          example: sample_offset
+        - name: sort_key
+          in: query
+          required: false
+          description: The sort key parameter.
+          schema:
+            type: string
+          example: sample_sort_key
+        - name: partition_key
+          in: query
+          required: false
+          description: The partition key parameter.
+          schema:
+            type: string
+          example: sample_partition_key
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    items: []
+                    next_page_token: abc
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key issued in the console.
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Login:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+          description: The user's password.
+        remember_token:
+          type: boolean

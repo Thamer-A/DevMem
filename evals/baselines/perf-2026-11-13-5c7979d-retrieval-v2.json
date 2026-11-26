@@ -1,0 +1,211 @@
+{
+ "schema": 1,
+ "date": "2026-11-13",
+ "git_head": "5c7979d59bb31b91987285b61f0102f4f91ddcbf",
+ "python": "3.13.13",
+ "platform": "win32",
+ "prompts": [
+  "fix the parsing bug when the input contains unicode characters",
+  "add a timeout option to the network client and document it",
+  "yes go ahead",
+  "refactor the logging code so errors include the file name"
+ ],
+ "results": [
+  {
+   "project": "C:\\Users\\dev\\Documents\\Personal_Projects\\DevMem\\fixtures\\blade-swarm\\project",
+   "files_on_disk": 19,
+   "lines_on_disk": 1474,
+   "cold_scan_s": 0.115,
+   "warm_scan_s": 0.037,
+   "warm_scan_runs_s": [
+    0.069,
+    0.038,
+    0.037
+   ],
+   "map_json_bytes": 12922,
+   "project_md_bytes": 2265,
+   "project_md_tokens_est": 558,
+   "index_db_bytes": 86016,
+   "files_in_map": 16,
+   "pack": [
+    {
+     "prompt": "fix the parsing bug when the input contains unicode characters",
+     "first_s": 0.02,
+     "best_s": 0.005,
+     "tokens_est": 246,
+     "error": null
+    },
+    {
+     "prompt": "add a timeout option to the network client and document it",
+     "first_s": 0.004,
+     "best_s": 0.004,
+     "tokens_est": 81,
+     "error": null
+    },
+    {
+     "prompt": "yes go ahead",
+     "first_s": 0.004,
+     "best_s": 0.002,
+     "tokens_est": 0,
+     "error": null
+    },
+    {
+     "prompt": "refactor the logging code so errors include the file name",
+     "first_s": 0.003,
+     "best_s": 0.003,
+     "tokens_est": 0,
+     "error": null
+    }
+   ],
+   "pack_first_mean_s": 0.008,
+   "target_got_a_store": false
+  },
+  {
+   "project": "C:\\Users\\dev\\Documents\\Personal_Projects\\DevMem\\fixtures\\taskboard\\project",
+   "files_on_disk": 4,
+   "lines_on_disk": 501,
+   "cold_scan_s": 0.059,
+   "warm_scan_s": 0.039,
+   "warm_scan_runs_s": [
+    0.063,
+    0.039,
+    0.039
+   ],
+   "map_json_bytes": 1362,
+   "project_md_bytes": 389,
+   "project_md_tokens_est": 95,
+   "index_db_bytes": 40960,
+   "files_in_map": 4,
+   "pack": [
+    {
+     "prompt": "fix the parsing bug when the input contains unicode characters",
+     "first_s": 0.016,
+     "best_s": 0.005,
+     "tokens_est": 100,
+     "error": null
+    },
+    {
+     "prompt": "add a timeout option to the network client and document it",
+     "first_s": 0.003,
+     "best_s": 0.002,
+     "tokens_est": 0,
+     "error": null
+    },
+    {
+     "prompt": "yes go ahead",
+     "first_s": 0.003,
+     "best_s": 0.002,
+     "tokens_est": 0,
+     "error": null
+    },
+    {
+     "prompt": "refactor the logging code so errors include the file name",
+     "first_s": 0.003,
+     "best_s": 0.003,
+     "tokens_est": 0,
+     "error": null
+    }
+   ],
+   "pack_first_mean_s": 0.006,
+   "target_got_a_store": false
+  },
+  {
+   "project": "C:\\Users\\dev\\Documents\\Personal_Projects\\DevMem\\fixtures\\coinrush\\project",
+   "files_on_disk": 27,
+   "lines_on_disk": 2346,
+   "cold_scan_s": 0.116,
+   "warm_scan_s": 0.041,
+   "warm_scan_runs_s": [
+    0.077,
+    0.044,
+    0.041
+   ],
+   "map_json_bytes": 25806,
+   "project_md_bytes": 5530,
+   "project_md_tokens_est": 1369,
+   "index_db_bytes": 98304,
+   "files_in_map": 27,
+   "pack": [
+    {
+     "prompt": "fix the parsing bug when the input contains unicode characters",
+     "first_s": 0.016,
+     "best_s": 0.003,
+     "tokens_est": 104,
+     "error": null
+    },
+    {
+     "prompt": "add a timeout option to the network client and document it",
+     "first_s": 0.004,
+     "best_s": 0.004,
+     "tokens_est": 91,
+     "error": null
+    },
+    {
+     "prompt": "yes go ahead",
+     "first_s": 0.003,
+     "best_s": 0.003,
+     "tokens_est": 0,
+     "error": null
+    },
+    {
+     "prompt": "refactor the logging code so errors include the file name",
+     "first_s": 0.006,
+     "best_s": 0.005,
+     "tokens_est": 375,
+     "error": null
+    }
+   ],
+   "pack_first_mean_s": 0.007,
+   "target_got_a_store": false
+  },
+  {
+   "project": "C:\\Users\\dev\\AppData\\Local\\Temp\\devmem-stdlib-s6re9lxr\\stdlib",
+   "files_on_disk": 779,
+   "lines_on_disk": 346686,
+   "cold_scan_s": 4.391,
+   "warm_scan_s": 0.053,
+   "warm_scan_runs_s": [
+    0.088,
+    0.053,
+    0.056
+   ],
+   "map_json_bytes": 682761,
+   "project_md_bytes": 7670,
+   "project_md_tokens_est": 1891,
+   "index_db_bytes": 6385664,
+   "files_in_map": 740,
+   "pack": [
+    {
+     "prompt": "fix the parsing bug when the input contains unicode characters",
+     "first_s": 0.062,
+     "best_s": 0.037,
+     "tokens_est": 498,
+     "error": null
+    },
+    {
+     "prompt": "add a timeout option to the network client and document it",
+     "first_s": 0.038,
+     "best_s": 0.038,
+     "tokens_est": 336,
+     "error": null
+    },
+    {
+     "prompt": "yes go ahead",
+     "first_s": 0.013,
+     "best_s": 0.013,
+     "tokens_est": 0,
+     "error": null
+    },
+    {
+     "prompt": "refactor the logging code so errors include the file name",
+     "first_s": 0.044,
+     "best_s": 0.044,
+     "tokens_est": 506,
+     "error": null
+    }
+   ],
+   "pack_first_mean_s": 0.039,
+   "target_got_a_store": false
+  }
+ ]
+}

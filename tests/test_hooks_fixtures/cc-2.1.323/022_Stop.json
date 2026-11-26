@@ -1,0 +1,15 @@
+{
+ "session_id": "4a014bc1-dc45-4a0c-9e7a-ab4dec5491d8",
+ "transcript_path": "{TRANSCRIPT}",
+ "cwd": "{PROJECT}",
+ "prompt_id": "f101623f-e5b1-4791-8d98-7cab74a120b8",
+ "permission_mode": "acceptEdits",
+ "effort": {
+  "level": "medium"
+ },
+ "hook_event_name": "Stop",
+ "stop_hook_active": false,
+ "last_assistant_message": "مرحبا! Done: `greet.py` now returns \"hi \", `farewell.py` defines `bye(name)`, `notes.txt` is removed, and `ls does_not_exist_dir` failed as expected with exit code 2.",
+ "background_tasks": [],
+ "session_crons": []
+}

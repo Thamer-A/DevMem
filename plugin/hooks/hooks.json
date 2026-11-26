@@ -1,0 +1,93 @@
+{
+  "description": "DevMem: records Claude Code sessions in projects switched on with /devmem:setup and adds relevant earlier work to their prompts. Does nothing in any other project.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "set +eu; set -- \"\\\" <#\" --plugin-hook SessionStart; shift; trap - EXIT; trap - ERR 2>/dev/null; f=\"$CLAUDE_PLUGIN_ROOT/bin/devmem\"; if [ -n \"${BASH_VERSION-}\" ] && ! shopt -oq posix; then . \"$f\"; else (. \"$f\"); fi; exit 0 #>; $r = $env:CLAUDE_PLUGIN_ROOT; if ($r -match '[%^]') { try { Add-Content -LiteralPath (Join-Path $env:TEMP 'devmem_hook_errors.log') -Value ((Get-Date).ToString() + ' devmem plugin hook SessionStart: the plugin folder path holds % or ^, which cmd cannot pass safely; nothing recorded: ' + $r) } catch {} } else { try { & \"$r\\bin\\devmem.cmd\" --plugin-hook SessionStart } catch {} }; exit 0",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "set +eu; set -- \"\\\" <#\" --plugin-hook UserPromptSubmit; shift; trap - EXIT; trap - ERR 2>/dev/null; f=\"$CLAUDE_PLUGIN_ROOT/bin/devmem\"; if [ -n \"${BASH_VERSION-}\" ] && ! shopt -oq posix; then . \"$f\"; else (. \"$f\"); fi; exit 0 #>; $r = $env:CLAUDE_PLUGIN_ROOT; if ($r -match '[%^]') { try { Add-Content -LiteralPath (Join-Path $env:TEMP 'devmem_hook_errors.log') -Value ((Get-Date).ToString() + ' devmem plugin hook UserPromptSubmit: the plugin folder path holds % or ^, which cmd cannot pass safely; nothing recorded: ' + $r) } catch {} } else { try { & \"$r\\bin\\devmem.cmd\" --plugin-hook UserPromptSubmit } catch {} }; exit 0",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "set +eu; set -- \"\\\" <#\" --plugin-hook PostToolUse; shift; trap - EXIT; trap - ERR 2>/dev/null; f=\"$CLAUDE_PLUGIN_ROOT/bin/devmem\"; if [ -n \"${BASH_VERSION-}\" ] && ! shopt -oq posix; then . \"$f\"; else (. \"$f\"); fi; exit 0 #>; $r = $env:CLAUDE_PLUGIN_ROOT; if ($r -match '[%^]') { try { Add-Content -LiteralPath (Join-Path $env:TEMP 'devmem_hook_errors.log') -Value ((Get-Date).ToString() + ' devmem plugin hook PostToolUse: the plugin folder path holds % or ^, which cmd cannot pass safely; nothing recorded: ' + $r) } catch {} } else { try { & \"$r\\bin\\devmem.cmd\" --plugin-hook PostToolUse } catch {} }; exit 0",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "set +eu; set -- \"\\\" <#\" --plugin-hook PostToolUseFailure; shift; trap - EXIT; trap - ERR 2>/dev/null; f=\"$CLAUDE_PLUGIN_ROOT/bin/devmem\"; if [ -n \"${BASH_VERSION-}\" ] && ! shopt -oq posix; then . \"$f\"; else (. \"$f\"); fi; exit 0 #>; $r = $env:CLAUDE_PLUGIN_ROOT; if ($r -match '[%^]') { try { Add-Content -LiteralPath (Join-Path $env:TEMP 'devmem_hook_errors.log') -Value ((Get-Date).ToString() + ' devmem plugin hook PostToolUseFailure: the plugin folder path holds % or ^, which cmd cannot pass safely; nothing recorded: ' + $r) } catch {} } else { try { & \"$r\\bin\\devmem.cmd\" --plugin-hook PostToolUseFailure } catch {} }; exit 0",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "set +eu; set -- \"\\\" <#\" --plugin-hook Stop; shift; trap - EXIT; trap - ERR 2>/dev/null; f=\"$CLAUDE_PLUGIN_ROOT/bin/devmem\"; if [ -n \"${BASH_VERSION-}\" ] && ! shopt -oq posix; then . \"$f\"; else (. \"$f\"); fi; exit 0 #>; $r = $env:CLAUDE_PLUGIN_ROOT; if ($r -match '[%^]') { try { Add-Content -LiteralPath (Join-Path $env:TEMP 'devmem_hook_errors.log') -Value ((Get-Date).ToString() + ' devmem plugin hook Stop: the plugin folder path holds % or ^, which cmd cannot pass safely; nothing recorded: ' + $r) } catch {} } else { try { & \"$r\\bin\\devmem.cmd\" --plugin-hook Stop } catch {} }; exit 0",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "set +eu; set -- \"\\\" <#\" --plugin-hook StopFailure; shift; trap - EXIT; trap - ERR 2>/dev/null; f=\"$CLAUDE_PLUGIN_ROOT/bin/devmem\"; if [ -n \"${BASH_VERSION-}\" ] && ! shopt -oq posix; then . \"$f\"; else (. \"$f\"); fi; exit 0 #>; $r = $env:CLAUDE_PLUGIN_ROOT; if ($r -match '[%^]') { try { Add-Content -LiteralPath (Join-Path $env:TEMP 'devmem_hook_errors.log') -Value ((Get-Date).ToString() + ' devmem plugin hook StopFailure: the plugin folder path holds % or ^, which cmd cannot pass safely; nothing recorded: ' + $r) } catch {} } else { try { & \"$r\\bin\\devmem.cmd\" --plugin-hook StopFailure } catch {} }; exit 0",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "set +eu; set -- \"\\\" <#\" --plugin-hook PostCompact; shift; trap - EXIT; trap - ERR 2>/dev/null; f=\"$CLAUDE_PLUGIN_ROOT/bin/devmem\"; if [ -n \"${BASH_VERSION-}\" ] && ! shopt -oq posix; then . \"$f\"; else (. \"$f\"); fi; exit 0 #>; $r = $env:CLAUDE_PLUGIN_ROOT; if ($r -match '[%^]') { try { Add-Content -LiteralPath (Join-Path $env:TEMP 'devmem_hook_errors.log') -Value ((Get-Date).ToString() + ' devmem plugin hook PostCompact: the plugin folder path holds % or ^, which cmd cannot pass safely; nothing recorded: ' + $r) } catch {} } else { try { & \"$r\\bin\\devmem.cmd\" --plugin-hook PostCompact } catch {} }; exit 0",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "set +eu; set -- \"\\\" <#\" --plugin-hook SessionEnd; shift; trap - EXIT; trap - ERR 2>/dev/null; f=\"$CLAUDE_PLUGIN_ROOT/bin/devmem\"; if [ -n \"${BASH_VERSION-}\" ] && ! shopt -oq posix; then . \"$f\"; else (. \"$f\"); fi; exit 0 #>; $r = $env:CLAUDE_PLUGIN_ROOT; if ($r -match '[%^]') { try { Add-Content -LiteralPath (Join-Path $env:TEMP 'devmem_hook_errors.log') -Value ((Get-Date).ToString() + ' devmem plugin hook SessionEnd: the plugin folder path holds % or ^, which cmd cannot pass safely; nothing recorded: ' + $r) } catch {} } else { try { & \"$r\\bin\\devmem.cmd\" --plugin-hook SessionEnd } catch {} }; exit 0",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

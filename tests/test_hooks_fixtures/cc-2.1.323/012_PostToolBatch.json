@@ -1,0 +1,33 @@
+{
+ "session_id": "4a014bc1-dc45-4a0c-9e7a-ab4dec5491d8",
+ "transcript_path": "{TRANSCRIPT}",
+ "cwd": "{PROJECT}",
+ "prompt_id": "f101623f-e5b1-4791-8d98-7cab74a120b8",
+ "permission_mode": "acceptEdits",
+ "effort": {
+  "level": "medium"
+ },
+ "hook_event_name": "PostToolBatch",
+ "tool_calls": [
+  {
+   "tool_name": "Edit",
+   "tool_input": {
+    "replace_all": false,
+    "file_path": "{PROJECT}/greet.py",
+    "old_string": "    return \"hello \" + name",
+    "new_string": "    return \"hi \" + name"
+   },
+   "tool_use_id": "toolu_016ZPL3o7CYsnPB3wu8QNMqg",
+   "tool_response": "The file {PROJECT}/greet.py has been updated successfully. (file state is current in your context — no need to Read it back)"
+  },
+  {
+   "tool_name": "Write",
+   "tool_input": {
+    "file_path": "{PROJECT}/farewell.py",
+    "content": "def bye(name):\n    return \"bye \" + name\n"
+   },
+   "tool_use_id": "toolu_01XnohfHT75kTJyeirbTta46",
+   "tool_response": "File created successfully at: {PROJECT}/farewell.py (file state is current in your context — no need to Read it back)"
+  }
+ ]
+}

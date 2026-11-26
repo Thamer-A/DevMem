@@ -1,0 +1,206 @@
+[
+  {
+    "id": "bs-01", "kind": "followup_early_req",
+    "task": "Add an Epic upgrade called Phoenix that revives the player once for 150 coins, and make sure it shows with the right rarity colours.",
+    "sessions_required": ["3e2bb0e2"], "sessions_optional": ["e695866c", "dbf18bb2"],
+    "files_required": ["src/shared/Config.lua", "src/server/Shop.lua"],
+    "files_optional": ["src/client/ShopUi.client.lua", "src/client/UiKit.lua"],
+    "verbatim": ["Common = gray, Rare = blue, Epic = purple"],
+    "why": "The rarity colours were stated in the HUD/shop UI session (3e2bb0e2); the Twin Spin session (e695866c) is the closest precedent for adding an Epic entry in Config + Shop."
+  },
+  {
+    "id": "bs-02", "kind": "terse_bug",
+    "task": "The blades look wrong again, too many of them and too far out.",
+    "sessions_required": ["9e11ad14"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.lua"],
+    "files_optional": ["src/client/BladeOrbit.client.lua", "src/server/Blades.server.lua"],
+    "verbatim": ["start with 2 blades", "orbit radius 7 studs"],
+    "why": "The only statement of the intended starting blade count (2) and orbit radius (7) is the first session (9e11ad14); the bug report omits both numbers and the word orbit."
+  },
+  {
+    "id": "bs-03", "kind": "followup_early_req",
+    "task": "Zombies drop too few coins. Triple the original reward per kill.",
+    "sessions_required": ["172a5388", "ff58317f"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.lua"],
+    "files_optional": ["src/server/Zombies.server.lua"],
+    "verbatim": ["5 coins per kill", "double the coins per kill"],
+    "why": "The original value (5 coins per kill, session 172a5388) and the later doubling (ff58317f) are both needed to know the current value (10) and the original (5)."
+  },
+  {
+    "id": "bs-04", "kind": "followup_early_req",
+    "task": "Zombies are too tanky on wave one. Lower their starting health a bit but keep the per-wave growth I set later.",
+    "sessions_required": ["172a5388", "ff58317f"], "sessions_optional": ["d9c19cbb"],
+    "files_required": ["src/shared/Config.lua"],
+    "files_optional": ["src/server/Zombies.server.lua"],
+    "verbatim": ["zombies have 60 health", "10% per wave"],
+    "why": "Base health 60 comes from 172a5388 and the final growth (10% per wave) from ff58317f, which superseded the 15% in d9c19cbb (optional, superseded)."
+  },
+  {
+    "id": "bs-05", "kind": "direct",
+    "task": "Make rerolling the shop offers twice as expensive.",
+    "sessions_required": ["dbf18bb2"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.lua"],
+    "files_optional": ["src/server/Shop.lua", "src/client/ShopUi.client.lua"],
+    "verbatim": ["Rerolling the offers costs 10 coins"],
+    "why": "The reroll price (10 coins) was specified in the shop session (dbf18bb2); it lives in Config.Shop.RerollCost."
+  },
+  {
+    "id": "bs-06", "kind": "paraphrase",
+    "task": "Each round the undead horde should grow by six rather than four.",
+    "sessions_required": ["d9c19cbb"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.lua", "src/server/Zombies.server.lua"],
+    "files_optional": [],
+    "verbatim": ["each wave adds 4 more"],
+    "why": "Describes the wave size growth (CountPerWave = 4) set in session d9c19cbb without using the words wave, zombie or add; the quota formula is in Zombies.server.lua."
+  },
+  {
+    "id": "bs-07", "kind": "paraphrase",
+    "task": "Make the spinning swords around the hero glow magenta instead.",
+    "sessions_required": ["9e11ad14"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.lua"],
+    "files_optional": ["src/client/BladeOrbit.client.lua"],
+    "verbatim": ["neon cyan blades"],
+    "why": "The blade colour (neon cyan) was set in session 9e11ad14; the prompt avoids the words blade, orbit and player, and Config.Blades.Color holds the value."
+  },
+  {
+    "id": "bs-08", "kind": "terse_bug",
+    "task": "Still no shop between rounds, nothing shows up.",
+    "sessions_required": ["dbf18bb2"], "sessions_optional": ["d7eef563", "e0eef7ec", "e516187c", "b2bdd465", "0bdbd8f9", "d46cc4fc"],
+    "files_required": ["src/server/Shop.lua", "src/client/ShopUi.client.lua"],
+    "files_optional": ["src/server/Zombies.server.lua", "src/shared/Remotes.lua", "src/shared/Config.lua"],
+    "verbatim": ["Each player gets 3 random offers"],
+    "why": "The shop spec (dbf18bb2) is the origin; the six playtest sessions are earlier attempts at this same bug and are useful (optional) so they are not repeated."
+  },
+  {
+    "id": "bs-09", "kind": "terse_bug",
+    "task": "Dying does nothing, the run never restarts.",
+    "sessions_required": ["ff58317f"], "sessions_optional": ["1ba52bf8"],
+    "files_required": ["src/server/Zombies.server.lua"],
+    "files_optional": ["src/shared/Config.lua"],
+    "verbatim": ["reset the run back to wave 1"],
+    "why": "The game-over rule was requested in ff58317f; 1ba52bf8 is the earlier fix attempt for this exact symptom."
+  },
+  {
+    "id": "bs-10", "kind": "followup_early_req",
+    "task": "Add a kills counter to the HUD that matches the look of the other stats.",
+    "sessions_required": ["3e2bb0e2"], "sessions_optional": ["172a5388"],
+    "files_required": ["src/client/Hud.client.lua"],
+    "files_optional": ["src/client/UiKit.lua", "src/shared/Config.lua"],
+    "verbatim": ["dark navy rounded panels, cyan accent, gold for coins"],
+    "why": "The HUD style rules (navy, cyan, gold) come from 3e2bb0e2; kills are tracked since 172a5388 (optional); the HUD is Hud.client.lua."
+  },
+  {
+    "id": "bs-11", "kind": "followup_early_req",
+    "task": "Touching a zombie hurts way too much, halve it.",
+    "sessions_required": ["d9c19cbb"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.lua"],
+    "files_optional": ["src/server/Zombies.server.lua"],
+    "verbatim": ["10 damage per second"],
+    "why": "Contact damage (10 per second) was specified in the wave session d9c19cbb; value is Config.Zombies.ContactDamage."
+  },
+  {
+    "id": "bs-12", "kind": "untouched_file",
+    "task": "Document the rojo build command in the README.",
+    "sessions_required": [], "sessions_optional": [],
+    "files_required": ["README.md"],
+    "files_optional": ["default.project.json"],
+    "verbatim": [],
+    "why": "No session edited README.md; the right pack points at the file by name. Any session carried is off-label."
+  },
+  {
+    "id": "bs-13", "kind": "untouched_file",
+    "task": "Add a Packages folder mapping to the Rojo project file.",
+    "sessions_required": [], "sessions_optional": [],
+    "files_required": ["default.project.json"],
+    "files_optional": ["README.md"],
+    "verbatim": [],
+    "why": "No session edited default.project.json; the task names the file's role (Rojo project file), not its path."
+  },
+  {
+    "id": "bs-14", "kind": "trivial", "task": "yes go ahead",
+    "sessions_required": [], "sessions_optional": [], "files_required": [], "files_optional": [], "verbatim": [],
+    "expect_empty": true,
+    "why": "A confirmation carries no retrievable topic; nothing should be injected."
+  },
+  {
+    "id": "bs-15", "kind": "trivial", "task": "thanks, that works",
+    "sessions_required": [], "sessions_optional": [], "files_required": [], "files_optional": [], "verbatim": [],
+    "expect_empty": true,
+    "why": "Thanks/acknowledgement; nothing relevant."
+  },
+  {
+    "id": "bs-16", "kind": "trivial", "task": "continue",
+    "sessions_required": [], "sessions_optional": [], "files_required": [], "files_optional": [], "verbatim": [],
+    "expect_empty": true,
+    "why": "Bare continuation; a hook cannot know what to retrieve from this alone."
+  },
+  {
+    "id": "bs-17", "kind": "non_english",
+    "task": "زد عدد الزومبي في كل موجة إلى ستة بدل أربعة",
+    "sessions_required": ["d9c19cbb"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.lua"],
+    "files_optional": ["src/server/Zombies.server.lua"],
+    "verbatim": ["each wave adds 4 more"],
+    "why": "Arabic: 'increase the number of zombies in each wave to six instead of four'; the English session d9c19cbb set the per-wave increase of 4."
+  },
+  {
+    "id": "bs-18", "kind": "non_english",
+    "task": "اجعل سعر إعادة سحب العروض في المتجر ضعف السعر الحالي",
+    "sessions_required": ["dbf18bb2"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.lua"],
+    "files_optional": ["src/server/Shop.lua", "src/client/ShopUi.client.lua"],
+    "verbatim": ["Rerolling the offers costs 10 coins"],
+    "why": "Arabic: 'make the price of rerolling the shop offers double the current price'; same target as bs-05."
+  },
+  {
+    "id": "bs-19", "kind": "non_english",
+    "task": "غيّر لون الندرة الملحمية إلى الذهبي مع الإبقاء على بقية الألوان",
+    "sessions_required": ["3e2bb0e2"], "sessions_optional": ["e695866c"],
+    "files_required": ["src/shared/Config.lua"],
+    "files_optional": ["src/client/ShopUi.client.lua", "src/client/UiKit.lua"],
+    "verbatim": ["Common = gray, Rare = blue, Epic = purple"],
+    "why": "Arabic: 'change the epic rarity colour to gold while keeping the other colours'; rarity colours were set in 3e2bb0e2."
+  },
+  {
+    "id": "bs-20", "kind": "non_english",
+    "task": "把商店刷新价格改成原来的两倍",
+    "sessions_required": ["dbf18bb2"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.lua"],
+    "files_optional": ["src/server/Shop.lua", "src/client/ShopUi.client.lua"],
+    "verbatim": ["Rerolling the offers costs 10 coins"],
+    "why": "Chinese: 'change the shop refresh price to twice the original'; same target as bs-05. Unsegmented CJK is the hard case for a tokenizer."
+  },
+  {
+    "id": "bs-21", "kind": "non_english",
+    "task": "Rallonge la pause entre les vagues à trente secondes",
+    "sessions_required": ["d9c19cbb"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.lua"],
+    "files_optional": ["src/server/Zombies.server.lua"],
+    "verbatim": ["20 second break between waves"],
+    "why": "French: 'lengthen the pause between waves to thirty seconds'; WaveBreak = 20 was specified in d9c19cbb. Accented Latin."
+  },
+  {
+    "id": "bs-22", "kind": "direct",
+    "task": "Make Greed give +50% coins instead.",
+    "sessions_required": ["dbf18bb2"], "sessions_optional": [],
+    "files_required": ["src/shared/Config.lua"],
+    "files_optional": ["src/server/Coins.lua", "src/server/Shop.lua"],
+    "verbatim": ["Greed +25% coins"],
+    "why": "The Greed upgrade and its current 25% were defined in the shop session dbf18bb2; the entry is in Config.Shop.Upgrades."
+  },
+  {
+    "id": "bs-23", "kind": "direct",
+    "task": "Add a sound effect when a zombie dies.",
+    "sessions_required": ["c976dd00"], "sessions_optional": [],
+    "files_required": ["src/client/CombatFx.client.lua"],
+    "files_optional": ["src/shared/Config.lua", "src/shared/Remotes.lua"],
+    "verbatim": [],
+    "why": "Zombie death effects (burst) were added in c976dd00 in CombatFx.client.lua; a death sound belongs beside them."
+  },
+  {
+    "id": "bs-24", "kind": "trivial", "task": "شكراً، ممتاز",
+    "sessions_required": [], "sessions_optional": [], "files_required": [], "files_optional": [], "verbatim": [],
+    "expect_empty": true,
+    "why": "Arabic 'thanks, excellent'; nothing relevant."
+  }
+]

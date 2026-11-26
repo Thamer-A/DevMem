@@ -1,0 +1,18 @@
+[
+  {
+    "ParameterKey": "DBPassword",
+    "UsePreviousValue": true
+  },
+  {
+    "ParameterKey": "ApiKeyName",
+    "ParameterValue": "web-api-key"
+  },
+  {
+    "ParameterKey": "TokenTtl",
+    "ParameterValue": "3600"
+  },
+  {
+    "ParameterKey": "KeyPairName",
+    "ParameterValue": "ops-laptop"
+  }
+]

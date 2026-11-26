@@ -1,0 +1,27 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+*.log
+
+# memory stores are local data, never committed
+.devmemory/
+
+# Claude Code's per-user settings for this checkout
+.claude/settings.local.json
+
+# SQLite indexes and scratch databases
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# backups an earlier devmem wrote next to a settings file
+*.devmem-backup

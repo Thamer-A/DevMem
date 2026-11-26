@@ -1,0 +1,56 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/v1/search": {
+      "get": {
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "description": "Your API key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search text",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "description": "Session token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "max_tokens",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 256
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "examples": {
+      "tok": {
+        "summary": "a token count",
+        "value": 12345
+      },
+      "key": {
+        "summary": "a sort key",
+        "value": "created_at"
+      }
+    }
+  }
+}

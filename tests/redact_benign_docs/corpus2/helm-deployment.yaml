@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          image: example/web:1.4.2
+          env:
+            - name: LOG_LEVEL
+              value: "info"
+            - name: DB_PASSWORD_FILE
+              value: "/run/secrets/db"
+            - name: API_TOKEN_TTL
+              value: "3600"
+            - name: SECRET_NAME
+              value: "app-secrets"
+            - name: MAX_TOKENS
+              value: "4096"
+            - name: TOKEN_ISSUER
+              value: "https://auth.example.invalid"
+            - name: KEY_ROTATION_DAYS
+              value: "90"
+            - name: PASSWORD_MIN_LENGTH
+              value: "12"
+            - name: SESSION_KEY_PREFIX
+              value: "sess"
+            - name: PRIMARY_KEY
+              value: "id"
+            - name: SORT_KEY
+              value: "created_at"
+            - name: API_KEY_HEADER
+              value: "X-API-Key"
+            - name: AUTH_TOKEN_URL
+              value: "https://auth.example.invalid/token"
+            - name: SECRET_STORE
+              value: "vault"
+            - name: TOKEN_BUDGET
+              value: "200000"
+            - name: KEYBOARD_LAYOUT
+              value: "us"
+            - name: PASSWORD_HASH
+              value: "argon2id"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: db-password
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: api-key

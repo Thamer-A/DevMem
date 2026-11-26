@@ -1,0 +1,20 @@
+{
+  "blade-swarm": {
+    "project": "fixtures/blade-swarm/project",
+    "sessions": "fixtures/blade-swarm/memory/sessions",
+    "exclude": [".devmemory"],
+    "note": "Roblox/Rojo game, 16 real captured Claude Code sessions"
+  },
+  "taskboard": {
+    "project": "fixtures/taskboard/project",
+    "sessions": "fixtures/taskboard/memory/sessions",
+    "exclude": ["data", "_server.log"],
+    "note": "Node task-board web app; 8 real captured Claude Code sessions (recorded in the hackathon cross-tool demo)"
+  },
+  "coinrush": {
+    "project": "fixtures/coinrush/project",
+    "sessions": "fixtures/coinrush/memory/sessions",
+    "exclude": [],
+    "note": "synthetic Roblox project P1; 5 scripted sessions; dev tasks A1-D2 only"
+  }
+}

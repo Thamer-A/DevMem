@@ -1,0 +1,57 @@
+{
+  "Reservations": [
+    {
+      "Instances": [
+        {
+          "InstanceId": "i-0abc123def4567890",
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "web-1"
+            },
+            {
+              "Key": "Environment",
+              "Value": "prod"
+            },
+            {
+              "Key": "SecretsManaged",
+              "Value": "true"
+            },
+            {
+              "Key": "TokenService",
+              "Value": "auth-v2"
+            },
+            {
+              "Key": "KeyRotation",
+              "Value": "enabled"
+            },
+            {
+              "Key": "PasswordPolicy",
+              "Value": "strict"
+            },
+            {
+              "Key": "ApiKeyOwner",
+              "Value": "team-payments"
+            },
+            {
+              "Key": "CostCenter",
+              "Value": "cc-1042"
+            },
+            {
+              "Key": "primary_key",
+              "Value": "order_id"
+            },
+            {
+              "Key": "SecretArnSuffix",
+              "Value": "a1B2c3"
+            },
+            {
+              "Key": "TokenBudget",
+              "Value": "250000"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
