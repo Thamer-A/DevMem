@@ -69,6 +69,9 @@ def _task_set(tmp: Path, monkeypatch) -> Path:
         (d / "grade.py").write_text(GRADE_ANSWER.replace("{NEEDLE!r}", repr(needle)), encoding="utf-8")
     monkeypatch.setattr(W, "TASKS", tasks)
     monkeypatch.setattr(W, "TUNING", tmp / "gate" / "tuning")
+    # The freeze check looks at the same (unfrozen) mini set, not at the real, frozen evals/gate/tasks.
+    monkeypatch.setattr(F, "GATE", tmp / "gate")
+    monkeypatch.setattr(F, "MANIFEST", tasks / "MANIFEST.sha256")
     return tasks
 
 
