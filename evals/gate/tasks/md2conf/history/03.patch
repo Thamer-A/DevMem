@@ -1,0 +1,94 @@
+diff --git a/README.md b/README.md
+index 1cb853b..fb4ae77 100644
+--- a/README.md
++++ b/README.md
+@@ -547,6 +547,7 @@ The generated-by text can also be templated with the following variables:
+ - `%{filestem}`: the name of the Markdown file without the extension
+ - `%{filepath}`: the path of the Markdown file relative to the _source root_
+ - `%{filedir}`: the dirname of the `%{filepath}` (the path without the filename)
++- `%{title}`: the page title, taken from the front-matter `title` or the unique top-level heading (empty if the page has neither)
+ 
+ When publishing a directory hierarchy, the *source root* is the directory in which *md2conf* is launched. When publishing a single file, this is the directory in which the Markdown file resides.
+ 
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 5e1381c..58eab6a 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -43,12 +43,12 @@ from .png import remove_png_chunks
+ from .scanner import ScannedDocument, Scanner
+ from .serializer import JsonType
+ from .slug import title_to_slug
+-from .toc import TableOfContentsBuilder
++from .toc import TableOfContentsBuilder, unique_title
+ from .uri import is_absolute_url, to_uuid_urn
+ from .xml import element_to_text, remove_element
+ 
+ 
+-def apply_generated_by_template(template: str, path: Path) -> str:
++def apply_generated_by_template(template: str, path: Path, *, title: str | None = None) -> str:
+     """Apply template substitution to the generated_by string.
+ 
+     Supported placeholders:
+@@ -56,9 +56,11 @@ def apply_generated_by_template(template: str, path: Path) -> str:
+     - %{filename}: Just the filename
+     - %{filedir}: Dirname of the full path to the file (relative to the source directory)
+     - %{filestem}: Just the filename without the extension
++    - %{title}: The page title (from front-matter or the unique top-level heading), or empty if there is none
+ 
+     :param template: The template string with placeholders
+     :param path: The path to the file being converted
++    :param title: The title of the page, if known
+     :returns: The template string with placeholders replaced
+     """
+ 
+@@ -67,6 +69,7 @@ def apply_generated_by_template(template: str, path: Path) -> str:
+         .replace("%{filename}", path.name)
+         .replace("%{filedir}", path.parent.as_posix())
+         .replace("%{filestem}", path.stem)
++        .replace("%{title}", title or "")
+     )
+ 
+ 
+@@ -1947,7 +1950,8 @@ class ConfluenceDocument:
+             generated_by = None
+ 
+         if generated_by is not None:
+-            generated_by = apply_generated_by_template(generated_by, path.relative_to(root_dir))
++            page_title = props.title or unique_title(document.text)
++            generated_by = apply_generated_by_template(generated_by, path.relative_to(root_dir), title=page_title)
+             generated_by_html = markdown_to_html(generated_by)
+ 
+             content = [
+diff --git a/tests/test_conversion.py b/tests/test_conversion.py
+index 49270a1..71bd95d 100644
+--- a/tests/test_conversion.py
++++ b/tests/test_conversion.py
+@@ -504,6 +504,28 @@ class TestConversion(TypedTestCase):
+         self.assertIn("Stem: images", xhtml)
+         self.assertIn("Dirname: images", xhtml)
+ 
++    def test_generated_by_title(self) -> None:
++        "Test that the `%{title}` placeholder is replaced with the page title."
++
++        cases = [
++            ("skip_title_heading_frontmatter.md", "Title: [Title from Front-matter]"),
++            ("sections.md", "Title: [Sections]"),
++            ("title.md", "Title: []"),
++        ]
++        for file_name, expected in cases:
++            with self.subTest(file_name=file_name):
++                _, doc = ConfluenceDocument.create(
++                    self.source_dir / file_name,
++                    ProcessorOptions(generated_by=Markdown("Title: [%{title}]")),
++                    self.source_dir,
++                    self.site_metadata,
++                    self.page_metadata,
++                    self.user_metadata,
++                )
++                xhtml = doc.xhtml()
++                self.assertIn(expected, xhtml)
++                self.assertNotIn("%{title}", xhtml)
++
+     def test_skip_title_heading_enabled(self) -> None:
+         """Test that the first heading is removed when skip_title_heading is enabled."""
+         _, doc = ConfluenceDocument.create(

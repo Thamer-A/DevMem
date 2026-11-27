@@ -1,0 +1,10 @@
+{
+  "id": "R02",
+  "repo": "md2conf",
+  "kind": "ordinary",
+  "prompt": "People who come from MkDocs write [TOC] for a table of contents, but md2conf only understands [[_TOC_]]. Please make a paragraph that consists of nothing but [TOC] produce the same table-of-contents macro as [[_TOC_]] does. Anywhere else, [TOC] must stay as it is: in the middle of a sentence, in inline code and in code blocks. Add a test.",
+  "requirement": null,
+  "oracle": null,
+  "max_turns": 30,
+  "timeout_s": 300
+}

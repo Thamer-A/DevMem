@@ -1,0 +1,68 @@
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 58eab6a..c02e001 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -1868,6 +1868,9 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+         return ElementAction.RECURSE
+ 
+ 
++_MARKDOWN_TOC_REGEXP = re.compile(r"^[ \t]*\[TOC\][ \t]*$", re.MULTILINE)
++
++
+ class ConfluenceDocument:
+     "Encapsulates an element tree for a Confluence document created by parsing a Markdown document."
+ 
+@@ -1924,6 +1927,9 @@ class ConfluenceDocument:
+         props = document.properties
+         self.options = options
+ 
++        # accept the Python-Markdown/MkDocs table of contents marker `[TOC]` on a line of its own
++        document.text = _MARKDOWN_TOC_REGEXP.sub("[[_TOC_]]", document.text)
++
+         # register auxiliary URL substitutions
+         lines: list[str] = []
+         for data_uri, color in status_images.items():
+diff --git a/tests/test_toc_marker.py b/tests/test_toc_marker.py
+new file mode 100644
+index 0000000..a78aa0b
+--- /dev/null
++++ b/tests/test_toc_marker.py
+@@ -0,0 +1,38 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import unittest
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.local import LocalConverter
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import ProcessorOptions
++from tests.utility import TypedTestCase
++
++
++class TestTocMarker(TypedTestCase):
++    def _convert(self, text: str) -> str:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            page = Path(temp_dir) / "page.md"
++            page.write_text(text, encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(ProcessorOptions(), site_metadata).process(page)
++            return page.with_suffix(".csf").read_text(encoding="utf-8")
++
++    def test_marker(self) -> None:
++        self.assertIn('ac:name="toc"', self._convert("# Page\n\n[TOC]\n\n## Section\n"))
++
++    def test_marker_in_text(self) -> None:
++        content = self._convert("# Page\n\nWrite [TOC] to get one.\n")
++        self.assertNotIn('ac:name="toc"', content)
++        self.assertIn("Write [TOC] to get one.", content)
++
++
++if __name__ == "__main__":
++    unittest.main()

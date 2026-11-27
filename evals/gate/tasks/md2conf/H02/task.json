@@ -1,0 +1,10 @@
+{
+  "id": "H02",
+  "repo": "md2conf",
+  "kind": "history",
+  "prompt": "Last week someone added a 40 MB screenshot to the docs and the upload to Confluence timed out. Please add a size check for image files that get attached to a page, so oversized ones are caught when we convert. Add a test.",
+  "requirement": "R2",
+  "oracle": "When we add a size check for images, the limit is 7 MiB (7,340,032 bytes), and a bigger image should only log a warning, never stop the conversion.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

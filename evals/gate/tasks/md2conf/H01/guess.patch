@@ -1,0 +1,50 @@
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 58eab6a..6bbe99f 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -238,6 +238,9 @@ _LANGUAGES = {
+ }
+ # spellchecker: enable
+ 
++# code blocks longer than this many lines are collapsed on the page
++LONG_CODE_BLOCK_LINES = 50
++
+ 
+ class ElementAction(Enum):
+     "Captures standard actions a node visitor may take with the element."
+@@ -964,6 +967,14 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+                     "true",
+                 )
+             )
++        if content.count("\n") + 1 > LONG_CODE_BLOCK_LINES:
++            parameters.append(
++                AC_ELEM(
++                    "parameter",
++                    {AC_ATTR("name"): "collapse"},
++                    "true",
++                )
++            )
+ 
+         return AC_ELEM(
+             "structured-macro",
+diff --git a/tests/test_code_block.py b/tests/test_code_block.py
+index da72883..72d2eb2 100644
+--- a/tests/test_code_block.py
++++ b/tests/test_code_block.py
+@@ -44,6 +44,16 @@ class TestCodeBlock(TypedTestCase):
+         self.assertIn('<ac:parameter ac:name="language">py</ac:parameter>', content)
+         self.assertIn('<ac:parameter ac:name="linenumbers">true</ac:parameter>', content)
+ 
++    def test_long_code_block_is_collapsed(self) -> None:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            source_dir = Path(temp_dir)
++            lines = "\n".join(f"print({n})" for n in range(1, 61))
++            (source_dir / "long.md").write_text(f"# Long\n\n```python\n{lines}\n```\n", encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(ProcessorOptions(), site_metadata).process(source_dir / "long.md")
++            content = (source_dir / "long.csf").read_text(encoding="utf-8")
++        self.assertIn('<ac:parameter ac:name="collapse">true</ac:parameter>', content)
++
+ 
+ if __name__ == "__main__":
+     unittest.main()

@@ -1,0 +1,105 @@
+diff --git a/README.md b/README.md
+index 4074aff..8f17eab 100644
+--- a/README.md
++++ b/README.md
+@@ -548,6 +548,7 @@ The generated-by text can also be templated with the following variables:
+ - `%{filepath}`: the path of the Markdown file relative to the _source root_
+ - `%{filedir}`: the dirname of the `%{filepath}` (the path without the filename)
+ - `%{title}`: the page title, taken from the front-matter `title` or the unique top-level heading (empty if the page has neither)
++- `%{modified}`: the date the Markdown file was last modified (`YYYY-MM-DD`)
+ 
+ When publishing a directory hierarchy, the *source root* is the directory in which *md2conf* is launched. When publishing a single file, this is the directory in which the Markdown file resides.
+ 
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 58eab6a..4ece180 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -14,6 +14,7 @@ import uuid
+ from abc import ABC, abstractmethod
+ from collections.abc import Sequence
+ from dataclasses import dataclass
++from datetime import datetime
+ from enum import Enum
+ from pathlib import Path
+ from typing import ClassVar
+@@ -48,7 +49,7 @@ from .uri import is_absolute_url, to_uuid_urn
+ from .xml import element_to_text, remove_element
+ 
+ 
+-def apply_generated_by_template(template: str, path: Path, *, title: str | None = None) -> str:
++def apply_generated_by_template(template: str, path: Path, *, title: str | None = None, modified: str | None = None) -> str:
+     """Apply template substitution to the generated_by string.
+ 
+     Supported placeholders:
+@@ -57,10 +58,12 @@ def apply_generated_by_template(template: str, path: Path, *, title: str | None
+     - %{filedir}: Dirname of the full path to the file (relative to the source directory)
+     - %{filestem}: Just the filename without the extension
+     - %{title}: The page title (from front-matter or the unique top-level heading), or empty if there is none
++    - %{modified}: The last modification date of the file (YYYY-MM-DD)
+ 
+     :param template: The template string with placeholders
+     :param path: The path to the file being converted
+     :param title: The title of the page, if known
++    :param modified: The last modification date of the file, if known
+     :returns: The template string with placeholders replaced
+     """
+ 
+@@ -70,6 +73,7 @@ def apply_generated_by_template(template: str, path: Path, *, title: str | None
+         .replace("%{filedir}", path.parent.as_posix())
+         .replace("%{filestem}", path.stem)
+         .replace("%{title}", title or "")
++        .replace("%{modified}", modified or "")
+     )
+ 
+ 
+@@ -1951,7 +1955,8 @@ class ConfluenceDocument:
+ 
+         if generated_by is not None:
+             page_title = props.title or unique_title(document.text)
+-            generated_by = apply_generated_by_template(generated_by, path.relative_to(root_dir), title=page_title)
++            modified = datetime.fromtimestamp(path.stat().st_mtime).strftime("%Y-%m-%d")
++            generated_by = apply_generated_by_template(generated_by, path.relative_to(root_dir), title=page_title, modified=modified)
+             generated_by_html = markdown_to_html(generated_by)
+ 
+             content = [
+diff --git a/tests/test_generated_by.py b/tests/test_generated_by.py
+new file mode 100644
+index 0000000..b514eca
+--- /dev/null
++++ b/tests/test_generated_by.py
+@@ -0,0 +1,35 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import os
++import unittest
++from datetime import datetime
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.local import LocalConverter
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import Markdown, ProcessorOptions
++from tests.utility import TypedTestCase
++
++
++class TestGeneratedBy(TypedTestCase):
++    def test_modified_placeholder(self) -> None:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            page = Path(temp_dir) / "page.md"
++            page.write_text("# Page", encoding="utf-8")
++            stamp = datetime(2026, 1, 9, 12, 0).timestamp()
++            os.utime(page, (stamp, stamp))
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(ProcessorOptions(generated_by=Markdown("Changed %{modified}")), site_metadata).process(page)
++            content = page.with_suffix(".csf").read_text(encoding="utf-8")
++        self.assertIn("Changed 2026-01-09", content)
++
++
++if __name__ == "__main__":
++    unittest.main()

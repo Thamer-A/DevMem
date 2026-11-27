@@ -1,0 +1,10 @@
+{
+  "id": "H03",
+  "repo": "md2conf",
+  "kind": "history",
+  "prompt": "Please add a %{modified} placeholder for the generated-by text that shows when the Markdown file was last changed, so readers can see how fresh a page is. Going by the file's modification time is fine. Add it to the README list of placeholders and add a test.",
+  "requirement": "R3",
+  "oracle": "Whenever md2conf writes a date onto a page, format it like 26 Nov 2026, with no leading zero on the day, the three-letter English month and the four-digit year.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

@@ -1,0 +1,103 @@
+diff --git a/README.md b/README.md
+index 4074aff..a2785ad 100644
+--- a/README.md
++++ b/README.md
+@@ -682,6 +682,20 @@ Content between `<!-- confluence-skip-start -->` and `<!-- confluence-skip-end -
+ 
+ Multiple exclusion blocks can be used in the same document.
+ 
++### Per-page settings
++
++Settings that apply to a single page go under the front-matter key `md2conf`:
++
++```yaml
++---
++title: "Example document"
++md2conf:
++  code_line_numbers: true
++---
++```
++
++* `code_line_numbers`: show (`true`) or hide (`false`) line numbers in the code blocks of this page, regardless of `--code-line-numbers`.
++
+ ### Labels
+ 
+ If a Markdown document has the front-matter attribute `tags`, *md2conf* assigns the specified tags to the Confluence page as labels.
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 58eab6a..2be59db 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -1976,6 +1976,8 @@ class ConfluenceDocument:
+         converter_options = copy.deepcopy(self.options.converter)
+         if props.layout is not None:
+             converter_options.layout = coalesce_dataclass(props.layout, converter_options.layout)
++        if props.md2conf is not None and props.md2conf.code_line_numbers is not None:
++            converter_options.code_line_numbers = props.md2conf.code_line_numbers
+         converter = ConfluenceStorageFormatConverter(converter_options, path, root_dir, site_metadata, page_metadata, user_metadata)
+ 
+         # execute HTML-to-Confluence converter
+diff --git a/md2conf/scanner.py b/md2conf/scanner.py
+index 0c0237e..9cb1d70 100644
+--- a/md2conf/scanner.py
++++ b/md2conf/scanner.py
+@@ -32,6 +32,17 @@ class AliasProperties:
+     confluence_space_key: str | None = None
+ 
+ 
++@dataclass
++class PageSettings:
++    """
++    Per-page md2conf settings, given in the front-matter under the key `md2conf`.
++
++    :param code_line_numbers: Whether to show line numbers in code blocks on this page (overrides the command-line option).
++    """
++
++    code_line_numbers: bool | None = None
++
++
+ @dataclass
+ class DocumentProperties:
+     """
+@@ -47,6 +58,7 @@ class DocumentProperties:
+     :param synchronized: True if the document content is parsed and synchronized with Confluence.
+     :param properties: A dictionary of key-value pairs extracted from front-matter to apply as page properties.
+     :param layout: Layout options for content on a Confluence page.
++    :param md2conf: Per-page md2conf settings (front-matter key `md2conf`).
+     """
+ 
+     page_id: str | None = None
+@@ -59,6 +71,7 @@ class DocumentProperties:
+     synchronized: bool | None = None
+     properties: dict[str, JsonType] | None = None
+     layout: LayoutOptions | None = None
++    md2conf: PageSettings | None = None
+ 
+ 
+ @dataclass
+diff --git a/tests/test_code_block.py b/tests/test_code_block.py
+index da72883..b8cb8d7 100644
+--- a/tests/test_code_block.py
++++ b/tests/test_code_block.py
+@@ -44,6 +44,22 @@ class TestCodeBlock(TypedTestCase):
+         self.assertIn('<ac:parameter ac:name="language">py</ac:parameter>', content)
+         self.assertIn('<ac:parameter ac:name="linenumbers">true</ac:parameter>', content)
+ 
++    def _convert_page(self, front_matter: str, options: ConverterOptions) -> str:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            source_dir = Path(temp_dir)
++            (source_dir / "code.md").write_text(front_matter + _DOCUMENT, encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(ProcessorOptions(converter=options), site_metadata).process(source_dir / "code.md")
++            return (source_dir / "code.csf").read_text(encoding="utf-8")
++
++    def test_line_numbers_from_front_matter(self) -> None:
++        content = self._convert_page("---\nmd2conf:\n  code_line_numbers: true\n---\n", ConverterOptions())
++        self.assertIn('<ac:parameter ac:name="linenumbers">true</ac:parameter>', content)
++
++    def test_front_matter_overrides_option(self) -> None:
++        content = self._convert_page("---\nmd2conf:\n  code_line_numbers: false\n---\n", ConverterOptions(code_line_numbers=True))
++        self.assertNotIn("linenumbers", content)
++
+ 
+ if __name__ == "__main__":
+     unittest.main()

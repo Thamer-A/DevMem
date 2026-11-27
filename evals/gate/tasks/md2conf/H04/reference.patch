@@ -1,0 +1,267 @@
+diff --git a/md2conf/clio.py b/md2conf/clio.py
+index 0471d14..874301d 100644
+--- a/md2conf/clio.py
++++ b/md2conf/clio.py
+@@ -6,6 +6,7 @@ Copyright 2022-2026, Levente Hunyadi
+ :see: https://github.com/hunyadi/md2conf
+ """
+ 
++import os
+ import re
+ from argparse import ArgumentParser, Namespace
+ from collections.abc import Callable
+@@ -24,25 +25,60 @@ class BaseOption:
+ 
+ @dataclass(frozen=True)
+ class BooleanOption(BaseOption):
++    """
++    An on/off flag.
++
++    :param true_text: Help text for the flag that turns the option on.
++    :param false_text: Help text for the flag that turns the option off.
++    :param env: Name of an environment variable (`true`/`false`, `1`/`0`, `yes`/`no`, `on`/`off`) that sets the option
++        when neither flag is given on the command line.
++    """
++
+     true_text: LiteralString
+     false_text: LiteralString
++    env: str | None = None
+ 
+ 
+-def boolean_option(true_text: LiteralString, false_text: LiteralString) -> dict[str, Any]:
++def boolean_option(true_text: LiteralString, false_text: LiteralString, *, env: str | None = None) -> dict[str, Any]:
+     "Identifies a command-line argument as a boolean (on/off) flag."
+ 
+-    return {BaseOption.field_name(): BooleanOption(true_text, false_text)}
++    return {BaseOption.field_name(): BooleanOption(true_text, false_text, env)}
++
++
++_TRUE_VALUES = ("1", "true", "yes", "on")
++_FALSE_VALUES = ("0", "false", "no", "off")
++
++
++def _env_flag(name: str, default: Any) -> Any:
++    "Reads an on/off value from an environment variable."
++
++    value = os.environ.get(name)
++    if value is None:
++        return default
++    if value.strip().lower() in _TRUE_VALUES:
++        return True
++    if value.strip().lower() in _FALSE_VALUES:
++        return False
++    raise ValueError(f"expected: one of {', '.join(_TRUE_VALUES + _FALSE_VALUES)} in environment variable {name}; got: {value!r}")
+ 
+ 
+ @dataclass(frozen=True)
+ class ValueOption(BaseOption):
++    """
++    An option that assigns a value.
++
++    :param text: Help text.
++    :param env: Name of an environment variable that supplies the value when the option is not given on the command line.
++    """
++
+     text: LiteralString
++    env: str | None = None
+ 
+ 
+-def value_option(text: LiteralString) -> dict[str, Any]:
++def value_option(text: LiteralString, *, env: str | None = None) -> dict[str, Any]:
+     "Identifies a command-line argument as an option that assigns a value."
+ 
+-    return {BaseOption.field_name(): ValueOption(text)}
++    return {BaseOption.field_name(): ValueOption(text, env)}
+ 
+ 
+ @dataclass(frozen=True)
+@@ -135,13 +171,17 @@ class _OptionTreeVisitor:
+         arg_name = field.name.replace("_", "-")
+         bool_opt = _get_metadata(field, BooleanOption)
+         true_text = bool_opt.true_text
++        if bool_opt.env is not None:
++            true_text += f" (env: {bool_opt.env})"
+         if field.default is True:
+             true_text += " (default)"
++        # the first action that names a destination supplies its default; a flag on the command line takes precedence
++        default = _env_flag(bool_opt.env, field.default) if bool_opt.env is not None else field.default
+         self.parser.add_argument(
+             self._get_arg_name(arg_name),
+             dest=self._get_field_name(field.name),
+             action="store_true",
+-            default=field.default,
++            default=default,
+             help=true_text,
+         )
+         if arg_name.startswith("skip-"):
+@@ -164,13 +204,18 @@ class _OptionTreeVisitor:
+         arg_name = field.name.replace("_", "-")
+         value_opt = _get_metadata(field, ValueOption)
+         help_text = value_opt.text
++        default = field.default
++        if value_opt.env is not None:
++            help_text += f" (env: {value_opt.env})"
++            # a value on the command line takes precedence; argparse converts a string default with `type`
++            default = os.environ.get(value_opt.env, default)
+         if field.default is not MISSING and field.default is not None:
+             help_text += f" (default: {field.default!s})"
+         metavar = _get_metavar(field_type)
+         self.parser.add_argument(
+             self._get_arg_name(arg_name),
+             dest=self._get_field_name(field.name),
+-            default=field.default,
++            default=default,
+             type=field_type,
+             help=help_text,
+             metavar=metavar,
+diff --git a/md2conf/options.py b/md2conf/options.py
+index bda65ce..6fd35fc 100644
+--- a/md2conf/options.py
++++ b/md2conf/options.py
+@@ -47,6 +47,7 @@ class ProcessorOptions:
+     :param converter: Options for converting an HTML tree into Confluence Storage Format.
+     :param line_numbers: Inject line numbers in Markdown source file to help localize conversion errors.
+     :param global_properties: JSON or YAML file of Confluence content properties to merge for every synchronized Markdown file.
++    :param skip_drafts: Whether to leave draft pages out when processing a directory.
+     """
+ 
+     root_page: ConfluencePageID | None = field(
+@@ -129,6 +130,14 @@ class ProcessorOptions:
+             "JSON or YAML file of Confluence content properties to merge for every synchronized Markdown file.",
+         ),
+     )
++    skip_drafts: bool = field(
++        default=False,
++        metadata=boolean_option(
++            "Leave draft pages out when processing a directory.",
++            "Process draft pages like any other page.",
++            env="MD2CONF_SKIP_DRAFTS",
++        ),
++    )
+ 
+ 
+ DocumentOptions = ProcessorOptions
+diff --git a/md2conf/processor.py b/md2conf/processor.py
+index a6b018e..7766db7 100644
+--- a/md2conf/processor.py
++++ b/md2conf/processor.py
+@@ -301,6 +301,11 @@ class Processor:
+             if matcher.is_excluded(entry):
+                 continue
+ 
++            if self.options.skip_drafts and entry.is_file() and entry.name.endswith(".draft.md"):
++                # draft pages are Markdown files whose name ends in `.draft.md`
++                LOGGER.info("Skipping draft: %s", entry.path)
++                continue
++
+             if entry.is_file():
+                 files.append(FileEntry(entry.name))
+             elif entry.is_dir():
+diff --git a/tests/test_clio_env.py b/tests/test_clio_env.py
+new file mode 100644
+index 0000000..fd05796
+--- /dev/null
++++ b/tests/test_clio_env.py
+@@ -0,0 +1,55 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import os
++import unittest
++from argparse import ArgumentParser
++from dataclasses import dataclass, field
++from unittest import mock
++
++from md2conf.clio import add_arguments, boolean_option, get_options, value_option
++from tests.utility import TypedTestCase
++
++
++@dataclass
++class EnvOptions:
++    flag: bool = field(default=False, metadata=boolean_option("Turn on.", "Turn off.", env="MD2CONF_TEST_FLAG"))
++    count: int | None = field(default=None, metadata=value_option("A number.", env="MD2CONF_TEST_COUNT"))
++
++
++def _parse(argv: list[str], env: dict[str, str]) -> EnvOptions:
++    clean = {k: v for k, v in os.environ.items() if not k.startswith("MD2CONF_TEST_")}
++    with mock.patch.dict(os.environ, {**clean, **env}, clear=True):
++        parser = ArgumentParser()
++        add_arguments(parser, EnvOptions)
++        return get_options(parser.parse_args(argv), EnvOptions)
++
++
++class TestEnvironmentOptions(TypedTestCase):
++    def test_defaults(self) -> None:
++        options = _parse([], {})
++        self.assertEqual(options.flag, False)
++        self.assertIsNone(options.count)
++
++    def test_environment(self) -> None:
++        options = _parse([], {"MD2CONF_TEST_FLAG": "true", "MD2CONF_TEST_COUNT": "3"})
++        self.assertEqual(options.flag, True)
++        self.assertEqual(options.count, 3)
++
++    def test_command_line_wins(self) -> None:
++        options = _parse(["--no-flag", "--count", "5"], {"MD2CONF_TEST_FLAG": "1", "MD2CONF_TEST_COUNT": "3"})
++        self.assertEqual(options.flag, False)
++        self.assertEqual(options.count, 5)
++
++    def test_invalid_flag(self) -> None:
++        with self.assertRaises(ValueError):
++            _parse([], {"MD2CONF_TEST_FLAG": "maybe"})
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tests/test_drafts.py b/tests/test_drafts.py
+new file mode 100644
+index 0000000..2f599e7
+--- /dev/null
++++ b/tests/test_drafts.py
+@@ -0,0 +1,41 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import unittest
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.local import LocalConverter
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import ProcessorOptions
++from tests.utility import TypedTestCase
++
++
++class TestDrafts(TypedTestCase):
++    def _convert(self, options: ProcessorOptions) -> list[str]:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            source_dir = Path(temp_dir)
++            (source_dir / "index.md").write_text("# Home", encoding="utf-8")
++            (source_dir / "plans.draft.md").write_text("# Draft", encoding="utf-8")
++            (source_dir / "_index_notes.md").write_text("# Index notes", encoding="utf-8")
++            (source_dir / "sub").mkdir()
++            (source_dir / "sub" / "page.md").write_text("# Page", encoding="utf-8")
++            (source_dir / "sub" / "notes.draft.md").write_text("# Notes", encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(options, site_metadata).process(source_dir)
++            return sorted(p.relative_to(source_dir).as_posix() for p in source_dir.rglob("*.csf"))
++
++    def test_skip_drafts(self) -> None:
++        self.assertListEqual(self._convert(ProcessorOptions(skip_drafts=True)), ["_index_notes.csf", "index.csf", "sub/page.csf"])
++
++    def test_keep_drafts(self) -> None:
++        self.assertListEqual(self._convert(ProcessorOptions()), ["_index_notes.csf", "index.csf", "plans.draft.csf", "sub/notes.draft.csf", "sub/page.csf"])
++
++
++if __name__ == "__main__":
++    unittest.main()

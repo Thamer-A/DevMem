@@ -1,0 +1,141 @@
+diff --git a/README.md b/README.md
+index 0a43a7a..1cb853b 100644
+--- a/README.md
++++ b/README.md
+@@ -870,6 +870,9 @@ options:
+                         Only allow supported languages in code blocks (unsupported languages are ignored) (default)
+   --no-force-valid-language
+                         Use unknown language names as-is (Confluence may still highlight code).
++  --code-line-numbers   Show line numbers in code blocks.
++  --no-code-line-numbers
++                        Show code blocks without line numbers. (default)
+   --layout-image-alignment {center,left,right,None}
+                         Alignment for block-level images and formulas.
+   --layout-image-max-width INT
+@@ -939,6 +942,7 @@ options = ProcessorOptions(
+         user_mentions=bool(),
+         use_panel=bool(),
+         force_valid_language=bool(),
++        code_line_numbers=bool(),
+         layout=LayoutOptions(
+             image=ImageLayoutOptions(
+                 alignment='center' or 'left' or 'right' or None,
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index ec3780f..5e1381c 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -946,17 +946,29 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+         else:
+             language_id = None
+ 
++        parameters = [
++            AC_ELEM(
++                "parameter",
++                {AC_ATTR("name"): "language"},
++                language_id or "none",
++            )
++        ]
++        if self.options.code_line_numbers:
++            parameters.append(
++                AC_ELEM(
++                    "parameter",
++                    {AC_ATTR("name"): "linenumbers"},
++                    "true",
++                )
++            )
++
+         return AC_ELEM(
+             "structured-macro",
+             {
+                 AC_ATTR("name"): "code",
+                 AC_ATTR("schema-version"): "1",
+             },
+-            AC_ELEM(
+-                "parameter",
+-                {AC_ATTR("name"): "language"},
+-                language_id or "none",
+-            ),
++            *parameters,
+             AC_ELEM("plain-text-body", ET.CDATA(content)),
+         )
+ 
+diff --git a/md2conf/options_converter.py b/md2conf/options_converter.py
+index a159796..a9ab8ba 100644
+--- a/md2conf/options_converter.py
++++ b/md2conf/options_converter.py
+@@ -86,6 +86,7 @@ class ConverterOptions:
+     :param use_panel: Whether to transform admonitions and alerts into a Confluence custom panel.
+     :param force_valid_language: When true, only allow supported languages in code blocks (unsupported languages are ignored);
+         if disabled, use unknown language names as-is (Confluence may still highlight code).
++    :param code_line_numbers: When true, show line numbers in code blocks.
+     :param layout: Layout options for content on a Confluence page.
+     :param extensions: Enables custom Atlassian Marketplace extension integrations.
+     """
+@@ -192,5 +193,12 @@ class ConverterOptions:
+             "Use unknown language names as-is (Confluence may still highlight code).",
+         ),
+     )
++    code_line_numbers: bool = field(
++        default=False,
++        metadata=boolean_option(
++            "Show line numbers in code blocks.",
++            "Show code blocks without line numbers.",
++        ),
++    )
+     layout: LayoutOptions = field(default_factory=LayoutOptions, metadata=composite_option())
+     extensions: Sequence[MarketplaceExtensionFactory] | None = None
+diff --git a/tests/test_code_block.py b/tests/test_code_block.py
+new file mode 100644
+index 0000000..da72883
+--- /dev/null
++++ b/tests/test_code_block.py
+@@ -0,0 +1,49 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import unittest
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.local import LocalConverter
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import ProcessorOptions
++from md2conf.options_converter import ConverterOptions
++from tests.utility import TypedTestCase
++
++_DOCUMENT = """# Code
++
++```python
++def main() -> None:
++    print("hello")
++```
++"""
++
++
++class TestCodeBlock(TypedTestCase):
++    def _convert(self, options: ConverterOptions) -> str:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            source_dir = Path(temp_dir)
++            (source_dir / "code.md").write_text(_DOCUMENT, encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(ProcessorOptions(converter=options), site_metadata).process(source_dir / "code.md")
++            return (source_dir / "code.csf").read_text(encoding="utf-8")
++
++    def test_default_has_no_line_numbers(self) -> None:
++        content = self._convert(ConverterOptions())
++        self.assertIn('<ac:parameter ac:name="language">py</ac:parameter>', content)
++        self.assertNotIn("linenumbers", content)
++
++    def test_line_numbers(self) -> None:
++        content = self._convert(ConverterOptions(code_line_numbers=True))
++        self.assertIn('<ac:parameter ac:name="language">py</ac:parameter>', content)
++        self.assertIn('<ac:parameter ac:name="linenumbers">true</ac:parameter>', content)
++
++
++if __name__ == "__main__":
++    unittest.main()

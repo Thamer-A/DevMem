@@ -1,0 +1,87 @@
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 58eab6a..3578503 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -238,6 +238,9 @@ _LANGUAGES = {
+ }
+ # spellchecker: enable
+ 
++# images larger than this (in bytes) trigger a warning
++MAX_IMAGE_SIZE = 7 * 1024 * 1024
++
+ 
+ class ElementAction(Enum):
+     "Captures standard actions a node visitor may take with the element."
+@@ -843,6 +846,8 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+             if absolute_path is None:
+                 return self._create_missing(path, attrs)
+ 
++            self._check_image_size(absolute_path, path)
++
+             for extension in self.extensions:
+                 if extension.matches_image(absolute_path):
+                     return extension.transform_image(absolute_path, attrs)
+@@ -874,6 +879,14 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+         else:
+             LOGGER.warning(msg)
+ 
++    def _check_image_size(self, absolute_path: Path, path: Path) -> None:
++        "Emits a warning (but carries on) when an image file is larger than the size limit."
++
++        size = absolute_path.stat().st_size
++        if size > MAX_IMAGE_SIZE:
++            source = path_relative_to(self.path, self.root_dir).as_posix()
++            LOGGER.warning("%s: image %s is %d bytes, larger than the limit of %d bytes (7 MiB)", source, path.as_posix(), size, MAX_IMAGE_SIZE)
++
+     def _verify_image_path(self, image: ElementType, path: Path) -> Path | None:
+         "Checks whether an image path is safe to use."
+ 
+diff --git a/tests/test_image_size.py b/tests/test_image_size.py
+new file mode 100644
+index 0000000..0458215
+--- /dev/null
++++ b/tests/test_image_size.py
+@@ -0,0 +1,43 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import unittest
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.converter import MAX_IMAGE_SIZE
++from md2conf.local import LocalConverter
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import ProcessorOptions
++from tests.utility import TypedTestCase
++
++
++class TestImageSize(TypedTestCase):
++    def _convert(self, size: int) -> str:
++        png = (Path(__file__).parent / "source" / "figure" / "raster.png").read_bytes()
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            source_dir = Path(temp_dir)
++            (source_dir / "big.png").write_bytes(png + bytes(size - len(png)))
++            (source_dir / "page.md").write_text("# Page\n\n![big](big.png)\n", encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(ProcessorOptions(), site_metadata).process(source_dir / "page.md")
++            return (source_dir / "page.csf").read_text(encoding="utf-8")
++
++    def test_large_image_warns(self) -> None:
++        with self.assertLogs("md2conf", level="WARNING") as logs:
++            content = self._convert(MAX_IMAGE_SIZE + 1)
++        self.assertIn('ri:filename="big.png"', content)
++        self.assertTrue(logs.output[0].startswith("WARNING:md2conf.converter:page.md: image big.png is"))
++
++    def test_image_at_limit(self) -> None:
++        with self.assertNoLogs("md2conf", level="WARNING"):
++            self._convert(MAX_IMAGE_SIZE)
++
++
++if __name__ == "__main__":
++    unittest.main()

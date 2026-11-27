@@ -1,0 +1,72 @@
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 58eab6a..0ea12e5 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -350,6 +350,12 @@ def is_placeholder_for(node: ElementType, name: str) -> bool:
+     return True
+ 
+ 
++def is_markdown_toc(node: ElementType) -> bool:
++    "True if the element is a paragraph that holds nothing but the Python-Markdown table of contents marker `[TOC]`."
++
++    return child_count(node) == 0 and node.text is not None and node.text.strip() == "[TOC]"
++
++
+ class PreprocessingError(RuntimeError):
+     "Raised when a preprocessing step has failed."
+ 
+@@ -1673,8 +1679,8 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+                         case _:
+                             pass
+ 
+-                # <p>[[<em>TOC</em>]]</p> (represented in Markdown as `[[_TOC_]]`)
+-                if is_placeholder_for(child, "TOC"):
++                # <p>[[<em>TOC</em>]]</p> (represented in Markdown as `[[_TOC_]]`), or <p>[TOC]</p> (Python-Markdown and MkDocs style)
++                if is_placeholder_for(child, "TOC") or is_markdown_toc(child):
+                     return self._transform_toc(child)
+ 
+                 # <p>[[<em>LISTING</em>]]</p> (represented in Markdown as `[[_LISTING_]]`)
+diff --git a/tests/test_toc_marker.py b/tests/test_toc_marker.py
+new file mode 100644
+index 0000000..a78aa0b
+--- /dev/null
++++ b/tests/test_toc_marker.py
+@@ -0,0 +1,38 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import unittest
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.local import LocalConverter
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import ProcessorOptions
++from tests.utility import TypedTestCase
++
++
++class TestTocMarker(TypedTestCase):
++    def _convert(self, text: str) -> str:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            page = Path(temp_dir) / "page.md"
++            page.write_text(text, encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(ProcessorOptions(), site_metadata).process(page)
++            return page.with_suffix(".csf").read_text(encoding="utf-8")
++
++    def test_marker(self) -> None:
++        self.assertIn('ac:name="toc"', self._convert("# Page\n\n[TOC]\n\n## Section\n"))
++
++    def test_marker_in_text(self) -> None:
++        content = self._convert("# Page\n\nWrite [TOC] to get one.\n")
++        self.assertNotIn('ac:name="toc"', content)
++        self.assertIn("Write [TOC] to get one.", content)
++
++
++if __name__ == "__main__":
++    unittest.main()

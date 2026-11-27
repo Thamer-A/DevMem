@@ -1,0 +1,10 @@
+{
+  "id": "T03",
+  "repo": "md2conf",
+  "kind": "tuning",
+  "prompt": "We're moving this Confluence space soon and want to tell readers on every page. Please add a --banner option that takes a short piece of Markdown and shows it in a box at the top of every page, below the generated-by box when there is one. Add a test.",
+  "requirement": "R9",
+  "oracle": "Leave the generated-by box as it is, but any other notice box md2conf adds to a page by itself should use the note macro, never info or warning.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

@@ -1,0 +1,35 @@
+{
+  "name": "md2conf",
+  "url": "https://github.com/hunyadi/md2conf",
+  "commit": "9fe9e080536d747fc67b33b0ea3e47e394b00673",
+  "language": "python",
+  "license": "MIT",
+  "deps": {
+    "kind": "python",
+    "requirements": [
+      "attrs==26.1.0",
+      "cattrs==26.2.1",
+      "certifi==2026.11.20",
+      "charset-normalizer==3.5.3",
+      "colorama==0.4.6",
+      "idna==3.20",
+      "iniconfig==2.3.1",
+      "lxml==6.1.3",
+      "Markdown==3.11.4",
+      "orjson==3.13.0",
+      "packaging==26.4",
+      "pathspec==1.1.1",
+      "pluggy==1.7.0",
+      "Pygments==2.21.0",
+      "pymdown-extensions==13.1.2",
+      "pytest==9.2.0",
+      "PyYAML==6.0.4",
+      "requests==2.34.2",
+      "truststore==0.10.5",
+      "typing_extensions==4.16.0",
+      "urllib3==2.8.0"
+    ]
+  },
+  "test": ["python", "-m", "pytest", "tests", "-q", "-p", "no:cacheprovider"],
+  "test_timeout_s": 300
+}

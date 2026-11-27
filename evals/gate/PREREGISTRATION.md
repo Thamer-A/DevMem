@@ -163,3 +163,17 @@ one re-run of arm D on all 24 scored tasks with two repeats (48 runs, owner's ye
 - A history-dependent task depends on a requirement that the history states and that the starting code does not
   reveal (a rule or value for later work, not one the reference patches already implement); the grader's
   "plausible guess" is a solution that follows the code and the task prompt but not that requirement.
+
+**A2, 2026-11-27 (after the md2conf set was written and reviewed, before any freeze or run).**
+- A grader whose own time limit cuts a subprocess short reports `grader_timeout`; such a run is a harness failure
+  (section 10: "the working copy could not be ... graded"), re-run once like any other.
+- Stated limitations, recorded now so the report cannot choose them afterwards:
+  - Many requirements are phrased as plans for later work ("When we add X, ...", "From now on, ..."), and the later
+    task asks for X in similar words. The tasks were written that way by a session that had not read the retrieval
+    code, because users talk that way; they were not reworded afterwards in either direction. Word overlap makes
+    retrieval by shared words easier, and such phrasing is also what Claude Code's automatic memory is built to
+    save, which may raise S's pass rate and shrink the room that threshold 1 measures.
+  - Graders also run the repository's existing suite, including tests the agent itself added, so a correct change
+    with a broken new test fails, in every arm alike.
+  - Some requirement values remain guessable at a low rate (a date format, a file-name marker); the guess patches
+    show the more likely wrong choice.

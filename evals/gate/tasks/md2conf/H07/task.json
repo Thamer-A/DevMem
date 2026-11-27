@@ -1,0 +1,10 @@
+{
+  "id": "H07",
+  "repo": "md2conf",
+  "kind": "history",
+  "prompt": "Pages with [[_TOC_]] list every heading level, which gets noisy on long pages. Please add a --toc-max-level option that takes a number and sets the maxLevel parameter of the table-of-contents macro. Without the option the macro should stay exactly as it is now. Add a test.",
+  "requirement": "R7",
+  "oracle": "From now on, every new command-line option needs an environment variable too, named MD2CONF_ plus the option name in capitals with dashes turned into underscores (so --foo-bar is MD2CONF_FOO_BAR), and the command-line value wins when both are set.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

@@ -1,0 +1,10 @@
+{
+  "id": "H06",
+  "repo": "md2conf",
+  "kind": "history",
+  "prompt": "Some pages need line numbers in their code blocks, but turning on --code-line-numbers for the whole site is too much. Please add a per-page setting in the front matter, code_line_numbers, that turns line numbers on (true) or off (false) for that page and overrides the command-line option. Pages without the setting should follow the option as now. Document it in the README and add a test.",
+  "requirement": "R6",
+  "oracle": "From now on, any new front-matter setting we add goes under a single md2conf key (md2conf: with the settings indented below it), never at the top level, because MkDocs and our other tools read the same files.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

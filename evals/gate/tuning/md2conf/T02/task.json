@@ -1,0 +1,10 @@
+{
+  "id": "T02",
+  "repo": "md2conf",
+  "kind": "tuning",
+  "prompt": "Please add a --reading-time flag, off by default, that shows an estimated reading time at the top of each page, something like \"3 min read\". Add a test.",
+  "requirement": "R10",
+  "oracle": "If we ever show a reading time on pages, count 200 words per minute and round up to a whole minute.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

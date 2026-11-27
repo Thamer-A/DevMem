@@ -1,0 +1,81 @@
+diff --git a/md2conf/__main__.py b/md2conf/__main__.py
+index cb3703c..b54d3e4 100644
+--- a/md2conf/__main__.py
++++ b/md2conf/__main__.py
+@@ -103,6 +103,7 @@ def get_parser() -> argparse.ArgumentParser:
+     parser.add_argument(
+         "-l",
+         "--loglevel",
++        type=str.lower,
+         choices=[logging.getLevelName(level).lower() for level in (logging.DEBUG, logging.INFO, logging.WARN, logging.ERROR, logging.CRITICAL)],
+         default=logging.getLevelName(logging.INFO),
+         help="Use this option to set the log verbosity.",
+@@ -165,6 +166,10 @@ def main() -> None:
+     args = Arguments()
+     parser.parse_args(namespace=args)
+ 
++    missing = [str(item) for item in args.mdpath if not item.exists()]
++    if missing:
++        parser.error(f"no such file or directory: {', '.join(missing)}")
++
+     logging.basicConfig(
+         level=getattr(logging, args.loglevel.upper(), logging.INFO),
+         format="%(asctime)s - %(levelname)s - %(funcName)s [%(lineno)d] - %(message)s",
+diff --git a/tests/test_main.py b/tests/test_main.py
+new file mode 100644
+index 0000000..e23bf19
+--- /dev/null
++++ b/tests/test_main.py
+@@ -0,0 +1,52 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import contextlib
++import io
++import sys
++import unittest
++from pathlib import Path
++from unittest import mock
++
++from md2conf.__main__ import get_parser, main
++from tests.utility import TypedTestCase
++
++
++class TestMain(TypedTestCase):
++    def test_loglevel_any_case(self) -> None:
++        parser = get_parser()
++        for value in ("debug", "DEBUG", "Warning"):
++            with self.subTest(value=value):
++                args = parser.parse_args(["page.md", "--loglevel", value])
++                self.assertEqual(args.loglevel, value.lower())
++
++    def test_loglevel_default(self) -> None:
++        args = get_parser().parse_args(["page.md"])
++        self.assertEqual(args.loglevel, "info")
++
++    def test_loglevel_invalid(self) -> None:
++        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
++            get_parser().parse_args(["page.md", "--loglevel", "verbose"])
++        self.assertEqual(cm.exception.code, 2)
++
++    def test_missing_path(self) -> None:
++        missing = Path(__file__).parent / "no_such_file.md"
++        stderr = io.StringIO()
++        with (
++            mock.patch.object(sys, "argv", ["md2conf", str(missing), "--local"]),
++            contextlib.redirect_stderr(stderr),
++            self.assertRaises(SystemExit) as cm,
++        ):
++            main()
++        self.assertEqual(cm.exception.code, 2)
++        self.assertIn("no such file or directory", stderr.getvalue())
++        self.assertIn("no_such_file.md", stderr.getvalue())
++
++
++if __name__ == "__main__":
++    unittest.main()

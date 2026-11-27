@@ -1,0 +1,85 @@
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 58eab6a..b8c685d 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -500,6 +500,7 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+     base_dir: Path
+     root_dir: Path
+     toc: TableOfContentsBuilder
++    heading_ids: dict[str, int]
+     links: list[str]
+     attachments: AttachmentCatalog
+     site_metadata: ConfluenceSiteMetadata
+@@ -528,6 +529,7 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+         self.base_dir = path.parent
+         self.root_dir = root_dir
+         self.toc = TableOfContentsBuilder()
++        self.heading_ids = {}
+         self.links = []
+         self.attachments = AttachmentCatalog()
+         self.site_metadata = site_metadata
+@@ -583,6 +585,12 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+         if identifier is None:
+             identifier = title_to_slug(element_to_text(heading))
+ 
++            # make repeated identifiers unique within the page
++            count = self.heading_ids.get(identifier, 0) + 1
++            self.heading_ids[identifier] = count
++            if count > 1:
++                identifier = f"{identifier}-{count}"
++
+         anchor = AC_ELEM(
+             "structured-macro",
+             {
+diff --git a/tests/target/slug.xml b/tests/target/slug.xml
+index fc14607..a855f04 100644
+--- a/tests/target/slug.xml
++++ b/tests/target/slug.xml
+@@ -8,6 +8,6 @@
+ <h3><ac:structured-macro ac:name="anchor" ac:schema-version="1"><ac:parameter ac:name="">a-heading-with-markdown</ac:parameter></ac:structured-macro>A <strong>heading</strong> with <em>Markdown</em></h3>
+ <h3><ac:structured-macro ac:name="anchor" ac:schema-version="1"><ac:parameter ac:name="">a-heading--with-hyphens</ac:parameter></ac:structured-macro>A heading--with-hyphens</h3>
+ <h3><ac:structured-macro ac:name="anchor" ac:schema-version="1"><ac:parameter ac:name="">árvíztűrő-tükörfúrógép</ac:parameter></ac:structured-macro>árvíztűrő tükörfúrógép</h3>
+-<h3><ac:structured-macro ac:name="anchor" ac:schema-version="1"><ac:parameter ac:name="">árvíztűrő-tükörfúrógép</ac:parameter></ac:structured-macro>ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP</h3>
++<h3><ac:structured-macro ac:name="anchor" ac:schema-version="1"><ac:parameter ac:name="">árvíztűrő-tükörfúrógép-2</ac:parameter></ac:structured-macro>ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP</h3>
+ <h3><ac:structured-macro ac:name="anchor" ac:schema-version="1"><ac:parameter ac:name="">i--unicode-кириллица-עברית-日本語-한글</ac:parameter></ac:structured-macro>I ♥ Unicode: Кириллица, עברית, 日本語, 한글</h3>
+ <h3><ac:structured-macro ac:name="anchor" ac:schema-version="1"><ac:parameter ac:name="">_-emoji</ac:parameter></ac:structured-macro>😄_😄 emoji</h3>
+diff --git a/tests/test_heading_anchors.py b/tests/test_heading_anchors.py
+new file mode 100644
+index 0000000..7700a43
+--- /dev/null
++++ b/tests/test_heading_anchors.py
+@@ -0,0 +1,34 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import re
++import unittest
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.local import LocalConverter
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import ProcessorOptions
++from md2conf.options_converter import ConverterOptions
++from tests.utility import TypedTestCase
++
++
++class TestHeadingAnchors(TypedTestCase):
++    def test_repeated_headings(self) -> None:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            page = Path(temp_dir) / "page.md"
++            page.write_text("# Page\n\n## Notes\n\n## Notes\n\n## Notes\n", encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(ProcessorOptions(converter=ConverterOptions(heading_anchors=True)), site_metadata).process(page)
++            content = page.with_suffix(".csf").read_text(encoding="utf-8")
++        anchors = re.findall(r'<ac:parameter ac:name="">([^<]*)</ac:parameter>', content)
++        self.assertListEqual(anchors, ["page", "notes", "notes-2", "notes-3"])
++
++
++if __name__ == "__main__":
++    unittest.main()

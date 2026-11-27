@@ -1,0 +1,288 @@
+diff --git a/md2conf/clio.py b/md2conf/clio.py
+index 0471d14..874301d 100644
+--- a/md2conf/clio.py
++++ b/md2conf/clio.py
+@@ -6,6 +6,7 @@ Copyright 2022-2026, Levente Hunyadi
+ :see: https://github.com/hunyadi/md2conf
+ """
+ 
++import os
+ import re
+ from argparse import ArgumentParser, Namespace
+ from collections.abc import Callable
+@@ -24,25 +25,60 @@ class BaseOption:
+ 
+ @dataclass(frozen=True)
+ class BooleanOption(BaseOption):
++    """
++    An on/off flag.
++
++    :param true_text: Help text for the flag that turns the option on.
++    :param false_text: Help text for the flag that turns the option off.
++    :param env: Name of an environment variable (`true`/`false`, `1`/`0`, `yes`/`no`, `on`/`off`) that sets the option
++        when neither flag is given on the command line.
++    """
++
+     true_text: LiteralString
+     false_text: LiteralString
++    env: str | None = None
+ 
+ 
+-def boolean_option(true_text: LiteralString, false_text: LiteralString) -> dict[str, Any]:
++def boolean_option(true_text: LiteralString, false_text: LiteralString, *, env: str | None = None) -> dict[str, Any]:
+     "Identifies a command-line argument as a boolean (on/off) flag."
+ 
+-    return {BaseOption.field_name(): BooleanOption(true_text, false_text)}
++    return {BaseOption.field_name(): BooleanOption(true_text, false_text, env)}
++
++
++_TRUE_VALUES = ("1", "true", "yes", "on")
++_FALSE_VALUES = ("0", "false", "no", "off")
++
++
++def _env_flag(name: str, default: Any) -> Any:
++    "Reads an on/off value from an environment variable."
++
++    value = os.environ.get(name)
++    if value is None:
++        return default
++    if value.strip().lower() in _TRUE_VALUES:
++        return True
++    if value.strip().lower() in _FALSE_VALUES:
++        return False
++    raise ValueError(f"expected: one of {', '.join(_TRUE_VALUES + _FALSE_VALUES)} in environment variable {name}; got: {value!r}")
+ 
+ 
+ @dataclass(frozen=True)
+ class ValueOption(BaseOption):
++    """
++    An option that assigns a value.
++
++    :param text: Help text.
++    :param env: Name of an environment variable that supplies the value when the option is not given on the command line.
++    """
++
+     text: LiteralString
++    env: str | None = None
+ 
+ 
+-def value_option(text: LiteralString) -> dict[str, Any]:
++def value_option(text: LiteralString, *, env: str | None = None) -> dict[str, Any]:
+     "Identifies a command-line argument as an option that assigns a value."
+ 
+-    return {BaseOption.field_name(): ValueOption(text)}
++    return {BaseOption.field_name(): ValueOption(text, env)}
+ 
+ 
+ @dataclass(frozen=True)
+@@ -135,13 +171,17 @@ class _OptionTreeVisitor:
+         arg_name = field.name.replace("_", "-")
+         bool_opt = _get_metadata(field, BooleanOption)
+         true_text = bool_opt.true_text
++        if bool_opt.env is not None:
++            true_text += f" (env: {bool_opt.env})"
+         if field.default is True:
+             true_text += " (default)"
++        # the first action that names a destination supplies its default; a flag on the command line takes precedence
++        default = _env_flag(bool_opt.env, field.default) if bool_opt.env is not None else field.default
+         self.parser.add_argument(
+             self._get_arg_name(arg_name),
+             dest=self._get_field_name(field.name),
+             action="store_true",
+-            default=field.default,
++            default=default,
+             help=true_text,
+         )
+         if arg_name.startswith("skip-"):
+@@ -164,13 +204,18 @@ class _OptionTreeVisitor:
+         arg_name = field.name.replace("_", "-")
+         value_opt = _get_metadata(field, ValueOption)
+         help_text = value_opt.text
++        default = field.default
++        if value_opt.env is not None:
++            help_text += f" (env: {value_opt.env})"
++            # a value on the command line takes precedence; argparse converts a string default with `type`
++            default = os.environ.get(value_opt.env, default)
+         if field.default is not MISSING and field.default is not None:
+             help_text += f" (default: {field.default!s})"
+         metavar = _get_metavar(field_type)
+         self.parser.add_argument(
+             self._get_arg_name(arg_name),
+             dest=self._get_field_name(field.name),
+-            default=field.default,
++            default=default,
+             type=field_type,
+             help=help_text,
+             metavar=metavar,
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 58eab6a..4eee352 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -48,6 +48,16 @@ from .uri import is_absolute_url, to_uuid_urn
+ from .xml import element_to_text, remove_element
+ 
+ 
++_LABEL_SEPARATOR_REGEXP = re.compile(r"[\W_]+")
++
++
++def make_label(text: str) -> str:
++    "Turns text such as a folder name into a label md2conf assigns by itself: `md-` and the words in lower case, run together."
++
++    words = _LABEL_SEPARATOR_REGEXP.sub("", text.lower())
++    return f"md-{words}" if words else ""
++
++
+ def apply_generated_by_template(template: str, path: Path, *, title: str | None = None) -> str:
+     """Apply template substitution to the generated_by string.
+ 
+@@ -2007,6 +2017,13 @@ class ConfluenceDocument:
+         # assign global properties for document
+         self.title = props.title or converter.toc.get_title()
+         self.labels = props.tags
++        if options.folder_labels:
++            folder_labels = [make_label(name) for name in path_relative_to(path.parent, root_dir.resolve()).parts]
++            folder_labels = [label for label in folder_labels if label]
++            if folder_labels:
++                labels = list(self.labels or [])
++                labels.extend(label for label in folder_labels if label not in labels)
++                self.labels = labels
+         self.properties = props.properties
+ 
+         # Remove the first heading if:
+diff --git a/md2conf/options.py b/md2conf/options.py
+index bda65ce..f104a5b 100644
+--- a/md2conf/options.py
++++ b/md2conf/options.py
+@@ -47,6 +47,7 @@ class ProcessorOptions:
+     :param converter: Options for converting an HTML tree into Confluence Storage Format.
+     :param line_numbers: Inject line numbers in Markdown source file to help localize conversion errors.
+     :param global_properties: JSON or YAML file of Confluence content properties to merge for every synchronized Markdown file.
++    :param folder_labels: Whether to add the names of the folders a Markdown file sits in as page labels.
+     """
+ 
+     root_page: ConfluencePageID | None = field(
+@@ -129,6 +130,14 @@ class ProcessorOptions:
+             "JSON or YAML file of Confluence content properties to merge for every synchronized Markdown file.",
+         ),
+     )
++    folder_labels: bool = field(
++        default=False,
++        metadata=boolean_option(
++            "Add the names of the folders a Markdown file sits in (below the published directory) as page labels.",
++            "Use only front-matter tags as page labels.",
++            env="MD2CONF_FOLDER_LABELS",
++        ),
++    )
+ 
+ 
+ DocumentOptions = ProcessorOptions
+diff --git a/tests/test_clio_env.py b/tests/test_clio_env.py
+new file mode 100644
+index 0000000..fd05796
+--- /dev/null
++++ b/tests/test_clio_env.py
+@@ -0,0 +1,55 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import os
++import unittest
++from argparse import ArgumentParser
++from dataclasses import dataclass, field
++from unittest import mock
++
++from md2conf.clio import add_arguments, boolean_option, get_options, value_option
++from tests.utility import TypedTestCase
++
++
++@dataclass
++class EnvOptions:
++    flag: bool = field(default=False, metadata=boolean_option("Turn on.", "Turn off.", env="MD2CONF_TEST_FLAG"))
++    count: int | None = field(default=None, metadata=value_option("A number.", env="MD2CONF_TEST_COUNT"))
++
++
++def _parse(argv: list[str], env: dict[str, str]) -> EnvOptions:
++    clean = {k: v for k, v in os.environ.items() if not k.startswith("MD2CONF_TEST_")}
++    with mock.patch.dict(os.environ, {**clean, **env}, clear=True):
++        parser = ArgumentParser()
++        add_arguments(parser, EnvOptions)
++        return get_options(parser.parse_args(argv), EnvOptions)
++
++
++class TestEnvironmentOptions(TypedTestCase):
++    def test_defaults(self) -> None:
++        options = _parse([], {})
++        self.assertEqual(options.flag, False)
++        self.assertIsNone(options.count)
++
++    def test_environment(self) -> None:
++        options = _parse([], {"MD2CONF_TEST_FLAG": "true", "MD2CONF_TEST_COUNT": "3"})
++        self.assertEqual(options.flag, True)
++        self.assertEqual(options.count, 3)
++
++    def test_command_line_wins(self) -> None:
++        options = _parse(["--no-flag", "--count", "5"], {"MD2CONF_TEST_FLAG": "1", "MD2CONF_TEST_COUNT": "3"})
++        self.assertEqual(options.flag, False)
++        self.assertEqual(options.count, 5)
++
++    def test_invalid_flag(self) -> None:
++        with self.assertRaises(ValueError):
++            _parse([], {"MD2CONF_TEST_FLAG": "maybe"})
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tests/test_folder_labels.py b/tests/test_folder_labels.py
+new file mode 100644
+index 0000000..288dfc1
+--- /dev/null
++++ b/tests/test_folder_labels.py
+@@ -0,0 +1,43 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import unittest
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.collection import ConfluencePageCollection, ConfluenceUserCollection
++from md2conf.converter import ConfluenceDocument, make_label
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import ProcessorOptions
++from tests.utility import TypedTestCase
++
++
++class TestFolderLabels(TypedTestCase):
++    def test_make_label(self) -> None:
++        self.assertEqual(make_label("User Guide"), "md-userguide")
++        self.assertEqual(make_label("FAQ"), "md-faq")
++
++    def _labels(self, options: ProcessorOptions) -> list[str] | None:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            root_dir = Path(temp_dir)
++            page = root_dir / "User Guide" / "Getting Started" / "install.md"
++            page.parent.mkdir(parents=True)
++            page.write_text("---\ntags: [setup]\n---\n<!-- confluence-page-id: 1234 -->\n# Install\n", encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            _, document = ConfluenceDocument.create(page, options, root_dir, site_metadata, ConfluencePageCollection(), ConfluenceUserCollection())
++            return document.labels
++
++    def test_folder_labels(self) -> None:
++        self.assertEqual(self._labels(ProcessorOptions(folder_labels=True)), ["setup", "md-userguide", "md-gettingstarted"])
++
++    def test_no_folder_labels(self) -> None:
++        self.assertEqual(self._labels(ProcessorOptions()), ["setup"])
++
++
++if __name__ == "__main__":
++    unittest.main()

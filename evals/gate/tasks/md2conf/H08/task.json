@@ -1,0 +1,10 @@
+{
+  "id": "H08",
+  "repo": "md2conf",
+  "kind": "history",
+  "prompt": "Images without alt text are a problem for some of our readers who use screen readers. Please make md2conf log a warning for each image on a page that has no alt text (missing, empty or only whitespace), so authors can find and fix them. The conversion itself should carry on as normal. Add a test.",
+  "requirement": "R8",
+  "oracle": "Every new warning md2conf logs must start with the Markdown file's path relative to the folder being published, with forward slashes, then a colon and a space, like guide/setup.md: image not found.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

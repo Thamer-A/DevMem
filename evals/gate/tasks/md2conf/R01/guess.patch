@@ -1,0 +1,103 @@
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 58eab6a..9edcef5 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -157,6 +157,7 @@ _LANGUAGES = {
+     "clojure": "clojure",
+     "coffeescript": "coffeescript",
+     "coldfusion": "coldfusion",
++    "console": "bash",
+     "cpp": "cpp",
+     "csharp": "c#",
+     "css": "css",
+@@ -205,6 +206,7 @@ _LANGUAGES = {
+     "powershell": "powershell",
+     "prolog": "prolog",
+     "protobuf": "protobuf",
++    "ps1": "powershell",
+     "puppet": "puppet",
+     "py": "py",
+     "python": "py",
+@@ -218,6 +220,7 @@ _LANGUAGES = {
+     "scala": "scala",
+     "scheme": "scheme",
+     "shell": "shell",
++    "sh": "bash",
+     "smalltalk": "smalltalk",
+     "splunk": "splunk",
+     "sql": "sql",
+@@ -226,6 +229,7 @@ _LANGUAGES = {
+     "tcl": "tcl",
+     "tex": "tex",
+     "toml": "toml",
++    "ts": "typescript",
+     "tsx": "tsx",
+     "typescript": "typescript",
+     "vala": "vala",
+@@ -235,6 +239,8 @@ _LANGUAGES = {
+     "xml": "xml",
+     "xquery": "xquery",
+     "yaml": "yaml",
++    "yml": "yaml",
++    "zsh": "bash",
+ }
+ # spellchecker: enable
+ 
+@@ -930,7 +936,8 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+ 
+         if language_class := code.get("class"):
+             if m := re.match("^language-(.*)$", language_class):
+-                language_name = m.group(1)
++                # language names are case-insensitive
++                language_name = m.group(1).lower()
+             else:
+                 language_name = None
+         else:
+diff --git a/tests/test_code_languages.py b/tests/test_code_languages.py
+new file mode 100644
+index 0000000..08c1995
+--- /dev/null
++++ b/tests/test_code_languages.py
+@@ -0,0 +1,42 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import re
++import unittest
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.local import LocalConverter
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import ProcessorOptions
++from md2conf.options_converter import ConverterOptions
++from tests.utility import TypedTestCase
++
++
++class TestCodeLanguages(TypedTestCase):
++    def _languages(self, names: list[str], options: ConverterOptions) -> list[str]:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            page = Path(temp_dir) / "page.md"
++            page.write_text("".join(f"```{name}\ncode\n```\n\n" for name in names), encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(ProcessorOptions(converter=options), site_metadata).process(page)
++            content = page.with_suffix(".csf").read_text(encoding="utf-8")
++        return re.findall(r'<ac:parameter ac:name="language">([^<]*)</ac:parameter>', content)
++
++    def test_aliases(self) -> None:
++        self.assertListEqual(self._languages(["sh", "zsh", "console", "yml", "ps1", "ts"], ConverterOptions()), ["bash", "bash", "bash", "yaml", "powershell", "typescript"])
++
++    def test_case(self) -> None:
++        self.assertListEqual(self._languages(["Python", "YAML"], ConverterOptions()), ["py", "yaml"])
++
++    def test_unknown_passed_through(self) -> None:
++        self.assertListEqual(self._languages(["MyLang"], ConverterOptions(force_valid_language=False)), ["mylang"])
++
++
++if __name__ == "__main__":
++    unittest.main()

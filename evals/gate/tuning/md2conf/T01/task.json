@@ -1,0 +1,10 @@
+{
+  "id": "T01",
+  "repo": "md2conf",
+  "kind": "tuning",
+  "prompt": "When we convert with --no-force-valid-url, broken relative links on a page only get a ❌ in front of them and a log line that nobody reads. In that case please also put a box at the top of the page that lists the broken links, so readers and authors notice them. Pages without broken links should not change. Add a test.",
+  "requirement": "R9",
+  "oracle": "Leave the generated-by box as it is, but any other notice box md2conf adds to a page by itself should use the note macro, never info or warning.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

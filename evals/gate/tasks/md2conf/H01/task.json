@@ -1,0 +1,10 @@
+{
+  "id": "H01",
+  "repo": "md2conf",
+  "kind": "history",
+  "prompt": "Long code listings make some of our pages a pain to scroll through. The Confluence code macro has a collapse parameter; please make long code blocks start out collapsed on the page, and leave short ones as they are. Add a test.",
+  "requirement": "R1",
+  "oracle": "When we get round to collapsing long code blocks, a block counts as long when its code is more than 2,500 characters, however many lines that is.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

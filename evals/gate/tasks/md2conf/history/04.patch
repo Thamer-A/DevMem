@@ -1,0 +1,89 @@
+diff --git a/README.md b/README.md
+index fb4ae77..4074aff 100644
+--- a/README.md
++++ b/README.md
+@@ -693,6 +693,8 @@ tags: ["markdown", "md", "wiki"]
+ ---
+ ```
+ 
++The tags may also be given as a single comma-separated string, e.g. `tags: markdown, md, wiki`.
++
+ Any previously assigned labels are discarded. As per Confluence terminology, new labels have the `prefix` of `global`.
+ 
+ If a document has no `tags` attribute, existing Confluence labels are left intact.
+diff --git a/md2conf/scanner.py b/md2conf/scanner.py
+index c744a80..bcb79d9 100644
+--- a/md2conf/scanner.py
++++ b/md2conf/scanner.py
+@@ -82,6 +82,19 @@ _SPACE_KEY_REGEXP = re.compile(r"<!--\s+confluence[-_]space[-_]key:\s*(\S+)\s+--
+ _GENERATED_BY_REGEXP = re.compile(r"<!--\s+generated[-_]by:\s*(.*)\s+-->")
+ 
+ 
++def _split_tags(value: JsonType) -> JsonType:
++    """
++    Accepts tags given as a single comma-separated string (e.g. `tags: markdown, wiki`) as well as a list.
++
++    Surrounding whitespace is removed from each tag, and empty items are dropped.
++    """
++
++    if isinstance(value, str):
++        return [tag.strip() for tag in value.split(",") if tag.strip()]
++    else:
++        return value
++
++
+ class Scanner:
+     def read(self, absolute_path: Path) -> ScannedDocument:
+         """
+@@ -113,6 +126,8 @@ class Scanner:
+         # extract front-matter
+         frontmatter, text = extract_frontmatter_json(text)
+         if frontmatter is not None:
++            if frontmatter.data is not None and "tags" in frontmatter.data:
++                frontmatter.data["tags"] = _split_tags(frontmatter.data["tags"])
+             frontmatter_props = json_to_object(DocumentProperties, frontmatter.data)
+             alias_props = json_to_object(AliasProperties, frontmatter.data)
+             if alias_props.confluence_page_id is not None:
+diff --git a/tests/test_scanner.py b/tests/test_scanner.py
+index c12b6ce..18f898d 100644
+--- a/tests/test_scanner.py
++++ b/tests/test_scanner.py
+@@ -66,6 +66,21 @@ title: 🏠 árvíztűrő tükörfúrógép
+ Text
+ """
+ 
++tags_string_frontmatter = """---
++title: Tags as a string
++tags: markdown, wiki ,  confluence,
++---
++
++Text
++"""
++
++tags_single_frontmatter = """---
++tags: markdown
++---
++
++Text
++"""
++
+ mermaid_frontmatter = """---
+ title: Tiny flow diagram
+ config:
+@@ -147,6 +162,16 @@ class TestScanner(TypedTestCase):
+         self.assertEqual(props.title, "Markdown example document")
+         self.assertEqual(props.tags, ["markdown", "confluence", "md", "wiki"])
+ 
++    def test_tags_string_frontmatter(self) -> None:
++        document = Scanner().parse(tags_string_frontmatter)
++        props = document.properties
++        self.assertEqual(props.title, "Tags as a string")
++        self.assertEqual(props.tags, ["markdown", "wiki", "confluence"])
++
++    def test_tags_single_frontmatter(self) -> None:
++        document = Scanner().parse(tags_single_frontmatter)
++        self.assertEqual(document.properties.tags, ["markdown"])
++
+     def test_mermaid_frontmatter(self) -> None:
+         properties = MermaidScanner().read(mermaid_frontmatter)
+         if properties.config is None:

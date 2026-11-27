@@ -1,0 +1,60 @@
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 58eab6a..7cd4a4a 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -2016,6 +2016,12 @@ class ConfluenceDocument:
+         if converter_options.skip_title_heading and props.title is None and self.title is not None:
+             self._remove_first_heading()
+ 
++        # Also remove the first heading if the front-matter title repeats it (ignoring case and surrounding whitespace)
++        elif converter_options.skip_title_heading and props.title is not None and converter.toc.tree:
++            first_heading = converter.toc.tree[0].text
++            if first_heading.strip().casefold() == props.title.strip().casefold():
++                self._remove_first_heading()
++
+     def _remove_first_heading(self) -> None:
+         """
+         Removes the first heading element from the document root.
+diff --git a/tests/test_title_heading.py b/tests/test_title_heading.py
+new file mode 100644
+index 0000000..5f6b128
+--- /dev/null
++++ b/tests/test_title_heading.py
+@@ -0,0 +1,37 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import unittest
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.local import LocalConverter
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import ProcessorOptions
++from md2conf.options_converter import ConverterOptions
++from tests.utility import TypedTestCase
++
++
++class TestTitleHeading(TypedTestCase):
++    def _convert(self, title: str) -> str:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            page = Path(temp_dir) / "page.md"
++            page.write_text(f"---\ntitle: {title}\n---\n\n# Overview\n\nText.\n", encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(ProcessorOptions(converter=ConverterOptions(skip_title_heading=True)), site_metadata).process(page)
++            return page.with_suffix(".csf").read_text(encoding="utf-8")
++
++    def test_repeated_title(self) -> None:
++        self.assertNotIn("<h1>Overview</h1>", self._convert("overview"))
++
++    def test_other_title(self) -> None:
++        self.assertIn("<h1>Overview</h1>", self._convert("Project overview"))
++
++
++if __name__ == "__main__":
++    unittest.main()

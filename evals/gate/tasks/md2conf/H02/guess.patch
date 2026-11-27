@@ -1,0 +1,75 @@
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 58eab6a..ccd07d3 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -238,6 +238,9 @@ _LANGUAGES = {
+ }
+ # spellchecker: enable
+ 
++# Confluence uploads of very large attachments tend to time out
++MAX_IMAGE_SIZE_BYTES = 10_000_000
++
+ 
+ class ElementAction(Enum):
+     "Captures standard actions a node visitor may take with the element."
+@@ -843,6 +846,10 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+             if absolute_path is None:
+                 return self._create_missing(path, attrs)
+ 
++            size = absolute_path.stat().st_size
++            if size > MAX_IMAGE_SIZE_BYTES:
++                self._warn_or_raise(image, f"image file too large ({size / 1_000_000:.1f} MB, limit is {MAX_IMAGE_SIZE_BYTES // 1_000_000} MB): {path}")
++
+             for extension in self.extensions:
+                 if extension.matches_image(absolute_path):
+                     return extension.transform_image(absolute_path, attrs)
+diff --git a/tests/test_image_size.py b/tests/test_image_size.py
+new file mode 100644
+index 0000000..c166ed7
+--- /dev/null
++++ b/tests/test_image_size.py
+@@ -0,0 +1,44 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import unittest
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.converter import MAX_IMAGE_SIZE_BYTES, ConversionError
++from md2conf.local import LocalConverter
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import ProcessorOptions
++from md2conf.options_converter import ConverterOptions
++from tests.utility import TypedTestCase
++
++
++class TestImageSize(TypedTestCase):
++    def _convert(self, size: int, options: ProcessorOptions) -> None:
++        png = (Path(__file__).parent / "source" / "figure" / "raster.png").read_bytes()
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            source_dir = Path(temp_dir)
++            (source_dir / "big.png").write_bytes(png + bytes(size - len(png)))
++            (source_dir / "page.md").write_text("# Page\n\n![big](big.png)\n", encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(options, site_metadata).process(source_dir / "page.md")
++
++    def test_large_image_raises(self) -> None:
++        with self.assertRaises(ConversionError):
++            self._convert(MAX_IMAGE_SIZE_BYTES + 1, ProcessorOptions())
++
++    def test_large_image_warns_when_ignoring_invalid(self) -> None:
++        with self.assertLogs("md2conf", level="WARNING"):
++            self._convert(MAX_IMAGE_SIZE_BYTES + 1, ProcessorOptions(converter=ConverterOptions(force_valid_url=False)))
++
++    def test_image_at_limit(self) -> None:
++        self._convert(MAX_IMAGE_SIZE_BYTES, ProcessorOptions())
++
++
++if __name__ == "__main__":
++    unittest.main()

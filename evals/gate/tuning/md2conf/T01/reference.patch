@@ -1,0 +1,105 @@
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 58eab6a..e1f6180 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -501,6 +501,7 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+     root_dir: Path
+     toc: TableOfContentsBuilder
+     links: list[str]
++    broken_links: list[str]
+     attachments: AttachmentCatalog
+     site_metadata: ConfluenceSiteMetadata
+     page_metadata: ConfluencePageCollection
+@@ -529,6 +530,7 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+         self.root_dir = root_dir
+         self.toc = TableOfContentsBuilder()
+         self.links = []
++        self.broken_links = []
+         self.attachments = AttachmentCatalog()
+         self.site_metadata = site_metadata
+         self.page_metadata = page_metadata or ConfluencePageCollection()
+@@ -601,13 +603,14 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+         anchor.tail = heading.text
+         heading.text = None
+ 
+-    def _anchor_warn_or_raise(self, anchor: ElementType, msg: str) -> None:
++    def _anchor_warn_or_raise(self, anchor: ElementType, msg: str, *, url: str) -> None:
+         "Emit a warning or raise an exception when a path points to a resource that doesn't exist or is outside of the permitted hierarchy."
+ 
+         if self.options.force_valid_url:
+             raise DocumentError(anchor, msg)
+         else:
+             LOGGER.warning(msg)
++            self.broken_links.append(url)
+             if anchor.text:
+                 anchor.text = "❌ " + anchor.text
+             elif len(anchor) > 0:
+@@ -668,7 +671,7 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+ 
+         # look up the absolute path in the page metadata dictionary to discover the relative path within Confluence that should be used
+         if not is_directory_within(absolute_path, self.root_dir):
+-            self._anchor_warn_or_raise(anchor, f"relative URL {url} points to outside root path: {self.root_dir}")
++            self._anchor_warn_or_raise(anchor, f"relative URL {url} points to outside root path: {self.root_dir}", url=url)
+             return None
+ 
+         if absolute_path.suffix == ".md":
+@@ -683,7 +686,7 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+ 
+         link_metadata = self.page_metadata.get(absolute_path)
+         if link_metadata is None:
+-            self._anchor_warn_or_raise(anchor, f"unable to find matching page for URL: {relative_url.geturl()}")
++            self._anchor_warn_or_raise(anchor, f"unable to find matching page for URL: {relative_url.geturl()}", url=relative_url.geturl())
+             return None
+ 
+         relative_path = os.path.relpath(absolute_path, self.base_dir)
+@@ -719,7 +722,7 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+         """
+ 
+         if not absolute_path.is_file():
+-            self._anchor_warn_or_raise(anchor, f"expected: path to file; got: {absolute_path}")
++            self._anchor_warn_or_raise(anchor, f"expected: path to file; got: {absolute_path}", url=path_relative_to(absolute_path, self.base_dir).as_posix())
+             return None
+ 
+         file_name = attachment_name(path_relative_to(absolute_path, self.base_dir))
+@@ -1999,6 +2002,19 @@ class ConfluenceDocument:
+         except RuntimeError as ex:
+             raise ConversionError(f"failed to convert Markdown file: {path}") from ex
+ 
++        # list broken links in a box at the top of the page (after the generated-by box)
++        if converter.broken_links:
++            items = [HTML.li(HTML.code(url)) for url in dict.fromkeys(converter.broken_links)]
++            box = AC_ELEM(
++                "structured-macro",
++                {
++                    AC_ATTR("name"): "note",
++                    AC_ATTR("schema-version"): "1",
++                },
++                AC_ELEM("rich-text-body", {}, HTML.p("This page has broken links:"), HTML.ul(*items)),
++            )
++            self.root.insert(1 if generated_by is not None else 0, box)
++
+         # extract information discovered by converter
+         self.links = converter.links
+         self.images = converter.attachments.images
+diff --git a/tests/target/missing.xml b/tests/target/missing.xml
+index 5498ff5..3fcbff8 100644
+--- a/tests/target/missing.xml
++++ b/tests/target/missing.xml
+@@ -3,6 +3,17 @@
+     <p>This page has been generated with a tool.</p>
+   </ac:rich-text-body>
+ </ac:structured-macro>
++<ac:structured-macro ac:name="note" ac:schema-version="1">
++  <ac:rich-text-body>
++    <p>This page has broken links:</p>
++    <ul>
++      <li><code>missing.md</code></li>
++      <li><code>../../sample/index.md</code></li>
++      <li><code>figure</code></li>
++      <li><code>docs/missing.pdf</code></li>
++    </ul>
++  </ac:rich-text-body>
++</ac:structured-macro>
+ <h2>Broken links</h2>
+ <p>Relative URLs to <a>❌ locations not exported</a> may be skipped.</p>
+ <p>Relative URLs to locations <a>❌ <strong>outside</strong> of root</a> cannot be published.</p>

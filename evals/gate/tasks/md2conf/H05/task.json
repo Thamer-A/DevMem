@@ -1,0 +1,10 @@
+{
+  "id": "H05",
+  "repo": "md2conf",
+  "kind": "history",
+  "prompt": "We'd like to be able to filter pages by area in Confluence. Please add a --folder-labels flag, off by default: when it's on, every page also gets a label for each folder it sits in below the directory being published, on top of any tags from its front matter. Add a test.",
+  "requirement": "R5",
+  "oracle": "Any label md2conf makes up by itself should start with md- followed by the words in lower case run together, so a folder called User Guide becomes md-userguide.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

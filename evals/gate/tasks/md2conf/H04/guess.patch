@@ -1,0 +1,104 @@
+diff --git a/md2conf/options.py b/md2conf/options.py
+index bda65ce..0f24750 100644
+--- a/md2conf/options.py
++++ b/md2conf/options.py
+@@ -47,6 +47,7 @@ class ProcessorOptions:
+     :param converter: Options for converting an HTML tree into Confluence Storage Format.
+     :param line_numbers: Inject line numbers in Markdown source file to help localize conversion errors.
+     :param global_properties: JSON or YAML file of Confluence content properties to merge for every synchronized Markdown file.
++    :param skip_drafts: Whether to leave draft pages out when processing a directory.
+     """
+ 
+     root_page: ConfluencePageID | None = field(
+@@ -129,6 +130,13 @@ class ProcessorOptions:
+             "JSON or YAML file of Confluence content properties to merge for every synchronized Markdown file.",
+         ),
+     )
++    skip_drafts: bool = field(
++        default=False,
++        metadata=boolean_option(
++            "Leave draft pages out when processing a directory.",
++            "Process draft pages like any other page.",
++        ),
++    )
+ 
+ 
+ DocumentOptions = ProcessorOptions
+diff --git a/md2conf/processor.py b/md2conf/processor.py
+index a6b018e..c860e15 100644
+--- a/md2conf/processor.py
++++ b/md2conf/processor.py
+@@ -302,6 +302,9 @@ class Processor:
+                 continue
+ 
+             if entry.is_file():
++                if self.options.skip_drafts and Scanner().read(Path(entry.path)).properties.draft:
++                    LOGGER.info("Skipping draft: %s", entry.path)
++                    continue
+                 files.append(FileEntry(entry.name))
+             elif entry.is_dir():
+                 directories.append(DirectoryEntry(entry.name))
+diff --git a/md2conf/scanner.py b/md2conf/scanner.py
+index 0c0237e..d59f032 100644
+--- a/md2conf/scanner.py
++++ b/md2conf/scanner.py
+@@ -45,6 +45,7 @@ class DocumentProperties:
+     :param title: The title extracted from front-matter.
+     :param tags: A list of tags (content labels) extracted from front-matter.
+     :param synchronized: True if the document content is parsed and synchronized with Confluence.
++    :param draft: True if the document is a draft that should not be published (with `skip_drafts`).
+     :param properties: A dictionary of key-value pairs extracted from front-matter to apply as page properties.
+     :param layout: Layout options for content on a Confluence page.
+     """
+@@ -57,6 +58,7 @@ class DocumentProperties:
+     title: str | None = None
+     tags: list[str] | None = None
+     synchronized: bool | None = None
++    draft: bool | None = None
+     properties: dict[str, JsonType] | None = None
+     layout: LayoutOptions | None = None
+ 
+diff --git a/tests/test_drafts.py b/tests/test_drafts.py
+new file mode 100644
+index 0000000..b63b99c
+--- /dev/null
++++ b/tests/test_drafts.py
+@@ -0,0 +1,38 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import unittest
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.local import LocalConverter
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import ProcessorOptions
++from tests.utility import TypedTestCase
++
++
++class TestDrafts(TypedTestCase):
++    def _convert(self, options: ProcessorOptions) -> list[str]:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            source_dir = Path(temp_dir)
++            (source_dir / "index.md").write_text("# Home", encoding="utf-8")
++            (source_dir / "draft.md").write_text("---\ndraft: true\n---\n# Draft", encoding="utf-8")
++            (source_dir / "final.md").write_text("---\ndraft: false\n---\n# Final", encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(options, site_metadata).process(source_dir)
++            return sorted(p.relative_to(source_dir).as_posix() for p in source_dir.rglob("*.csf"))
++
++    def test_skip_drafts(self) -> None:
++        self.assertListEqual(self._convert(ProcessorOptions(skip_drafts=True)), ["final.csf", "index.csf"])
++
++    def test_keep_drafts(self) -> None:
++        self.assertListEqual(self._convert(ProcessorOptions()), ["draft.csf", "final.csf", "index.csf"])
++
++
++if __name__ == "__main__":
++    unittest.main()

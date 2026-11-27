@@ -1,0 +1,10 @@
+{
+  "id": "H04",
+  "repo": "md2conf",
+  "kind": "history",
+  "prompt": "Half-finished pages in our docs folder keep ending up in Confluence. Please add a --skip-drafts flag, off by default, so that draft pages are left out when md2conf processes a directory, both when publishing and with --local. Add a test.",
+  "requirement": "R4",
+  "oracle": "When we add a way to keep drafts out of Confluence, a draft is any Markdown file whose name ends in .draft.md, like plans.draft.md.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

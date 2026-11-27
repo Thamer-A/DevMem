@@ -1,0 +1,159 @@
+diff --git a/md2conf/gif.py b/md2conf/gif.py
+new file mode 100644
+index 0000000..752f64a
+--- /dev/null
++++ b/md2conf/gif.py
+@@ -0,0 +1,65 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++from io import BytesIO
++from pathlib import Path
++from typing import BinaryIO, overload
++
++from .jpeg import ImageFormatError
++
++
++def _extract_gif_dimensions(source_file: BinaryIO) -> tuple[int, int]:
++    """
++    Returns the width and height of a GIF image inspecting its header.
++
++    The logical screen width and height follow the 6-byte signature as 16-bit little-endian integers.
++
++    :param source_file: A binary file opened for reading that contains GIF image data.
++    :returns: A tuple of the image's width and height in pixels.
++    """
++
++    signature = source_file.read(6)
++    if signature not in (b"GIF87a", b"GIF89a"):
++        raise ImageFormatError("not a valid GIF file")
++
++    screen = source_file.read(4)
++    if len(screen) != 4:
++        raise ImageFormatError("unexpected end of GIF file")
++
++    width = int.from_bytes(screen[0:2], "little")
++    height = int.from_bytes(screen[2:4], "little")
++    return width, height
++
++
++@overload
++def extract_gif_dimensions(*, data: bytes) -> tuple[int, int]: ...
++
++
++@overload
++def extract_gif_dimensions(*, path: str | Path) -> tuple[int, int]: ...
++
++
++def extract_gif_dimensions(*, data: bytes | None = None, path: str | Path | None = None) -> tuple[int, int]:
++    """
++    Returns the width and height of a GIF image inspecting its header.
++
++    :param data: GIF image data.
++    :param path: Path to the GIF image file.
++    :returns: A tuple of the image's width and height in pixels.
++    """
++
++    if data is not None and path is not None:
++        raise TypeError("expected: either `data` or `path`; got: both")
++    elif data is not None:
++        with BytesIO(data) as f:
++            return _extract_gif_dimensions(f)
++    elif path is not None:
++        with open(path, "rb") as f:
++            return _extract_gif_dimensions(f)
++    else:
++        raise TypeError("expected: either `data` or `path`; got: neither")
+diff --git a/md2conf/image.py b/md2conf/image.py
+index 14f5a23..38bfbde 100644
+--- a/md2conf/image.py
++++ b/md2conf/image.py
+@@ -16,6 +16,7 @@ from .csf import AC_ATTR, AC_ELEM, RI_ATTR, RI_ELEM, ElementType
+ from .extension import ImageGenerator
+ from .extension import ImageGeneratorOptions as ImageGeneratorOptions
+ from .formatting import FormattingContext, ImageAlignment, ImageAttributes, display_width
++from .gif import extract_gif_dimensions
+ from .jpeg import extract_jpeg_dimensions
+ from .png import extract_png_dimensions
+ from .svg import fix_svg_get_dimensions, get_svg_dimensions
+@@ -85,6 +86,8 @@ class DefaultImageGenerator(ImageGenerator):
+                     dimensions = extract_png_dimensions(path=absolute_path)
+                 case ".jpg" | ".jpeg":
+                     dimensions = extract_jpeg_dimensions(path=absolute_path)
++                case ".gif":
++                    dimensions = extract_gif_dimensions(path=absolute_path)
+                 case _:
+                     dimensions = None
+             if dimensions is not None:
+diff --git a/tests/test_gif.py b/tests/test_gif.py
+new file mode 100644
+index 0000000..2ef01fd
+--- /dev/null
++++ b/tests/test_gif.py
+@@ -0,0 +1,61 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import unittest
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.gif import extract_gif_dimensions
++from md2conf.jpeg import ImageFormatError
++from md2conf.local import LocalConverter
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import ProcessorOptions
++from tests.utility import TypedTestCase, temporary_file
++
++# 1x1 transparent GIF, with the logical screen size patched by `_gif`
++_GIF_1x1 = bytes.fromhex("47494638396101000100800000000000ffffff21f90401000000002c00000000010001000002024401003b")
++
++
++def _gif(width: int, height: int) -> bytes:
++    return _GIF_1x1[:6] + width.to_bytes(2, "little") + height.to_bytes(2, "little") + _GIF_1x1[10:]
++
++
++class TestGifDimensions(TypedTestCase):
++    "Unit tests for GIF dimension extraction."
++
++    def test_gif_dimensions_from_data(self) -> None:
++        self.assertEqual(extract_gif_dimensions(data=_GIF_1x1), (1, 1))
++        self.assertEqual(extract_gif_dimensions(data=_gif(300, 20)), (300, 20))
++
++    def test_gif_dimensions_from_file(self) -> None:
++        with temporary_file(_gif(640, 480), suffix=".gif") as path:
++            self.assertEqual(extract_gif_dimensions(path=path), (640, 480))
++
++    def test_gif87a(self) -> None:
++        self.assertEqual(extract_gif_dimensions(data=b"GIF87a" + _gif(2, 3)[6:]), (2, 3))
++
++    def test_invalid_gif(self) -> None:
++        with self.assertRaises(ImageFormatError):
++            extract_gif_dimensions(data=b"\x89PNG\r\n\x1a\n")
++        with self.assertRaises(ImageFormatError):
++            extract_gif_dimensions(data=b"GIF89a\x01")
++
++    def test_gif_in_document(self) -> None:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            source_dir = Path(temp_dir)
++            (source_dir / "anim.gif").write_bytes(_gif(320, 200))
++            (source_dir / "page.md").write_text("# Animation\n\n![animation](anim.gif)\n", encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(ProcessorOptions(), site_metadata).process(source_dir / "page.md")
++            content = (source_dir / "page.csf").read_text(encoding="utf-8")
++            self.assertIn('ac:original-width="320"', content)
++            self.assertIn('ac:original-height="200"', content)
++
++
++if __name__ == "__main__":
++    unittest.main()

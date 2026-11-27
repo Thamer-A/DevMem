@@ -1,0 +1,10 @@
+{
+  "id": "R04",
+  "repo": "md2conf",
+  "kind": "ordinary",
+  "prompt": "--skip-title-heading never removes the first heading when the page title comes from the front matter. In our docs the front-matter title is usually just the first # heading again, so the title shows up twice on the page. When --skip-title-heading is on and the front-matter title is the same text as the first heading (ignoring upper/lower case and leading or trailing spaces), remove that heading too. If they are different, keep the heading as it is now. Add a test.",
+  "requirement": null,
+  "oracle": null,
+  "max_turns": 30,
+  "timeout_s": 300
+}

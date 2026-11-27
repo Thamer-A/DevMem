@@ -1,0 +1,56 @@
+{
+  "sessions": [
+    {
+      "n": 1,
+      "prompt": "I'd like code blocks to be able to show line numbers on the Confluence page. Please add an on/off option for it, off by default, that sets the linenumbers parameter of the code macro; on the command line that should come out as --code-line-numbers and --no-code-line-numbers. Put it in the README's option list too, and add a test. When we get round to collapsing long code blocks, a block counts as long when its code is more than 2,500 characters, however many lines that is. That's for later though, just the line numbers for now.",
+      "patch": "01.patch",
+      "requirements": [
+        {"id": "R1", "text": "When we get round to collapsing long code blocks, a block counts as long when its code is more than 2,500 characters, however many lines that is."}
+      ]
+    },
+    {
+      "n": 2,
+      "prompt": "Animated GIFs show up at the wrong size on our pages because md2conf doesn't know their dimensions: it reads them from PNG, JPEG and SVG files but not from GIFs. Please add a GIF reader that works like the JPEG one (width and height from the file header, from a path or from bytes), use it when an image is attached to a page, and add tests. While you're in the image code, one decision so we don't have to discuss it again. When we add a size check for images, the limit is 7 MiB (7,340,032 bytes), and a bigger image should only log a warning, never stop the conversion. No need to build that today.",
+      "patch": "02.patch",
+      "requirements": [
+        {"id": "R2", "text": "When we add a size check for images, the limit is 7 MiB (7,340,032 bytes), and a bigger image should only log a warning, never stop the conversion."}
+      ]
+    },
+    {
+      "n": 3,
+      "prompt": "Please add a %{title} placeholder to the generated-by text, next to %{filename}, %{filepath} and the others. It should be the page title: the front-matter title if there is one, otherwise the unique top-level heading, and empty if there is neither. Update the README section that lists the placeholders and add a test. A few decisions about things we'll add later, so you know them. Whenever md2conf writes a date onto a page, format it like 26 Nov 2026, with no leading zero on the day, the three-letter English month and the four-digit year. Leave the generated-by box as it is, but any other notice box md2conf adds to a page by itself should use the note macro, never info or warning. If we ever show a reading time on pages, count 200 words per minute and round up to a whole minute.",
+      "patch": "03.patch",
+      "requirements": [
+        {"id": "R3", "text": "Whenever md2conf writes a date onto a page, format it like 26 Nov 2026, with no leading zero on the day, the three-letter English month and the four-digit year."},
+        {"id": "R9", "text": "Leave the generated-by box as it is, but any other notice box md2conf adds to a page by itself should use the note macro, never info or warning."},
+        {"id": "R10", "text": "If we ever show a reading time on pages, count 200 words per minute and round up to a whole minute."}
+      ]
+    },
+    {
+      "n": 4,
+      "prompt": "Front-matter tags break when someone writes them as a plain string: tags: markdown, wiki ends up as labels made of single characters. Please accept a comma-separated string as well as a list (trim the spaces, drop empty items), mention it in the Labels section of the README and add tests. Two things about where this is heading. When we add a way to keep drafts out of Confluence, a draft is any Markdown file whose name ends in .draft.md, like plans.draft.md. Any label md2conf makes up by itself should start with md- followed by the words in lower case run together, so a folder called User Guide becomes md-userguide.",
+      "patch": "04.patch",
+      "requirements": [
+        {"id": "R4", "text": "When we add a way to keep drafts out of Confluence, a draft is any Markdown file whose name ends in .draft.md, like plans.draft.md."},
+        {"id": "R5", "text": "Any label md2conf makes up by itself should start with md- followed by the words in lower case run together, so a folder called User Guide becomes md-userguide."}
+      ]
+    },
+    {
+      "n": 5,
+      "prompt": "Some of our Markdown files are saved by Windows editors with a byte order mark and CRLF line endings, and then md2conf ignores the front matter and the page gets the wrong title. Please make the scanner cope with both. Also check the place where the page ID is written back into the Markdown file: with a BOM it currently ends up in front of the front matter and breaks it. Tests for both, please. And a rule for the future. From now on, any new front-matter setting we add goes under a single md2conf key (md2conf: with the settings indented below it), never at the top level, because MkDocs and our other tools read the same files.",
+      "patch": "05.patch",
+      "requirements": [
+        {"id": "R6", "text": "From now on, any new front-matter setting we add goes under a single md2conf key (md2conf: with the settings indented below it), never at the top level, because MkDocs and our other tools read the same files."}
+      ]
+    },
+    {
+      "n": 6,
+      "prompt": "Two small command-line fixes. --loglevel only accepts lower case, so --loglevel DEBUG fails; please accept any case. And when a path given on the command line doesn't exist we get a traceback; it should be an ordinary usage error (exit code 2) that names the missing path. Add tests for both. Then two rules for everything we build after this. From now on, every new command-line option needs an environment variable too, named MD2CONF_ plus the option name in capitals with dashes turned into underscores (so --foo-bar is MD2CONF_FOO_BAR), and the command-line value wins when both are set. Every new warning md2conf logs must start with the Markdown file's path relative to the folder being published, with forward slashes, then a colon and a space, like guide/setup.md: image not found.",
+      "patch": "06.patch",
+      "requirements": [
+        {"id": "R7", "text": "From now on, every new command-line option needs an environment variable too, named MD2CONF_ plus the option name in capitals with dashes turned into underscores (so --foo-bar is MD2CONF_FOO_BAR), and the command-line value wins when both are set."},
+        {"id": "R8", "text": "Every new warning md2conf logs must start with the Markdown file's path relative to the folder being published, with forward slashes, then a colon and a space, like guide/setup.md: image not found."}
+      ]
+    }
+  ]
+}

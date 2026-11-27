@@ -1,0 +1,10 @@
+{
+  "id": "R01",
+  "repo": "md2conf",
+  "kind": "ordinary",
+  "prompt": "Code blocks fenced as ```sh, ```zsh or ```console get no syntax highlighting on Confluence, and neither do ```yml, ```ps1 or ```ts. Please map sh, zsh and console to bash, yml to yaml, ps1 to powershell and ts to typescript. Language names should also match regardless of case, so ```Python and ```YAML work too. With --no-force-valid-language, names md2conf doesn't know must still be passed through exactly as they are written. Add a test.",
+  "requirement": null,
+  "oracle": null,
+  "max_turns": 30,
+  "timeout_s": 300
+}

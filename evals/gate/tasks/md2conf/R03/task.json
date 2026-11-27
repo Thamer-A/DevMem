@@ -1,0 +1,10 @@
+{
+  "id": "R03",
+  "repo": "md2conf",
+  "kind": "ordinary",
+  "prompt": "With --heading-anchors, two headings whose text gives the same anchor get the same anchor, so a link to the second one lands on the first. Please number repeated anchors within a page the way GitHub does: the first one keeps the plain anchor, the second gets -1 appended, the third -2, and so on. Headings with different text must keep their anchors as they are now. Add a test.",
+  "requirement": null,
+  "oracle": null,
+  "max_turns": 30,
+  "timeout_s": 300
+}

@@ -46,8 +46,9 @@ and tuning tasks that depend on a requirement, and null for ordinary ones.
 bool}}`. `env` is the process environment with the repository's tools first on `PATH` (pass it to `subprocess.run`).
 It may run the repository's tests (with files from `hidden/` copied in first and removed after; the folder of
 grade.py is `Path(__file__).parent`) and read files. Standard library only. It must not use the network, must finish
-within the task's `timeout_s`, and must not modify anything outside `work`. A grader that raises counts as a failed
-run.
+within the task's `timeout_s` (all its subprocesses together), and must not modify anything outside `work`. A grader
+that raises counts as a failed run. A grader whose own time limit cut a subprocess short returns
+`"grader_timeout": true` (with `passed` false): the runner records that run as a harness failure, not a fail.
 
 **Validation** (`python -m evals.gate.validate`): for every task, the starting code fails the grader, the starting
 code plus `reference.patch` passes it, and the starting code plus `guess.patch` fails it. A history task's guess

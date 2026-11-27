@@ -282,6 +282,8 @@ def one_run(spec: dict, root: Path, results: Path, cmd: list[str], version: str,
     if (cur / "work" / ".devmemory" / "packs.jsonl").is_file():
         shutil.copyfile(cur / "work" / ".devmemory" / "packs.jsonl", cur / "logs" / "packs.jsonl")
     hf = harness_failure(m)
+    if hf is None and g.get("grader_timeout"):      # the working copy could not be graded (section 10)
+        hf = "grader timed out"
     row = {**{k: spec[k] for k in ("stage", "repo", "task", "arm", "repeat", "order")}, "attempt": attempt,
            "run_id": run_id, "ts": now(), "kind": task["kind"], "passed": bool(g.get("passed")) and not hf,
            "checks": g.get("checks"), "grader_error": g.get("error"), "harness_failure": hf,

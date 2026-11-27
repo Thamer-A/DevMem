@@ -1,0 +1,78 @@
+diff --git a/md2conf/publisher.py b/md2conf/publisher.py
+index c53175c..67715cf 100644
+--- a/md2conf/publisher.py
++++ b/md2conf/publisher.py
+@@ -737,7 +737,8 @@ class SynchronizingProcessor(Processor):
+         Writes the Confluence object ID and space key at the beginning of the Markdown file.
+         """
+ 
+-        document = path.read_text(encoding="utf-8")
++        # a byte order mark would hide the front-matter, and is not written back
++        document = path.read_text(encoding="utf-8-sig")
+ 
+         # Insert identifiers after optional front-matter, preserving it as author-managed metadata.
+         index = 0
+diff --git a/md2conf/scanner.py b/md2conf/scanner.py
+index bcb79d9..0c0237e 100644
+--- a/md2conf/scanner.py
++++ b/md2conf/scanner.py
+@@ -109,6 +109,9 @@ class Scanner:
+         Extracts essential properties from a Markdown document.
+         """
+ 
++        # files saved by some Windows editors start with a byte order mark and use CRLF line endings
++        text = text.removeprefix("﻿").replace("\r\n", "\n")
++
+         # extract Confluence page ID
+         page_id, text = extract_value(_PAGE_ID_REGEXP, text)
+ 
+diff --git a/tests/test_publisher.py b/tests/test_publisher.py
+index 5fb06b1..66f0ece 100644
+--- a/tests/test_publisher.py
++++ b/tests/test_publisher.py
+@@ -279,6 +279,21 @@ class TestPublisher(unittest.TestCase):
+                 api.delete_page(page.id)
+             self.assertEqual(api.get_page_count(), 1)
+ 
++    def test_update_byte_order_mark(self) -> None:
++        "Checks if a Markdown file that starts with a byte order mark keeps its front-matter when a page ID is written."
++
++        with MockConfluenceAPI() as api, _create_temporary_directory() as source_dir:
++            document_path = source_dir / "index.md"
++            document_path.write_text("﻿---\ntitle: Saved with BOM\n---\n\nSome text.\n", encoding="utf-8")
++
++            Publisher(api, self.get_processor_options(api, keep_hierarchy=False, skip_update=False)).process_directory(source_dir)
++
++            content = document_path.read_text(encoding="utf-8")
++            self.assertFalse(content.startswith("﻿"))
++            self.assertTrue(content.startswith("---\ntitle: Saved with BOM\n---\n"))
++            page = _get_page_for_document(api, document_path)
++            self.assertEqual(page.title, "Saved with BOM")
++
+     def test_version_message(self) -> None:
+         "Checks custom version messages and the default source-path message."
+ 
+diff --git a/tests/test_scanner.py b/tests/test_scanner.py
+index 18f898d..7a21fe2 100644
+--- a/tests/test_scanner.py
++++ b/tests/test_scanner.py
+@@ -172,6 +172,19 @@ class TestScanner(TypedTestCase):
+         document = Scanner().parse(tags_single_frontmatter)
+         self.assertEqual(document.properties.tags, ["markdown"])
+ 
++    def test_byte_order_mark(self) -> None:
++        document = Scanner().parse("﻿" + tags_string_frontmatter)
++        props = document.properties
++        self.assertEqual(props.title, "Tags as a string")
++        self.assertEqual(document.text.strip(), "Text")
++
++    def test_crlf_line_endings(self) -> None:
++        document = Scanner().parse(id_space_title.replace("\n", "\r\n"))
++        props = document.properties
++        self.assertEqual(props.page_id, "1234567")
++        self.assertEqual(props.title, "🏠 árvíztűrő tükörfúrógép")
++        self.assertNotIn("\r", document.text)
++
+     def test_mermaid_frontmatter(self) -> None:
+         properties = MermaidScanner().read(mermaid_frontmatter)
+         if properties.config is None:

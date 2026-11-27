@@ -1,0 +1,99 @@
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 58eab6a..1e4d934 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -978,6 +978,13 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+     def _transform_toc(self, code: ElementType) -> ElementType:
+         "Creates a table of contents, constructed from headings in the document."
+ 
++        parameters = [
++            AC_ELEM("parameter", {AC_ATTR("name"): "outline"}, "clear"),
++            AC_ELEM("parameter", {AC_ATTR("name"): "style"}, "default"),
++        ]
++        if self.options.toc_max_level is not None:
++            parameters.append(AC_ELEM("parameter", {AC_ATTR("name"): "maxLevel"}, str(self.options.toc_max_level)))
++
+         return AC_ELEM(
+             "structured-macro",
+             {
+@@ -985,8 +992,7 @@ class ConfluenceStorageFormatConverter(NodeVisitor):
+                 AC_ATTR("schema-version"): "1",
+                 "data-layout": "default",
+             },
+-            AC_ELEM("parameter", {AC_ATTR("name"): "outline"}, "clear"),
+-            AC_ELEM("parameter", {AC_ATTR("name"): "style"}, "default"),
++            *parameters,
+         )
+ 
+     def _transform_listing(self, code: ElementType) -> ElementType:
+diff --git a/md2conf/options_converter.py b/md2conf/options_converter.py
+index a9ab8ba..9f4106c 100644
+--- a/md2conf/options_converter.py
++++ b/md2conf/options_converter.py
+@@ -87,6 +87,7 @@ class ConverterOptions:
+     :param force_valid_language: When true, only allow supported languages in code blocks (unsupported languages are ignored);
+         if disabled, use unknown language names as-is (Confluence may still highlight code).
+     :param code_line_numbers: When true, show line numbers in code blocks.
++    :param toc_max_level: Deepest heading level listed in a table of contents (or `None` for all levels).
+     :param layout: Layout options for content on a Confluence page.
+     :param extensions: Enables custom Atlassian Marketplace extension integrations.
+     """
+@@ -200,5 +201,11 @@ class ConverterOptions:
+             "Show code blocks without line numbers.",
+         ),
+     )
++    toc_max_level: int | None = field(
++        default=None,
++        metadata=value_option(
++            "Deepest heading level listed in a table of contents.",
++        ),
++    )
+     layout: LayoutOptions = field(default_factory=LayoutOptions, metadata=composite_option())
+     extensions: Sequence[MarketplaceExtensionFactory] | None = None
+diff --git a/tests/test_toc_level.py b/tests/test_toc_level.py
+new file mode 100644
+index 0000000..15daa6f
+--- /dev/null
++++ b/tests/test_toc_level.py
+@@ -0,0 +1,41 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import unittest
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.__main__ import get_parser
++from md2conf.clio import get_options
++from md2conf.local import LocalConverter
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import ProcessorOptions
++from md2conf.options_converter import ConverterOptions
++from tests.utility import TypedTestCase
++
++
++class TestTocLevel(TypedTestCase):
++    def _options(self, argv: list[str]) -> ProcessorOptions:
++        return get_options(get_parser().parse_args(["page.md", *argv]), ProcessorOptions)
++
++    def test_option(self) -> None:
++        self.assertIsNone(self._options([]).converter.toc_max_level)
++        self.assertEqual(self._options(["--toc-max-level", "3"]).converter.toc_max_level, 3)
++
++    def test_macro(self) -> None:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            page = Path(temp_dir) / "page.md"
++            page.write_text("# Page\n\n[[_TOC_]]\n\n## Section\n", encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            LocalConverter(ProcessorOptions(converter=ConverterOptions(toc_max_level=2)), site_metadata).process(page)
++            content = page.with_suffix(".csf").read_text(encoding="utf-8")
++        self.assertIn('<ac:parameter ac:name="maxLevel">2</ac:parameter>', content)
++
++
++if __name__ == "__main__":
++    unittest.main()

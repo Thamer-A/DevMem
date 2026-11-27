@@ -173,6 +173,16 @@ def test_replay_keeps_the_configuration_and_the_store(gate):
                    "--family", "D", "--confirm", "1"]) == 2       # never replayed twice by accident
 
 
+def test_a_grader_timeout_is_a_harness_failure(gate, monkeypatch):
+    monkeypatch.setattr(W, "grade", lambda task, work, env: {"passed": False, "checks": {}, "grader_timeout": True})
+    assert _run(gate, "--stage", "gt", "--arms", "S", "--tasks", "R01", "--repeats", "1", "--confirm", "1") == 0
+    row = _rows(gate, "gt")[0]
+    assert row["harness_failure"] == "grader timed out" and not row["passed"]
+    # it is run once more
+    assert _run(gate, "--stage", "gt", "--arms", "S", "--tasks", "R01", "--repeats", "1", "--confirm", "1") == 0
+    assert [r["attempt"] for r in _rows(gate, "gt")] == [1, 2]
+
+
 def test_confirm_must_match(gate):
     assert _run(gate, "--stage", "dry", "--arms", "S", "--repeats", "1", "--confirm", "5") == 2
     assert not (gate["results"] / "dry.jsonl").exists()

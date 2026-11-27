@@ -1,0 +1,87 @@
+diff --git a/md2conf/converter.py b/md2conf/converter.py
+index 58eab6a..98a4acc 100644
+--- a/md2conf/converter.py
++++ b/md2conf/converter.py
+@@ -2007,6 +2007,11 @@ class ConfluenceDocument:
+         # assign global properties for document
+         self.title = props.title or converter.toc.get_title()
+         self.labels = props.tags
++        if options.folder_labels:
++            # Confluence labels cannot contain spaces
++            folders = [name.strip().lower().replace(" ", "-") for name in path.parent.relative_to(root_dir.resolve()).parts]
++            if folders:
++                self.labels = list(dict.fromkeys([*(self.labels or []), *folders]))
+         self.properties = props.properties
+ 
+         # Remove the first heading if:
+diff --git a/md2conf/options.py b/md2conf/options.py
+index bda65ce..aa8e066 100644
+--- a/md2conf/options.py
++++ b/md2conf/options.py
+@@ -47,6 +47,7 @@ class ProcessorOptions:
+     :param converter: Options for converting an HTML tree into Confluence Storage Format.
+     :param line_numbers: Inject line numbers in Markdown source file to help localize conversion errors.
+     :param global_properties: JSON or YAML file of Confluence content properties to merge for every synchronized Markdown file.
++    :param folder_labels: Whether to add the names of the folders a Markdown file sits in as page labels.
+     """
+ 
+     root_page: ConfluencePageID | None = field(
+@@ -129,6 +130,13 @@ class ProcessorOptions:
+             "JSON or YAML file of Confluence content properties to merge for every synchronized Markdown file.",
+         ),
+     )
++    folder_labels: bool = field(
++        default=False,
++        metadata=boolean_option(
++            "Add the names of the folders a Markdown file sits in (below the published directory) as page labels.",
++            "Use only front-matter tags as page labels.",
++        ),
++    )
+ 
+ 
+ DocumentOptions = ProcessorOptions
+diff --git a/tests/test_folder_labels.py b/tests/test_folder_labels.py
+new file mode 100644
+index 0000000..dbc3425
+--- /dev/null
++++ b/tests/test_folder_labels.py
+@@ -0,0 +1,39 @@
++"""
++Publish Markdown files to Confluence wiki.
++
++Copyright 2022-2026, Levente Hunyadi
++
++:see: https://github.com/hunyadi/md2conf
++"""
++
++import unittest
++from pathlib import Path
++from tempfile import TemporaryDirectory
++
++from md2conf.collection import ConfluencePageCollection, ConfluenceUserCollection
++from md2conf.converter import ConfluenceDocument
++from md2conf.metadata import ConfluenceSiteMetadata
++from md2conf.options import ProcessorOptions
++from tests.utility import TypedTestCase
++
++
++class TestFolderLabels(TypedTestCase):
++    def _labels(self, options: ProcessorOptions) -> list[str] | None:
++        with TemporaryDirectory(dir=Path(__file__).parent) as temp_dir:
++            root_dir = Path(temp_dir)
++            page = root_dir / "User Guide" / "Getting Started" / "install.md"
++            page.parent.mkdir(parents=True)
++            page.write_text("---\ntags: [setup]\n---\n<!-- confluence-page-id: 1234 -->\n# Install\n", encoding="utf-8")
++            site_metadata = ConfluenceSiteMetadata(domain="example.com", base_path="/wiki/", space_key="SPACE_KEY")
++            _, document = ConfluenceDocument.create(page, options, root_dir, site_metadata, ConfluencePageCollection(), ConfluenceUserCollection())
++            return document.labels
++
++    def test_folder_labels(self) -> None:
++        self.assertEqual(self._labels(ProcessorOptions(folder_labels=True)), ["setup", "user-guide", "getting-started"])
++
++    def test_no_folder_labels(self) -> None:
++        self.assertEqual(self._labels(ProcessorOptions()), ["setup"])
++
++
++if __name__ == "__main__":
++    unittest.main()
