@@ -14,6 +14,7 @@ earlier session? The question, arms, counts, measures, thresholds and stop rules
 | `verify_freeze.py`, `MANIFEST.sha256` | the hash freeze of the task set; the runner refuses a changed set |
 | `run.py`, `runner.json` | the runner (pinned Claude Code version, model, flags) and the history replay |
 | `fake_claude.py` | a stand-in for `claude -p` used by `tests/test_gate_runner.py`, `tests/test_gate_calibrate.py` and `--fake` dry runs |
+| `analyze.py` | section 6 and 7: pass rates with task-bootstrap intervals, per-task differences against S, the sign-flip test and the thresholds, from `results/<stage>.jsonl` (`--stages A`, `--stages A,B`); writes `results/analysis-<stages>.json` |
 | `calibrate.py`, `BASELINE-FACTS.md` | Task 2: the nine calibration sessions (a-i) with the runner's isolation in `<root>/calib/` (`--only a,b`, `--confirm N`), and what the documentation says next to what they showed |
 | `results/` | one JSON line per run (`<stage>.jsonl`); `results/raw/<run id>/` the stream, prompt, diff, grade and pack log of each run (kept locally, not committed) |
 
