@@ -732,8 +732,10 @@ def cmd_forget(a) -> int:
     for p in result["removed"]:
         _say(f"  deleted {p}")
     pl = result.get("pack_log") or {}
-    if pl.get("deleted"):
-        _say("  deleted the pack log (packs.jsonl): it could not be read whole")
+    if pl.get("error"):
+        _say(f"  the pack log (packs.jsonl) could not be cleaned or deleted ({pl['error']}): delete it by hand")
+    elif pl.get("deleted"):
+        _say("  deleted the pack log (packs.jsonl): it could not be read whole or rewritten")
     elif pl.get("lines_removed") or pl.get("lines_changed"):
         _say(f"  pack log (packs.jsonl): {pl.get('lines_removed', 0)} line(s) removed, "
              f"{pl.get('lines_changed', 0)} line(s) lost items of the forgotten session(s)")
@@ -783,7 +785,8 @@ def cmd_packs(a) -> int:
             line += f" [{e['forgotten_items']} item(s) of a forgotten session removed]"
         _say(line)
     if not info.get("complete", True):
-        _say("(the log is longer than devmem reads at once; the rows above are its beginning)")
+        _say("(the log is longer than devmem reads at once: these are its OLDEST rows and the newest are not shown; "
+             "`devmem forget --all` deletes it)")
     return 0
 
 

@@ -369,7 +369,8 @@ a lowercase word is not.
   file deleted. All three also delete the MCP call log, if you switched it on: its lines carry no session id, so they
   cannot be matched to a session. From the pack log (`packs.jsonl`, one line per prompt) they remove the chosen
   sessions' lines, and from other sessions' lines every item a chosen session supplied (the line then counts them in
-  `forgotten_items`); a pack log too long to read whole is deleted instead, and `--all` deletes it. A line a hook
+  `forgotten_items`); a pack log too long to read whole, or one that cannot be rewritten, is deleted instead, and
+  `--all` deletes it. A line a hook
   appends while `forget` rewrites the log can be lost. `--all` also deletes every pending `begin` snapshot.
   Deleted sessions are removed from the search index, and the command then scrubs the index: `secure_delete` is on
   for every index connection, the first forget on an index written by an older version vacuums it once, and a

@@ -1492,8 +1492,21 @@ def forget_pack_log(store: Path, ids: list[str]) -> dict:
     `sources` loses every `session:<id8>` key of a forgotten session), counted in the line's `forgotten_items`. The
     rest is written back through the redactor. When the log cannot be read whole (past read_events' bound, or a line
     too long to read), the whole file is deleted instead: nothing of a forgotten session may stay. A line a hook
-    appends while this runs can be lost (the file is replaced). {"lines_removed", "lines_changed", "deleted"}."""
-    store = Path(store)
+    appends while this runs can be lost (the file is replaced). Any failure on the way (a line of unexpected shape, a
+    rewrite that cannot be written) deletes the whole log instead, so forget fails closed and never raises from here.
+    {"lines_removed", "lines_changed", "deleted"}, and "error" when even deleting the log failed."""
+    try:
+        return _forget_pack_log(Path(store), ids)
+    except Exception as exc:  # noqa: BLE001 - the session files are already gone: never leave its lines behind
+        out: dict = {"lines_removed": 0, "lines_changed": 0, "deleted": False}
+        try:
+            out["deleted"] = bool(_remove([Path(store) / PACK_LOG], Path(store)))
+        except OSError as gone_exc:
+            out["error"] = f"{exc!r}; deleting the pack log failed too: {gone_exc!r}"[:400]
+        return out
+
+
+def _forget_pack_log(store: Path, ids: list[str]) -> dict:
     path = store / PACK_LOG
     out = {"lines_removed": 0, "lines_changed": 0, "deleted": False}
     gone = {str(i) for i in ids if i}
@@ -1516,9 +1529,11 @@ def forget_pack_log(store: Path, ids: list[str]) -> dict:
         sources = sources if isinstance(sources, dict) else None
 
         def from_gone(k) -> bool:
+            if not isinstance(k, str):      # never written by the hooks: dropped, it cannot be checked
+                return True
             if sources is not None and str(sources.get(k) or "") in gone:
                 return True
-            return isinstance(k, str) and k.startswith("session:") and k[8:] in short
+            return k.startswith("session:") and k[8:] in short
         drop = [k for k in keys if from_gone(k)]
         if drop:
             e["keys"] = [k for k in keys if k not in drop]

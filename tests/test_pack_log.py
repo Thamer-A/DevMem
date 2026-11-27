@@ -158,6 +158,29 @@ def test_a_log_too_long_to_read_whole_is_deleted_by_forget(project, monkeypatch)
     assert result["deleted"] and not (store / "packs.jsonl").exists()
 
 
+def test_a_hand_edited_line_of_odd_shape_does_not_break_forget(project):
+    _five_prompts(project)
+    store = project / ".devmemory"
+    with open(store / "packs.jsonl", "a", encoding="utf-8") as f:
+        f.write(json.dumps({"session_id": "other-0009", "keys": [["a"], {"b": 1}, "file:x.py"],
+                            "sources": {"a": "b"}, "forgotten_items": "many"}) + "\n")
+    result = S.forget_pack_log(store, [EARLIER])            # raised TypeError before the review fix
+    assert result["lines_removed"] == 1 and not result["deleted"]
+    odd = [e for e in _lines(project) if e["session_id"] == "other-0009"][0]
+    assert odd["keys"] == ["file:x.py"] and odd["forgotten_items"] == 2
+
+
+def test_a_rewrite_that_fails_deletes_the_log_instead(project, monkeypatch):
+    _five_prompts(project)
+    store = project / ".devmemory"
+
+    def broken(path, text):
+        raise OSError("read-only (test)")
+    monkeypatch.setattr(S, "_atomic_write", broken)
+    result = S.forget_pack_log(store, [EARLIER])
+    assert result["deleted"] and not (store / "packs.jsonl").exists()
+
+
 def test_forget_of_an_unrelated_session_leaves_the_log_untouched(project):
     _five_prompts(project)
     path = project / ".devmemory" / "packs.jsonl"
