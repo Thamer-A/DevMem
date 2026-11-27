@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -276,6 +277,32 @@ def test_a_run_that_writes_into_the_shared_install_keeps_its_result_and_the_inst
 def test_confirm_must_match(gate):
     assert _run(gate, "--stage", "dry", "--arms", "S", "--repeats", "1", "--confirm", "5") == 2
     assert not (gate["results"] / "dry.jsonl").exists()
+
+
+@pytest.mark.parametrize("with_spec", [True, False])
+def test_a_run_the_runner_never_finished_is_a_logged_harness_failure(gate, with_spec):
+    assert _run(gate, "--stage", "cut", "--arms", "S", "--repeats", "1", "--confirm", "2") == 0
+    rows = _rows(gate, "cut")
+    first = min(rows, key=lambda r: r["order"])
+    # rebuild what a runner stopped in the middle of the first run leaves behind: its row gone, current/ in place
+    (gate["results"] / "cut.jsonl").write_text(
+        "".join(json.dumps(r) + "\n" for r in rows if r is not first), encoding="utf-8")
+    cur = gate["root"] / "current"
+    (cur / "logs").mkdir(parents=True)
+    shutil.copyfile(gate["results"] / "raw" / first["run_id"] / "prompt.txt", cur / "logs" / "prompt.txt")
+    if with_spec:
+        spec = {k: first[k] for k in ("stage", "repo", "task", "arm", "repeat", "order")}
+        (cur / "logs" / "spec.json").write_text(json.dumps({**spec, "attempt": 1, "run_id": first["run_id"]}),
+                                                encoding="utf-8")
+    assert _run(gate, "--stage", "cut", "--arms", "S", "--repeats", "1", "--confirm", "1") == 0
+    got = [r for r in _rows(gate, "cut") if (r["task"], r["arm"]) == (first["task"], first["arm"])]
+    assert [(r["attempt"], r["harness_failure"]) for r in got] == [(1, R.INTERRUPTED), (2, None)]
+    assert not cur.exists() and (gate["root"] / "runs" / first["run_id"] / "logs" / "prompt.txt").is_file()
+    # a leftover folder whose run did finish is not logged again
+    (cur / "logs").mkdir(parents=True)
+    shutil.copyfile(gate["results"] / "raw" / first["run_id"] / "prompt.txt", cur / "logs" / "prompt.txt")
+    assert _run(gate, "--stage", "cut", "--arms", "S", "--repeats", "1", "--confirm", "0") == 0
+    assert len(_rows(gate, "cut")) == 3
 
 
 def test_the_run_stops_at_the_owners_weekly_limit(gate, monkeypatch):

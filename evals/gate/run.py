@@ -305,6 +305,9 @@ def one_run(spec: dict, root: Path, results: Path, cmd: list[str], version: str,
     run_id = f"{spec['stage']}_{spec['repo']}_{spec['task']}_{spec['arm']}_r{spec['repeat']}_a{attempt}"
     deps_dir = W.deps(cfg, root)
     cur = prepare_current(root)
+    # which run this folder holds, so that a run the runner never finished is found and logged (recover_interrupted)
+    (cur / "logs" / "spec.json").write_text(json.dumps({**spec, "attempt": attempt, "run_id": run_id}),
+                                            encoding="utf-8")
     W.work_copy(cfg, root, cur / "work")
     env = session_env(cfg, deps_dir, cur, devmem=arm["pack_mode"] is not None)
     replayed = restore_state(root / "replay" / spec["repo"] / arm["family"], cur, arm["family"])
@@ -366,6 +369,56 @@ def _done(path: Path) -> dict[tuple, dict]:
     return done
 
 
+INTERRUPTED = "interrupted: the runner stopped before the session ended"
+
+
+def recover_interrupted(root: Path, results: Path, out: Path, runs: list[dict], done: dict) -> dict | None:
+    """A run of this stage that the runner started but never finished (the runner was stopped: a crash, a machine
+    out of memory, a suspend) is a harness failure (PREREGISTRATION.md section 10). Log it as one, keep its logs,
+    and delete a shared Node install it may have written into, which no fingerprint check saw. Returns the row, or
+    None when `<root>/current` holds no unfinished run of this stage.
+
+    The folder names its run in logs/spec.json; a folder from before that file existed is matched to the first run
+    not yet done in the stage's order, and only when its prompt is that run's prompt."""
+    cur = root / "current"
+    logs = cur / "logs"
+    spec = None
+    if (logs / "spec.json").is_file():
+        spec = json.loads((logs / "spec.json").read_text(encoding="utf-8"))
+    elif (logs / "prompt.txt").is_file():
+        nxt = next((r for r in runs if run_key(r) not in done), None)
+        if nxt is not None:
+            task = W.load_task(W.TASKS / nxt["repo"] / nxt["task"])
+            want = RUNNER["oracle_wrapper"].format(oracle=task["oracle"], prompt=task["prompt"]) \
+                if ARMS[nxt["arm"]]["oracle"] else task["prompt"]
+            if (logs / "prompt.txt").read_text(encoding="utf-8") == want:
+                spec = {**nxt, "attempt": 1,
+                        "run_id": f"{nxt['stage']}_{nxt['repo']}_{nxt['task']}_{nxt['arm']}_r{nxt['repeat']}_a1"}
+    if spec is None or not runs or spec.get("stage") != runs[0]["stage"]:
+        return None
+    prev = done.get(run_key(spec))
+    if prev is not None and prev.get("attempt", 1) >= spec["attempt"]:
+        return None                       # that run finished; the folder is only a leftover
+    task = W.load_task(W.TASKS / spec["repo"] / spec["task"])
+    row = {**{k: spec.get(k) for k in ("stage", "repo", "task", "arm", "repeat", "order")},
+           "attempt": spec["attempt"], "run_id": spec["run_id"], "ts": now(), "kind": task["kind"], "passed": False,
+           "harness_failure": INTERRUPTED, "recovered": True, "model_requested": RUNNER["model"]}
+    raw = results / "raw" / spec["run_id"]
+    W.rmtree(raw)
+    shutil.copytree(logs, raw)
+    dest = root / "runs" / spec["run_id"]
+    W.rmtree(dest)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    os.replace(cur, dest)
+    cfg = W.load_repo(spec["repo"])
+    if cfg["deps"]["kind"] == "node":
+        W.rmtree(W.deps_path(cfg, root))  # deps() installs it fresh before the next run
+    with open(out, "a", encoding="utf-8") as f:
+        f.write(json.dumps(row) + "\n")
+    done[run_key(spec)] = row
+    return row
+
+
 def cmd_run(a) -> int:
     from evals.gate import verify_freeze
     frozen, msgs = verify_freeze.check()
@@ -381,6 +434,10 @@ def cmd_run(a) -> int:
     results = Path(a.results)
     out = results / f"{a.stage}.jsonl"
     done = _done(out)
+    results.mkdir(parents=True, exist_ok=True)
+    lost = recover_interrupted(Path(a.root), results, out, runs, done)
+    if lost:
+        print(f"logged {lost['run_id']} as a harness failure ({INTERRUPTED}); it is run once more")
     todo = []
     for r in runs:
         prev = done.get(run_key(r))
