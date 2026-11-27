@@ -337,7 +337,9 @@ a lowercase word is not.
   applies to the hooks; devmem itself sets `DEVMEM_NO_CAPTURE` for sessions it launches and records itself). The
   pack is still delivered unless `deliver` is also false, and for that devmem keeps a small per-session state
   file, `.devmemory/live/<session>.state.json`, with which context was already sent (no prompt or tool text), `"deliver": false` stops adding the
-  pack to prompts, `"pack_budget"` sets the token budget (default 1500), `"redact": false` turns redaction off (with
+  pack to prompts, `"pack_budget"` sets the token budget (default 1500), `"pack_mode": "requests"` limits the pack
+  to past sessions and earlier requirements (no relevant files, no conventions, no notes on changed files; the
+  default `"full"` has them all), `"redact": false` turns redaction off (with
   your permission only, above), and
   `"mcp_call_log": true` makes the MCP server keep a log of the calls it receives in `.devmemory/mcp_calls.jsonl`
   (off by default; written only when the value is true, so `"false"` and `"off"` keep it off; the arguments are
@@ -345,7 +347,8 @@ a lowercase word is not.
   file, see "Forgetting"). What the other store files and
   keys can do if a repository supplies them: `capture: false`, `deliver: false`, `read_transcript: false`, an `ignore`
   file and extra patterns in a `redact` file only record, read or send less; `pack_budget` changes how much earlier
-  work is added to a prompt (capped at Claude Code's 10,000-character hook output), not what is stored;
+  work is added to a prompt (capped at Claude Code's 10,000-character hook output), not what is stored; `pack_mode`
+  only chooses which of the pack's sections are shown;
   `mcp_call_log` adds a local, redacted log inside the store. `embeddings` would mean a model download and a cache
   folder the config names, so a `config.json` that git tracks never turns them on (`DEVMEM_EMBED`, set by you, still
   does). The patterns in a `redact` file run only when it is the file you approved: `devmem init` and /devmem:setup

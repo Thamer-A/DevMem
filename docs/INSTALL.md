@@ -173,7 +173,7 @@ Commands you will use:
 | command | what it does |
 |---|---|
 | `devmem status` | captured sessions (turns, in progress), whether hooks are installed, whether the store is git-ignored |
-| `devmem pack "task"` | print the context pack a session would receive for that task (`--copy`: put it on the clipboard) |
+| `devmem pack "task"` | print the context pack a session would receive for that task (`--copy`: put it on the clipboard; `--mode requests`: past sessions and earlier requirements only) |
 | `devmem sessions` / `devmem show <id>` | list the recorded sessions / print one turn by turn with who wrote each text (what the MCP tools `list_sessions` and `read_session` return) |
 | `devmem connect <tool>` / `disconnect <tool>` | set devmem up for another AI tool (MCP entry and instruction block in project files), or remove it; see "Other tools" |
 | `devmem forget <id> / --before DATE / --all` | delete captured sessions (`--all` says how many files it deletes before it asks) |

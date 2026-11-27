@@ -1420,8 +1420,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("task", help="the task, in the user's words")
     p.add_argument("--budget", type=_ranged(100, 20_000), default=1500,
                    help="approximate token budget, 100-20000 (default 1500)")
-    p.add_argument("--mode", default="full", choices=["full", "static", "nofresh"],
-                   help="full (default), static (map only, no sessions) or nofresh (sessions without stale flags)")
+    p.add_argument("--mode", default="full", choices=["full", "static", "nofresh", "requests"],
+                   help="full (default), static (map only, no sessions), nofresh (sessions without stale flags) "
+                        "or requests (past sessions and earlier requirements only: no files, no conventions)")
     p.add_argument("--out", metavar="FILE", help="also write the pack to FILE (UTF-8)")
     p.add_argument("--copy", action="store_true",
                    help="put the pack on the clipboard instead of printing it (for chat interfaces without tools)")

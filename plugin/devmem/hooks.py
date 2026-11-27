@@ -579,7 +579,7 @@ def _deliver(payload: dict, project: Path, store: Path, sid: str, prompt: str, s
     from .consent import recorded_refusal
     if recorded_refusal(project, store):   # not this user's store (run() asked store_refusal for this event already)
         return ""
-    from .pack import build_pack
+    from .pack import PACK_MODES, build_pack
     p = _paths(store, sid)
     map_missing = not (store / "index" / "map.json").exists()
     if map_missing or not st.get("scanned") or st.get("scan_incomplete") or p["edited"].exists():
@@ -599,7 +599,7 @@ def _deliver(payload: dict, project: Path, store: Path, sid: str, prompt: str, s
         budget = 1500   # a config value of the wrong type falls back to the default
     budget = max(100, min(20000, budget))
     mode = cfg.get("pack_mode", "full")
-    kwargs = {"budget": budget, "mode": mode if mode in ("full", "static", "nofresh") else "full"}
+    kwargs = {"budget": budget, "mode": mode if isinstance(mode, str) and mode in PACK_MODES else "full"}
     params = inspect.signature(build_pack).parameters
     # Retrieval layer hook-in: if build_pack accepts these, it can skip context already sent this session.
     if "session_id" in params:

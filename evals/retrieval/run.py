@@ -372,7 +372,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--json", help="write the full result as stable JSON to this path")
     ap.add_argument("--md", help="write the Markdown report to this path")
     ap.add_argument("--budget", type=int, default=1500)
-    ap.add_argument("--mode", default="full", choices=["full", "static", "nofresh"])
+    ap.add_argument("--mode", default="full", choices=["full", "static", "nofresh", "requests"])
     ap.add_argument("--project", action="append", help="only this project (repeatable)")
     ap.add_argument("--kind", action="append", help="only this case kind (repeatable)")
     ap.add_argument("--case", action="append", help="only this case id (repeatable)")
