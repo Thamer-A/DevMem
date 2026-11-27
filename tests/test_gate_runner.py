@@ -278,6 +278,16 @@ def test_confirm_must_match(gate):
     assert not (gate["results"] / "dry.jsonl").exists()
 
 
+def test_the_run_stops_at_the_owners_weekly_limit(gate, monkeypatch):
+    monkeypatch.setenv("FAKE_SEVEN_DAY", "0.35")
+    assert _run(gate, "--stage", "lim", "--arms", "S", "--repeats", "1", "--confirm", "2", "--stop-weekly", "0.35") == 3
+    rows = _rows(gate, "lim")
+    assert len(rows) == 1 and rows[0]["rate_limit"]["seven_day"] == 0.35      # stopped after the first run
+    monkeypatch.setenv("FAKE_SEVEN_DAY", "0.20")                             # below the limit: the rest runs
+    assert _run(gate, "--stage", "lim", "--arms", "S", "--repeats", "1", "--confirm", "1", "--stop-weekly", "0.35") == 0
+    assert len(_rows(gate, "lim")) == 2
+
+
 def test_preregistered_run_counts(tmp_path, monkeypatch):
     tasks = tmp_path / "tasks"
     for repo in ("one", "two"):

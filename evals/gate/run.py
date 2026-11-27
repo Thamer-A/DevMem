@@ -403,6 +403,12 @@ def cmd_run(a) -> int:
               f"{'PASS' if row['passed'] else 'fail'}{' HARNESS: ' + row['harness_failure'] if row['harness_failure'] else ''}"
               f"{' DEPS CHANGED (reinstalled next run)' if row['deps_changed'] else ''}"
               f" turns={row['turns']} weighted={row['price_weighted']} {row['wall_s']}s", flush=True)
+        weekly = (row.get("rate_limit") or {}).get("seven_day")
+        if a.stop_weekly is not None and isinstance(weekly, (int, float)) and weekly >= a.stop_weekly:
+            # the owner's usage limit (PREREGISTRATION.md section 4): stop and ask; the next call resumes here
+            print(f"STOPPED: the subscription's seven-day use is {weekly:.0%}, at or above --stop-weekly "
+                  f"{a.stop_weekly:.0%}; {len(todo) - i} run(s) not started", flush=True)
+            return 3
     return 0
 
 
@@ -502,6 +508,8 @@ def main(argv: list[str] | None = None) -> int:
             p.add_argument("--tasks", type=lambda s: s.split(","))
             p.add_argument("--unfrozen", action="store_true", help="allow a task set that is not frozen (rows say so)")
             p.add_argument("--keep-work", action="store_true")
+            p.add_argument("--stop-weekly", type=float, default=None,
+                           help="stop after a run whose rate_limit event reports this seven-day use or more (0.35)")
     a = ap.parse_args(argv)
     return {"plan": cmd_plan, "run": cmd_run, "replay": cmd_replay}[a.cmd](a)
 

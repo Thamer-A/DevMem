@@ -69,6 +69,10 @@ def main(argv: list[str]) -> int:
         {"type": "assistant", "message": {"model": model, "content": [
             {"type": "tool_use", "name": "Write", "input": {"file_path": str(Path.cwd() / "answer.txt")}}]}},
         {"type": "user", "message": {"content": [{"type": "tool_result", "content": "ok"}]}},
+        # the subscription's use as Claude Code reports it; FAKE_SEVEN_DAY lets a test set the seven-day figure
+        {"type": "rate_limit_event", "rate_limit_info": {"unifiedWindows": {
+            "five_hour": {"utilization": 0.05},
+            "seven_day": {"utilization": float(os.environ.get("FAKE_SEVEN_DAY", "0.14"))}}}},
         {"type": "result", "subtype": "success", "is_error": False, "num_turns": 2, "duration_ms": 1234,
          "total_cost_usd": 0.0001, "session_id": sid, "result": "done" + (" (with context)" if context else "") + (f" (remembered: {recalled.strip()})" if recalled else ""),
          "usage": {"input_tokens": 100, "cache_creation_input_tokens": 50, "cache_read_input_tokens": 200,
