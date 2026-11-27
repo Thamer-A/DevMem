@@ -148,4 +148,18 @@ one re-run of arm D on all 24 scored tasks with two repeats (48 runs, owner's ye
 
 ## 11. Amendments
 
-None yet.
+**A1, 2026-11-26 (before any task, history or run exists).**
+- The repositories, chosen by the owner: `hunyadi/md2conf` (Python, MIT) and `danfry1/bonsai-js` (TypeScript,
+  MIT). Their pinned commits are written in `evals/gate/tasks/<repo>/repo.json` and in the freeze manifest.
+- The owner confirmed the thresholds as written (section 7) and that the usage limit in section 4 covers the test's
+  own Claude Code sessions only.
+- The code a task starts from is fixed, the same for every arm and run: the repository at its pinned commit plus
+  the **reference patch** of each history session, applied in order (the format is in
+  `evals/gate/TASK-FORMAT.md`). The replay (section 4) runs the history's prompts as real sessions only to build each
+  arm's memory: Claude Code's automatic-memory folder for S and O, that plus the DevMem store for D and DF. The code
+  those replay sessions write is discarded. Reason: otherwise every arm would start from different code and the
+  graders, frozen before any run, could not be validated against it. Consequence, stated in the report: a memory
+  may describe code that differs in detail from the code the task starts from, alike in every arm.
+- A history-dependent task depends on a requirement that the history states and that the starting code does not
+  reveal (a rule or value for later work, not one the reference patches already implement); the grader's
+  "plausible guess" is a solution that follows the code and the task prompt but not that requirement.
