@@ -129,8 +129,13 @@ def deps(cfg: dict, root: Path) -> Path:
     spec = cfg["deps"]
     src = source(cfg, root)
     lock = b""
+    lock_file = src / "package-lock.json"
     if spec["kind"] == "node":
-        lock = (src / "package-lock.json").read_bytes()
+        # A repository that ships no npm lock file (bonsai-js has only bun.lock) names one kept with its tasks
+        # (`"deps": {"kind": "node", "lock": "package-lock.json"}`, made once from its package.json), frozen with them.
+        if spec.get("lock"):
+            lock_file = cfg["dir"] / spec["lock"]
+        lock = lock_file.read_bytes()
     dest = root / "deps" / f"{cfg['name']}-{cfg['commit'][:12]}-{_digest(json.dumps(spec, sort_keys=True).encode(), lock)}"
     done = dest / ".installed"
     if done.exists():
@@ -144,8 +149,8 @@ def deps(cfg: dict, root: Path) -> Path:
             subprocess.run([str(py), "-m", "pip", "install", "-q", "--disable-pip-version-check",
                             *spec["requirements"]], check=True)
     elif spec["kind"] == "node":
-        for f in ("package.json", "package-lock.json"):
-            shutil.copyfile(src / f, dest / f)
+        shutil.copyfile(src / "package.json", dest / "package.json")
+        shutil.copyfile(lock_file, dest / "package-lock.json")
         subprocess.run(["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], cwd=dest, check=True,
                        shell=os.name == "nt")
     else:

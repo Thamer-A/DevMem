@@ -224,9 +224,10 @@ def test_freeze_detects_any_change(tmp_path, monkeypatch):
     f = gate / "tasks" / "x" / "task.json"
     f.write_text("{}\n", encoding="utf-8")
     monkeypatch.setattr(F, "GATE", gate)
-    monkeypatch.setattr(F, "MANIFEST", gate / "MANIFEST.sha256")
+    monkeypatch.setattr(F, "MANIFEST", gate / "tasks" / "MANIFEST.sha256")
     assert F.check()[0] is False
     assert F.main(["--write"]) == 0 and F.check() == (True, [])
+    assert "MANIFEST.sha256" not in F.MANIFEST.read_text(encoding="utf-8")   # not listed in itself
     f.write_bytes(b"{}\r\n")                              # line endings alone do not count
     assert F.check()[0] is True
     f.write_text("{\"changed\": 1}\n", encoding="utf-8")

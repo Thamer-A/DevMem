@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 GATE = Path(__file__).resolve().parent
-MANIFEST = GATE / "MANIFEST.sha256"
+MANIFEST = GATE / "tasks" / "MANIFEST.sha256"      # where PREREGISTRATION.md section 2 puts it
 FOLDERS = ("tasks", "tuning")
 
 
@@ -23,7 +23,8 @@ def _files() -> list[Path]:
     for top in FOLDERS:
         base = GATE / top
         if base.is_dir():
-            out += [p for p in base.rglob("*") if p.is_file() and "__pycache__" not in p.parts]
+            out += [p for p in base.rglob("*")
+                    if p.is_file() and "__pycache__" not in p.parts and p.resolve() != MANIFEST.resolve()]
     return sorted(out, key=lambda p: p.relative_to(GATE).as_posix())
 
 
@@ -65,7 +66,7 @@ def check() -> tuple[bool, list[str]]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="python -m evals.gate.verify_freeze", description=__doc__.split("\n\n")[0])
+    ap = argparse.ArgumentParser(prog="python -m evals.gate.verify_freeze", description=(__doc__ or "").split("\n\n")[0])
     ap.add_argument("--write", action="store_true")
     a = ap.parse_args(argv)
     if a.write:

@@ -16,8 +16,8 @@ evals/gate/
       reference.patch                 a correct solution, on top of the starting code
       guess.patch                     a plausible solution that the grader must reject
       hidden/                         optional: test files copied in only at grading time
+    MANIFEST.sha256                   every other file under tasks/ and tuning/, with its SHA-256 (verify_freeze)
   tuning/<repo>/<task id>/            the 3 tuning tasks per repository, same layout (T01..T03); never scored
-  MANIFEST.sha256                     every file under tasks/ and tuning/, with its SHA-256 (verify_freeze)
 ```
 
 **repo.json**: `{"name", "url", "commit" (full SHA), "language", "license", "deps", "test": [argv],
@@ -26,7 +26,9 @@ evals/gate/
 - `"deps": {"kind": "python", "requirements": ["pkg==1.2.3", ...]}`: a virtual environment with exactly these
   (pinned) packages; the repository's own package is not installed, it is imported from the working copy.
 - `"deps": {"kind": "node"}`: `npm ci` from the repository's own `package.json` and lock file; each working copy
-  gets `node_modules` as a link (a junction on Windows) to that install.
+  gets `node_modules` as a link (a junction on Windows) to that install. A repository that ships no
+  `package-lock.json` names one kept in its task folder, `"deps": {"kind": "node", "lock": "package-lock.json"}`
+  (made once with `npm install --package-lock-only`); it is frozen with the tasks and used in its place.
 
 `test` runs the repository's own suite offline from the working copy, with the tool environment on `PATH` (for
 example `["python", "-m", "pytest", "tests", "-q", "-p", "no:cacheprovider"]` or `["npx", "vitest", "run"]`).
