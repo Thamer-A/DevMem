@@ -15,6 +15,11 @@ to `<root>/runs/<run id>/` and its logs are copied to `<results>/raw/<run id>/`;
 
 A run whose key (stage, repo, task, arm, repeat) already has a line is skipped, so an interrupted stage continues
 where it stopped; a harness failure is run once more (`attempt` 2), and a second one stays a harness failure.
+
+For a Node repository the working copy's `node_modules` is a link to one shared install. Its fingerprint
+(workspace.deps_fingerprint) is taken before each session and after grading: a run that changed it (an agent's
+`npm install`, a cache written through the link) keeps its result and has `"deps_changed": true` in its row, and the
+install is deleted so that the next run gets a fresh one (`false` when unchanged, `null` for a python repository).
 """
 from __future__ import annotations
 
@@ -242,7 +247,9 @@ def harness_failure(m: dict) -> str | None:
 
 
 def diff_against_start(work: Path) -> str:
-    W.git(work, "add", "-A", "--", ".", ":(exclude).claude", ":(exclude).devmemory", ":(exclude)node_modules")
+    # node_modules is left out by .git/info/exclude (workspace.base); naming it in an exclude pathspec as well makes
+    # `git add` fail ("paths are ignored", exit 1, git 2.51) whenever the link is there, as in every Node run.
+    W.git(work, "add", "-A", "--", ".", ":(exclude).claude", ":(exclude).devmemory")
     return W.git(work, "diff", "--cached", "HEAD")
 
 
@@ -255,6 +262,19 @@ def pack_summary(work: Path) -> dict:
             "pack_tokens_est": sum(e.get("tokens_est") or 0 for e in lines),
             "pack_keys": [k for e in lines for k in (e.get("keys") or [])],
             "pack_empty_reasons": [e.get("empty_reason") for e in lines if not e.get("keys")]}
+
+
+def deps_before(cfg: dict, deps_dir: Path) -> str | None:
+    """The shared Node install's fingerprint before a session (None for a python repository)."""
+    return W.deps_fingerprint(deps_dir) if cfg["deps"]["kind"] == "node" else None
+
+
+def deps_changed(deps_dir: Path, before: str | None) -> bool | None:
+    """Whether the run wrote into the shared Node install through its `node_modules` link (an `npm install`, a
+    cache). The run keeps its own result (the agent did it in its own session, PREREGISTRATION.md section 10); the
+    caller then deletes the install (workspace.rmtree, links inside removed as links), so that deps() installs it
+    fresh before the next run and no later run or arm uses what this one wrote."""
+    return None if before is None else W.deps_fingerprint(deps_dir) != before
 
 
 def one_run(spec: dict, root: Path, results: Path, cmd: list[str], version: str, frozen: bool, fake: bool,
@@ -273,11 +293,13 @@ def one_run(spec: dict, root: Path, results: Path, cmd: list[str], version: str,
     prompt = RUNNER["oracle_wrapper"].format(oracle=task["oracle"], prompt=task["prompt"]) if arm["oracle"] \
         else task["prompt"]
     (cur / "logs" / "prompt.txt").write_text(prompt, encoding="utf-8")
+    fingerprint = deps_before(cfg, deps_dir)
     m = run_session(cmd, prompt, cur, env, int(task.get("max_turns", 30)))
     diff = diff_against_start(cur / "work")
     (cur / "logs" / "diff.patch").write_text(diff, encoding="utf-8", newline="\n")
     g = W.grade(task, cur / "work", W.tool_env(cfg, deps_dir, cur / "work"))
     (cur / "logs" / "grade.json").write_text(json.dumps(g, indent=1), encoding="utf-8")
+    changed_deps = deps_changed(deps_dir, fingerprint)
     packs = pack_summary(cur / "work")
     if (cur / "work" / ".devmemory" / "packs.jsonl").is_file():
         shutil.copyfile(cur / "work" / ".devmemory" / "packs.jsonl", cur / "logs" / "packs.jsonl")
@@ -295,8 +317,8 @@ def one_run(spec: dict, root: Path, results: Path, cmd: list[str], version: str,
            "subtype": m.get("subtype"), "model_requested": RUNNER["model"], "model": m.get("model"),
            "claude_version": version, "cost_usd_list": m.get("cost_usd_list"), "rate_limit": m.get("rate_limit"),
            "tool_calls": m.get("tool_calls"), "diff_lines": diff.count("\n"), "replayed_state": replayed,
-           "frozen": frozen, "fake": fake, "devmem_rev": W.git(REPO_ROOT, "rev-parse", "--short", "HEAD").strip(),
-           **packs}
+           "deps_changed": changed_deps, "frozen": frozen, "fake": fake,
+           "devmem_rev": W.git(REPO_ROOT, "rev-parse", "--short", "HEAD").strip(), **packs}
     (cur / "logs" / "row.json").write_text(json.dumps(row, indent=1), encoding="utf-8")
     raw = results / "raw" / run_id
     W.rmtree(raw)
@@ -307,6 +329,8 @@ def one_run(spec: dict, root: Path, results: Path, cmd: list[str], version: str,
     W.rmtree(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
     os.replace(cur, dest)
+    if changed_deps:            # after the working copy's link to it is gone; deps() reinstalls it for the next run
+        W.rmtree(deps_dir)
     return row
 
 
@@ -357,6 +381,7 @@ def cmd_run(a) -> int:
             f.write(json.dumps(row) + "\n")
         print(f"[{i}/{len(todo)}] {row['repo']} {row['task']} {row['arm']} r{row['repeat']} "
               f"{'PASS' if row['passed'] else 'fail'}{' HARNESS: ' + row['harness_failure'] if row['harness_failure'] else ''}"
+              f"{' DEPS CHANGED (reinstalled next run)' if row['deps_changed'] else ''}"
               f" turns={row['turns']} weighted={row['price_weighted']} {row['wall_s']}s", flush=True)
     return 0
 
@@ -405,15 +430,17 @@ def cmd_replay(a) -> int:
         restore_state(state, cur, a.family)
         if a.family == "D":
             install_devmem(cur, env, "requests")
+        fingerprint = deps_before(cfg, deps_dir)
         m = run_session(cmd, s["prompt"], cur, env, 40)
+        changed_deps = deps_changed(deps_dir, fingerprint)
         save_state(state, cur, a.family)
         row = {"stage": "replay", "repo": a.repo, "family": a.family, "session": s["n"], "ts": now(),
                "harness_failure": harness_failure(m), "exit_code": m.get("exit_code"), "turns": m.get("num_turns"),
                "uncached_input_tokens": m.get("input_tokens"), "cache_write_tokens": m.get("cache_creation_tokens"),
                "cache_read_tokens": m.get("cache_read_tokens"), "output_tokens": m.get("output_tokens"),
                "price_weighted": price_weighted(m), "wall_s": m.get("wall_s"), "model": m.get("model"),
-               "claude_version": version, "rate_limit": m.get("rate_limit"), "fake": a.fake,
-               **pack_summary(cur / "work")}
+               "claude_version": version, "rate_limit": m.get("rate_limit"), "deps_changed": changed_deps,
+               "fake": a.fake, **pack_summary(cur / "work")}
         run_id = f"replay_{a.repo}_{a.family}_s{s['n']}"
         raw = results / "raw" / run_id
         W.rmtree(raw)
@@ -424,6 +451,8 @@ def cmd_replay(a) -> int:
         W.rmtree(root / "runs" / run_id)
         (root / "runs").mkdir(parents=True, exist_ok=True)
         os.replace(cur, root / "runs" / run_id)
+        if changed_deps:        # the next session's work_copy() installs it fresh
+            W.rmtree(deps_dir)
         print(f"replay {a.repo} {a.family} session {s['n']}: exit {row['exit_code']} turns={row['turns']}"
               f"{' HARNESS: ' + row['harness_failure'] if row['harness_failure'] else ''}", flush=True)
     return 0

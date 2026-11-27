@@ -1,7 +1,8 @@
 """The gate experiment's runner (evals/gate/run.py) with the stand-in claude (evals/gate/fake_claude.py): no model, no
 network. A tiny local repository stands in for the real ones. Checks the pre-registered run counts, that a dry run
 of 2 tasks x 2 arms writes complete lines, that a run writes nothing outside its own folder, the oracle arm, the
-DevMem arm's pack log, the harness-failure rules and the freeze."""
+DevMem arm's pack log, the harness-failure rules, the freeze, and that a run which writes into a shared Node install
+says so (deps_changed) and has that install dropped."""
 from __future__ import annotations
 
 import json
@@ -111,6 +112,7 @@ def test_dry_run_two_tasks_two_arms_writes_complete_lines(gate):
     for r in rows:
         assert all(r.get(k) is not None for k in COMPLETE), {k: r.get(k) for k in COMPLETE}
         assert r["harness_failure"] is None and r["fake"] and not r["frozen"]
+        assert r["deps_changed"] is None                    # a python repository: no shared node_modules
         assert r["cache_write_5m"] == 40 and r["cache_write_1h"] == 10
         assert r["price_weighted"] == 100 + 1.25 * 40 + 2 * 10 + 0.1 * 200 + 5 * 30
         assert (gate["results"] / "raw" / r["run_id"] / "stream.jsonl").is_file()
@@ -181,6 +183,75 @@ def test_a_grader_timeout_is_a_harness_failure(gate, monkeypatch):
     # it is run once more
     assert _run(gate, "--stage", "gt", "--arms", "S", "--tasks", "R01", "--repeats", "1", "--confirm", "1") == 0
     assert [r["attempt"] for r in _rows(gate, "gt")] == [1, 2]
+
+
+def _node_install(gate) -> Path:
+    """Make the mini repository a Node one, with its shared install already in place (so no npm runs)."""
+    repo = W.TASKS / "mini"
+    cfg = json.loads((repo / "repo.json").read_text(encoding="utf-8"))
+    cfg["deps"] = {"kind": "node", "lock": "package-lock.json"}
+    (repo / "repo.json").write_text(json.dumps(cfg), encoding="utf-8")
+    (repo / "package-lock.json").write_text('{"lockfileVersion": 3}\n', encoding="utf-8")
+    d = W.deps_path(W.load_repo("mini"), gate["root"])
+    (d / "node_modules" / "vitest").mkdir(parents=True)
+    (d / "node_modules" / "vitest" / "package.json").write_text("{}\n", encoding="utf-8")
+    (d / "node_modules" / ".package-lock.json").write_text('{"lockfileVersion": 3}\n', encoding="utf-8")
+    (d / ".installed").write_text("ok\n", encoding="utf-8")
+    assert W.deps(W.load_repo("mini"), gate["root"]) == d
+    return d
+
+
+def test_deps_fingerprint_sees_top_level_names_and_the_lock(tmp_path):
+    nm = tmp_path / "node_modules"
+    (nm / "vitest").mkdir(parents=True)
+    (nm / ".package-lock.json").write_text("{}\n", encoding="utf-8")
+    first = W.deps_fingerprint(tmp_path)
+    assert W.deps_fingerprint(tmp_path) == first
+    (nm / "vitest" / "cache.json").write_text("{}\n", encoding="utf-8")   # cheap: inside a package is not looked at
+    assert W.deps_fingerprint(tmp_path) == first
+    for name in (".vite", ".vitest", ".cache"):                            # dot-entries count
+        (nm / name).mkdir()
+        assert W.deps_fingerprint(tmp_path) != first
+        (nm / name).rmdir()
+        assert W.deps_fingerprint(tmp_path) == first
+    (nm / ".package-lock.json").write_text('{"packages": {"left-pad": {}}}\n', encoding="utf-8")
+    assert W.deps_fingerprint(tmp_path) != first
+    W.rmtree(nm)
+    assert W.deps_fingerprint(tmp_path) == "no node_modules"
+
+
+def test_an_untouched_node_install_is_kept(gate):
+    d = _node_install(gate)
+    assert _run(gate, "--stage", "nd", "--arms", "S", "--tasks", "R01", "--repeats", "1", "--confirm", "1") == 0
+    row = _rows(gate, "nd")[0]
+    assert row["deps_changed"] is False and row["passed"]
+    diff = (gate["results"] / "raw" / row["run_id"] / "diff.patch").read_text(encoding="utf-8")
+    assert "answer.txt" in diff and "node_modules" not in diff     # the link is left out of the run's diff
+    assert (d / ".installed").is_file() and (d / "node_modules" / "vitest" / "package.json").is_file()
+
+
+@pytest.mark.parametrize("write", ["new top-level entry", "lock changed"])
+def test_a_run_that_writes_into_the_shared_install_keeps_its_result_and_the_install_is_dropped(gate, monkeypatch,
+                                                                                              write):
+    d = _node_install(gate)
+    real = R.run_session
+
+    def session_that_installs(cmd, prompt, cur, env, max_turns):
+        m = real(cmd, prompt, cur, env, max_turns)
+        nm = cur / "work" / "node_modules"          # the working copy's link to the shared install
+        if write == "new top-level entry":
+            (nm / ".vite").mkdir()
+        else:
+            (nm / ".package-lock.json").write_text('{"packages": {"left-pad": {}}}\n', encoding="utf-8")
+        return m
+
+    monkeypatch.setattr(R, "run_session", session_that_installs)
+    assert _run(gate, "--stage", "nd", "--arms", "S", "--tasks", "R01", "--repeats", "1", "--confirm", "1") == 0
+    row = _rows(gate, "nd")[0]
+    assert row["deps_changed"] is True
+    assert row["passed"] and row["harness_failure"] is None       # the agent's own doing: not a harness failure
+    assert not d.exists()                                          # deps() installs it fresh before the next run
+    assert (gate["results"] / "raw" / row["run_id"] / "row.json").is_file()
 
 
 def test_confirm_must_match(gate):

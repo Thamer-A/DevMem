@@ -124,19 +124,39 @@ def source(cfg: dict, root: Path) -> Path:
     return dest
 
 
+def _lock_file(cfg: dict, src: Path) -> Path:
+    # A repository that ships no npm lock file (bonsai-js has only bun.lock) names one kept with its tasks
+    # (`"deps": {"kind": "node", "lock": "package-lock.json"}`, made once from its package.json), frozen with them.
+    spec = cfg["deps"]
+    return cfg["dir"] / spec["lock"] if spec.get("lock") else src / "package-lock.json"
+
+
+def deps_path(cfg: dict, root: Path) -> Path:
+    """Where deps() installs the repository's dependencies (nothing is installed here)."""
+    spec = cfg["deps"]
+    lock = _lock_file(cfg, source(cfg, root)).read_bytes() if spec["kind"] == "node" else b""
+    return root / "deps" / f"{cfg['name']}-{cfg['commit'][:12]}-{_digest(json.dumps(spec, sort_keys=True).encode(), lock)}"
+
+
+def deps_fingerprint(deps_dir: Path) -> str:
+    """A cheap fingerprint of a shared Node install, to see whether a run wrote into it through its working copy's
+    `node_modules` link (an agent's `npm install`, a tool's cache): the sorted top-level names of node_modules,
+    dot-entries included (.vite, .vitest, .cache, .package-lock.json), and the SHA-256 of
+    node_modules/.package-lock.json."""
+    nm = Path(deps_dir) / "node_modules"
+    if not nm.is_dir():
+        return "no node_modules"
+    lock = nm / ".package-lock.json"
+    lock_hash = hashlib.sha256(lock.read_bytes()).hexdigest() if lock.is_file() else None
+    return hashlib.sha256(json.dumps([sorted(os.listdir(nm)), lock_hash]).encode("utf-8")).hexdigest()
+
+
 def deps(cfg: dict, root: Path) -> Path:
     """The repository's dependencies, installed once outside every working copy."""
     spec = cfg["deps"]
     src = source(cfg, root)
-    lock = b""
-    lock_file = src / "package-lock.json"
-    if spec["kind"] == "node":
-        # A repository that ships no npm lock file (bonsai-js has only bun.lock) names one kept with its tasks
-        # (`"deps": {"kind": "node", "lock": "package-lock.json"}`, made once from its package.json), frozen with them.
-        if spec.get("lock"):
-            lock_file = cfg["dir"] / spec["lock"]
-        lock = lock_file.read_bytes()
-    dest = root / "deps" / f"{cfg['name']}-{cfg['commit'][:12]}-{_digest(json.dumps(spec, sort_keys=True).encode(), lock)}"
+    lock_file = _lock_file(cfg, src)
+    dest = deps_path(cfg, root)
     done = dest / ".installed"
     if done.exists():
         return dest
