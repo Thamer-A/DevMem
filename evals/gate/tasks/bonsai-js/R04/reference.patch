@@ -1,0 +1,89 @@
+diff --git a/README.md b/README.md
+index d08feeb..5b173af 100644
+--- a/README.md
++++ b/README.md
+@@ -212,7 +212,7 @@ All callable as `f(x, ...)` or `x.f(...)`.
+ | Area | Functions |
+ |---|---|
+ | Text | `toUpperCase` `toLowerCase` `capitalize` `trim` `trimStart` `trimEnd` `startsWith` `endsWith` `includes` `indexOf` `lastIndexOf` `slice` `split` `replace` `replaceAll` `padStart` `padEnd` `repeat` `at` `matches` `toString` `toNumber` |
+-| Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `compact` `flat` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
++| Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `compact` `flat` `chunk` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
+ | Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `min` `max` `sum` `avg` |
+ | Maps and values | `keys` `values` `entries` `isEmpty` `type` `toString` |
+ | Time | `now` `timestamp` `duration` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `inDays` `inHours` `inMinutes` `inSeconds` `inMilliseconds` `year` `month` `day` `hour` `minute` `second` `dayOfWeek` `daysInMonth` `startOfDay` `startOfMonth` `startOfYear` `addDays` `addMonths` `addYears` `formatDate` |
+diff --git a/src/builtins/index.ts b/src/builtins/index.ts
+index 00fc8ca..457bdbd 100644
+--- a/src/builtins/index.ts
++++ b/src/builtins/index.ts
+@@ -68,6 +68,7 @@ export const reverse = defs.reverse as unknown as Builtin
+ export const unique = defs.unique as unknown as Builtin
+ export const compact = defs.compact as unknown as Builtin
+ export const flat = defs.flat as unknown as Builtin
++export const chunk = defs.chunk as unknown as Builtin
+ export const first = defs.first as unknown as Builtin
+ export const last = defs.last as unknown as Builtin
+ export const join = defs.join as unknown as Builtin
+diff --git a/src/functions/builtins.ts b/src/functions/builtins.ts
+index e60406b..b85b0aa 100644
+--- a/src/functions/builtins.ts
++++ b/src/functions/builtins.ts
+@@ -1531,6 +1531,20 @@ export const flat: FunctionDef = /* @__PURE__ */ define('flat', [
+   ),
+ ])
+ 
++export const chunk: FunctionDef = /* @__PURE__ */ define('chunk', [
++  /* @__PURE__ */ overload([listT, num], /* @__PURE__ */ t.list(listT), ([l, n], site) => {
++    const items = list(l)
++    const size = integer(n, 'Size', site)
++    if (size <= 0) throw site.state.error('INVALID_ARGUMENT', 'Size must be at least 1', site.span)
++    site.state.charge(items.length)
++    const count = Math.ceil(items.length / size)
++    const out = newList(count, site)
++    for (let i = 0; i < count; i++)
++      out[i] = made(copyOf(items, i * size, Math.min(items.length, (i + 1) * size)), site)
++    return made(out, site)
++  }),
++])
++
+ export const first: FunctionDef = /* @__PURE__ */ define('first', [
+   /* @__PURE__ */ overload([listT], optT, ([l]) => list(l)[0] ?? null),
+ ])
+@@ -1920,6 +1934,7 @@ export const BUILTINS: ReadonlyMap<string, FunctionDef> = /* @__PURE__ */ (() =>
+       unique,
+       compact,
+       flat,
++      chunk,
+       first,
+       last,
+       join,
+diff --git a/src/functions/descriptions.ts b/src/functions/descriptions.ts
+index 413fa58..332b4b7 100644
+--- a/src/functions/descriptions.ts
++++ b/src/functions/descriptions.ts
+@@ -114,6 +114,8 @@ const TEXTS: readonly string[] = [
+   'The items that are not null, in order.',
+   // flat
+   'Flattens nested lists one level.',
++  // chunk
++  'Splits a list into lists of a given size; the last one may be shorter.',
+   // first
+   'The first item, or null.',
+   // last
+diff --git a/tests/builtins.test.ts b/tests/builtins.test.ts
+index 7776954..43bd847 100644
+--- a/tests/builtins.test.ts
++++ b/tests/builtins.test.ts
+@@ -782,3 +782,13 @@ describe('time functions', () => {
+     )
+   })
+ })
++
++describe('chunk', () => {
++  it('splits a list into lists of a size', async () => {
++    expect(await ok('chunk([1, 2, 3, 4, 5], 2)')).toEqual([[1, 2], [3, 4], [5]])
++    expect(await ok('[1, 2, 3].chunk(3)')).toEqual([[1, 2, 3]])
++    expect(await ok('chunk([], 2)')).toEqual([])
++    expect(await fails('chunk([1], n)', { n: 0 })).toBe('INVALID_ARGUMENT')
++    expect(await fails('chunk([1], n)', { n: 1.5 })).toBe('INVALID_ARGUMENT')
++  })
++})

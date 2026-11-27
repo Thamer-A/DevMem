@@ -1,0 +1,10 @@
+{
+  "id": "H05",
+  "repo": "bonsai-js",
+  "kind": "history",
+  "prompt": "We want to name people in sentences, for example the people assigned to a ticket. Please add formatList(list, locale?) that joins a list of text items the way a sentence would, using Intl.ListFormat, with an optional locale like formatNumber has. Wire it up and add tests like the other formatting functions.",
+  "requirement": "R5",
+  "oracle": "Any new formatting function we add should default to the en-GB locale, even though formatNumber and formatCurrency keep en-US.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

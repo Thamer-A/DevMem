@@ -1,0 +1,10 @@
+{
+  "id": "R02",
+  "repo": "bonsai-js",
+  "kind": "ordinary",
+  "prompt": "reverse() only works on lists. Please let it reverse text too, so \"abc\".reverse() is \"cba\". Characters outside the Basic Multilingual Plane, such as emoji, must come out intact, not as broken halves. Update its description and add tests.",
+  "requirement": null,
+  "oracle": null,
+  "max_turns": 30,
+  "timeout_s": 300
+}

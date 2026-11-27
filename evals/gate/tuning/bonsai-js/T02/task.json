@@ -1,0 +1,10 @@
+{
+  "id": "T02",
+  "repo": "bonsai-js",
+  "kind": "tuning",
+  "prompt": "Attachment sizes in our templates are shown as raw byte counts. Please add formatBytes(bytes) that turns a byte count into a size people can read, wire it up like the other built-ins and add tests.",
+  "requirement": "R10",
+  "oracle": "When we show file sizes, use 1,024-based units written B, KiB, MiB and GiB, with one decimal place above bytes, like 1.5 KiB.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

@@ -1,0 +1,130 @@
+diff --git a/README.md b/README.md
+index d08feeb..3ecaede 100644
+--- a/README.md
++++ b/README.md
+@@ -213,7 +213,7 @@ All callable as `f(x, ...)` or `x.f(...)`.
+ |---|---|
+ | Text | `toUpperCase` `toLowerCase` `capitalize` `trim` `trimStart` `trimEnd` `startsWith` `endsWith` `includes` `indexOf` `lastIndexOf` `slice` `split` `replace` `replaceAll` `padStart` `padEnd` `repeat` `at` `matches` `toString` `toNumber` |
+ | Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `compact` `flat` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
+-| Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `min` `max` `sum` `avg` |
++| Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `formatList` `min` `max` `sum` `avg` |
+ | Maps and values | `keys` `values` `entries` `isEmpty` `type` `toString` |
+ | Time | `now` `timestamp` `duration` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `inDays` `inHours` `inMinutes` `inSeconds` `inMilliseconds` `year` `month` `day` `hour` `minute` `second` `dayOfWeek` `daysInMonth` `startOfDay` `startOfMonth` `startOfYear` `addDays` `addMonths` `addYears` `formatDate` |
+ 
+diff --git a/src/builtins/index.ts b/src/builtins/index.ts
+index 00fc8ca..29a8a91 100644
+--- a/src/builtins/index.ts
++++ b/src/builtins/index.ts
+@@ -47,6 +47,7 @@ export const clamp = defs.clamp as unknown as Builtin
+ export const toFixed = defs.toFixed as unknown as Builtin
+ export const formatNumber = defs.formatNumber as unknown as Builtin
+ export const formatCurrency = defs.formatCurrency as unknown as Builtin
++export const formatList = defs.formatList as unknown as Builtin
+ export const min = defs.min as unknown as Builtin
+ export const max = defs.max as unknown as Builtin
+ export const sum = defs.sum as unknown as Builtin
+diff --git a/src/functions/builtins.ts b/src/functions/builtins.ts
+index e60406b..3d57829 100644
+--- a/src/functions/builtins.ts
++++ b/src/functions/builtins.ts
+@@ -1189,6 +1189,60 @@ export const formatCurrency: FunctionDef = /* @__PURE__ */ define('formatCurrenc
+   ),
+ ])
+ 
++/** Joins text items as a sentence would, with Intl.ListFormat. */
++function listText(l: unknown, locale: unknown, defaultLocale: string, site: CallSite): string {
++  const items = list(l)
++  site.state.charge(items.length)
++  const parts: string[] = []
++  let length = 0
++  // oxlint-disable-next-line typescript/prefer-for-of -- indexing never runs a host list's iterator
++  for (let i = 0; i < items.length; i++) {
++    const item = items[i]
++    if (typeof item !== 'string') {
++      throw site.state.error(
++        'TYPE_ERROR',
++        `formatList takes a list of text, not one holding ${describeKind(item)}`,
++        site.span,
++      )
++    }
++    length += item.length + 2
++    parts.push(item)
++  }
++  site.state.stringLimit(length, site.span)
++  const tag = typeof locale === 'string' ? locale : defaultLocale
++  if (tag.length > MAX_LOCALE_LENGTH) {
++    throw site.state.error(
++      'INVALID_ARGUMENT',
++      `Locale tags are at most ${MAX_LOCALE_LENGTH} characters long`,
++      site.span,
++    )
++  }
++  const format = site.state.resource(`l${tag}`, NUMBER_FORMAT_COST, () => {
++    let supported: string[]
++    let created: Intl.ListFormat
++    try {
++      supported = Intl.ListFormat.supportedLocalesOf(tag)
++      created = new Intl.ListFormat(tag, { type: 'conjunction', style: 'long' })
++    } catch (error) {
++      throw site.state.error('INVALID_ARGUMENT', `Invalid locale: ${errorText(error)}`, site.span)
++    }
++    if (supported.length === 0)
++      throw site.state.error('INVALID_ARGUMENT', `Unsupported locale ${shown(tag)}`, site.span)
++    return created
++  })
++  site.state.charge(FORMAT_COST + (length >>> SCAN_SHIFT))
++  return format.format(parts)
++}
++
++export const formatList: FunctionDef = /* @__PURE__ */ define('formatList', [
++  /* @__PURE__ */ overload(
++    [/* @__PURE__ */ t.list(str), /* @__PURE__ */ t.optional(str)],
++    str,
++    ([l, locale], site) => listText(l, locale, 'en-US', site),
++    { required: 1 },
++  ),
++])
++
+ export const min: FunctionDef = /* @__PURE__ */ define('min', /* @__PURE__ */ extremes(-1))
+ 
+ export const max: FunctionDef = /* @__PURE__ */ define('max', /* @__PURE__ */ extremes(1))
+@@ -1899,6 +1953,7 @@ export const BUILTINS: ReadonlyMap<string, FunctionDef> = /* @__PURE__ */ (() =>
+       toFixed,
+       formatNumber,
+       formatCurrency,
++      formatList,
+       min,
+       max,
+       sum,
+diff --git a/src/functions/descriptions.ts b/src/functions/descriptions.ts
+index 413fa58..1be7330 100644
+--- a/src/functions/descriptions.ts
++++ b/src/functions/descriptions.ts
+@@ -72,6 +72,8 @@ const TEXTS: readonly string[] = [
+   'Formats a number with grouping, e.g. 1,234.5, with optional decimals and locale (default "en-US"; an unsupported locale is an error).',
+   // formatCurrency
+   'Formats an amount in a currency (ISO 4217 code such as "EUR"; a code without a known symbol prints as the code), with an optional locale (default "en-US"; an unsupported locale is an error).',
++  // formatList
++  'Joins a list of text as a sentence would ("a, b, and c"), in a locale (default en-US).',
+   // min
+   'The smallest value (nulls are skipped); null for an empty list.',
+   // max
+diff --git a/tests/builtins.test.ts b/tests/builtins.test.ts
+index 7776954..9f2e04f 100644
+--- a/tests/builtins.test.ts
++++ b/tests/builtins.test.ts
+@@ -782,3 +782,14 @@ describe('time functions', () => {
+     )
+   })
+ })
++
++describe('formatList', () => {
++  it('joins text as a sentence would', async () => {
++    expect(await ok('formatList(["Ann", "Bob", "Cy"])')).toBe('Ann, Bob, and Cy')
++    expect(await ok('["Ann", "Bob"].formatList()')).toBe('Ann and Bob')
++    expect(await ok('formatList(["Ann"])')).toBe('Ann')
++    expect(await ok('formatList([])')).toBe('')
++    expect(await ok('formatList(["Ann", "Bob", "Cy"], "de-DE")')).toBe('Ann, Bob und Cy')
++    expect(await fails('formatList(xs)', { xs: ['a', 1] })).toBe('TYPE_ERROR')
++  })
++})

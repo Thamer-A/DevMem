@@ -1,0 +1,87 @@
+diff --git a/README.md b/README.md
+index d08feeb..eccbfd8 100644
+--- a/README.md
++++ b/README.md
+@@ -211,7 +211,7 @@ All callable as `f(x, ...)` or `x.f(...)`.
+ 
+ | Area | Functions |
+ |---|---|
+-| Text | `toUpperCase` `toLowerCase` `capitalize` `trim` `trimStart` `trimEnd` `startsWith` `endsWith` `includes` `indexOf` `lastIndexOf` `slice` `split` `replace` `replaceAll` `padStart` `padEnd` `repeat` `at` `matches` `toString` `toNumber` |
++| Text | `toUpperCase` `toLowerCase` `capitalize` `titleCase` `trim` `trimStart` `trimEnd` `startsWith` `endsWith` `includes` `indexOf` `lastIndexOf` `slice` `split` `replace` `replaceAll` `padStart` `padEnd` `repeat` `at` `matches` `toString` `toNumber` |
+ | Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `compact` `flat` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
+ | Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `min` `max` `sum` `avg` |
+ | Maps and values | `keys` `values` `entries` `isEmpty` `type` `toString` |
+diff --git a/src/builtins/index.ts b/src/builtins/index.ts
+index 00fc8ca..af87e7d 100644
+--- a/src/builtins/index.ts
++++ b/src/builtins/index.ts
+@@ -18,6 +18,7 @@ import * as defs from '../functions/builtins.js'
+ export const toUpperCase = defs.toUpperCase as unknown as Builtin
+ export const toLowerCase = defs.toLowerCase as unknown as Builtin
+ export const capitalize = defs.capitalize as unknown as Builtin
++export const titleCase = defs.titleCase as unknown as Builtin
+ export const trim = defs.trim as unknown as Builtin
+ export const trimStart = defs.trimStart as unknown as Builtin
+ export const trimEnd = defs.trimEnd as unknown as Builtin
+diff --git a/src/functions/builtins.ts b/src/functions/builtins.ts
+index e60406b..ade5b6e 100644
+--- a/src/functions/builtins.ts
++++ b/src/functions/builtins.ts
+@@ -866,6 +866,18 @@ export const capitalize: FunctionDef = /* @__PURE__ */ define('capitalize', [
+   }),
+ ])
+ 
++export const titleCase: FunctionDef = /* @__PURE__ */ define('titleCase', [
++  /* @__PURE__ */ overload([str], str, ([s], site) => {
++    const text = s as string
++    site.state.charge(1 + (text.length >>> SCAN_SHIFT))
++    return text.replace(/\S+/gu, (word) => {
++      const lower = word.toLowerCase()
++      const head = String.fromCodePoint(lower.codePointAt(0) as number)
++      return head.toUpperCase() + lower.slice(head.length)
++    })
++  }),
++])
++
+ export const trim: FunctionDef = /* @__PURE__ */ define('trim', [
+   /* @__PURE__ */ overload([str], str, ([s]) => (s as string).trim()),
+ ])
+@@ -1870,6 +1882,7 @@ export const BUILTINS: ReadonlyMap<string, FunctionDef> = /* @__PURE__ */ (() =>
+       toUpperCase,
+       toLowerCase,
+       capitalize,
++      titleCase,
+       trim,
+       trimStart,
+       trimEnd,
+diff --git a/src/functions/descriptions.ts b/src/functions/descriptions.ts
+index 413fa58..0de704b 100644
+--- a/src/functions/descriptions.ts
++++ b/src/functions/descriptions.ts
+@@ -14,6 +14,8 @@ const TEXTS: readonly string[] = [
+   'Lower-cases text.',
+   // capitalize
+   'Upper-cases the first character of text and leaves the rest unchanged.',
++  // titleCase
++  'Upper-cases the first letter of each word and lower-cases the rest.',
+   // trim
+   'Removes leading and trailing whitespace.',
+   // trimStart
+diff --git a/tests/builtins.test.ts b/tests/builtins.test.ts
+index 7776954..8c85a3e 100644
+--- a/tests/builtins.test.ts
++++ b/tests/builtins.test.ts
+@@ -782,3 +782,13 @@ describe('time functions', () => {
+     )
+   })
+ })
++
++describe('titleCase', () => {
++  it('writes text in title case', async () => {
++    expect(await ok('titleCase("hello world")')).toBe('Hello World')
++    expect(await ok('"the LORD".titleCase()')).toBe('The Lord')
++    expect(await ok('titleCase("  two  spaces ")')).toBe('  Two  Spaces ')
++    expect(await ok('titleCase("")')).toBe('')
++    expect(await fails('titleCase(x)', { x: 1 })).toBe('NO_OVERLOAD')
++  })
++})

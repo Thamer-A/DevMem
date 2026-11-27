@@ -1,0 +1,10 @@
+{
+  "id": "R03",
+  "repo": "bonsai-js",
+  "kind": "ordinary",
+  "prompt": "Please add zip(a, b) that pairs up the items of two lists by position, so zip([1, 2, 3], [\"a\", \"b\", \"c\"]) is [[1, \"a\"], [2, \"b\"], [3, \"c\"]]. When the lists differ in length it stops at the end of the shorter one. Wire it up like the other list functions and add tests.",
+  "requirement": null,
+  "oracle": null,
+  "max_turns": 30,
+  "timeout_s": 300
+}

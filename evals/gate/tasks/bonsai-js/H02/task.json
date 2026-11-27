@@ -1,0 +1,10 @@
+{
+  "id": "H02",
+  "repo": "bonsai-js",
+  "kind": "history",
+  "prompt": "The finance team wants to write rules per quarter. Please add quarter(timestamp, zone?) next to month() and year(), reading the date in the given time zone the same way (UTC by default), and test it like the other calendar functions.",
+  "requirement": "R2",
+  "oracle": "When we add quarter(), our financial year starts on 1 April, so April to June is quarter 1 and January to March is quarter 4.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

@@ -1,0 +1,86 @@
+{
+  "sessions": [
+    {
+      "n": 1,
+      "prompt": "Our admins keep writing name.slice(0, 1).toUpperCase() + name.slice(1) in their templates. Please add a capitalize built-in that upper-cases the first character of a text and leaves the rest alone, so \"mcDonald\" becomes \"McDonald\" and an empty string stays empty. Wire it up everywhere the other text functions are listed (the descriptions, bonsai-js/builtins and the README table) and add tests. Two decisions about text functions we'll add later, so nobody has to ask me again. When we add titleCase, keep a, an, the, and, but, or, nor, of, in, on, at, to, for and by in lower case unless they are the first word. When we add a mask function for card and account numbers, every character except the last four becomes •, and spaces and dashes stay as they are.",
+      "patch": "01.patch",
+      "requirements": [
+        {
+          "id": "R1",
+          "text": "When we add titleCase, keep a, an, the, and, but, or, nor, of, in, on, at, to, for and by in lower case unless they are the first word."
+        },
+        {
+          "id": "R4",
+          "text": "When we add a mask function for card and account numbers, every character except the last four becomes •, and spaces and dashes stay as they are."
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "prompt": "People want to clamp durations as well as numbers, for example clamp(waited, minutes(5), hours(2)), and today that fails. Please add a duration overload to clamp, with the same error when min is greater than max, update its description and add tests. And two things about number functions we'll add later. When we add between, the low end counts and the high end does not, so between(10, 0, 10) is false and between(0, 0, 10) is true. Any new rounding function we add should round halves to the even neighbour (banker's rounding); round() itself stays as it is.",
+      "patch": "02.patch",
+      "requirements": [
+        {
+          "id": "R3",
+          "text": "When we add between, the low end counts and the high end does not, so between(10, 0, 10) is false and between(0, 0, 10) is true."
+        },
+        {
+          "id": "R7",
+          "text": "Any new rounding function we add should round halves to the even neighbour (banker's rounding); round() itself stays as it is."
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "prompt": "Finance rules need to know how long a month is. Please add daysInMonth(timestamp, zone?) that returns 28 to 31 for the month the timestamp falls in, read in the given time zone the way month() is (UTC by default), and add tests that cover a leap year and a time zone where the month differs from UTC. Two things for the time functions still to come. When we add quarter(), our financial year starts on 1 April, so April to June is quarter 1 and January to March is quarter 4. For anything new about weeks, our weeks run from Sunday to Saturday, not Monday to Sunday; dayOfWeek() stays as it is.",
+      "patch": "03.patch",
+      "requirements": [
+        {
+          "id": "R2",
+          "text": "When we add quarter(), our financial year starts on 1 April, so April to June is quarter 1 and January to March is quarter 4."
+        },
+        {
+          "id": "R9",
+          "text": "For anything new about weeks, our weeks run from Sunday to Saturday, not Monday to Sunday; dayOfWeek() stays as it is."
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "prompt": "Lists coming from our forms are full of nulls for the fields people left empty. Please add compact(list), which drops the null items and keeps everything else in order (false, 0 and empty strings stay), typed so that compacting a list of optional strings gives a list of strings. The usual places: descriptions, bonsai-js/builtins, the README table, and tests. Two decisions for formatting functions we'll add. Any new formatting function we add should default to the en-GB locale, even though formatNumber and formatCurrency keep en-US. When we add formatDuration, show only the two largest non-zero units, written like 2d 3h or 5m 12s, and drop the rest without rounding.",
+      "patch": "04.patch",
+      "requirements": [
+        {
+          "id": "R5",
+          "text": "Any new formatting function we add should default to the en-GB locale, even though formatNumber and formatCurrency keep en-US."
+        },
+        {
+          "id": "R6",
+          "text": "When we add formatDuration, show only the two largest non-zero units, written like 2d 3h or 5m 12s, and drop the rest without rounding."
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "prompt": "listFunctions() only reports a cost for host functions that declare one, so our rule editor can't show what the others cost. Please report the cost of every host function, using the default of 32 steps when it doesn't declare one, and leave cost out for built-ins. Keep the default in one place so the compiler and the listing can't disagree, update the FunctionInfo docs and add a test. One thing for later. When async host functions get their own default cost, it should be 250 steps, because nearly all of ours call other services over the network.",
+      "patch": "05.patch",
+      "requirements": [
+        {
+          "id": "R8",
+          "text": "When async host functions get their own default cost, it should be 250 steps, because nearly all of ours call other services over the network."
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "prompt": "Our visual rule builder prints rules with print(), but the people who edit them afterwards are used to single quotes. Please add a quotes option to print(), 'double' (the default, as today) or 'single', that escapes only the quote it uses, and reject any other value with a TypeError like the calls option does. Document it on the printer page and add tests, including a round trip. Unrelated, but before I forget. When we show file sizes, use 1,024-based units written B, KiB, MiB and GiB, with one decimal place above bytes, like 1.5 KiB.",
+      "patch": "06.patch",
+      "requirements": [
+        {
+          "id": "R10",
+          "text": "When we show file sizes, use 1,024-based units written B, KiB, MiB and GiB, with one decimal place above bytes, like 1.5 KiB."
+        }
+      ]
+    }
+  ]
+}

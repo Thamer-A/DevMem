@@ -1,0 +1,10 @@
+{
+  "id": "H06",
+  "repo": "bonsai-js",
+  "kind": "history",
+  "prompt": "Notification templates should say how long something took, for example how long a ticket waited for a reply. Please add formatDuration(duration) that turns a duration into short text people can read, wire it up like the other built-ins and add tests.",
+  "requirement": "R6",
+  "oracle": "When we add formatDuration, show only the two largest non-zero units, written like 2d 3h or 5m 12s, and drop the rest without rounding.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

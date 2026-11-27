@@ -1,0 +1,10 @@
+{
+  "id": "T03",
+  "repo": "bonsai-js",
+  "kind": "tuning",
+  "prompt": "Support wants a rule for tickets answered in the same week they were opened. Please add sameWeek(a, b, zone?) that says whether two timestamps fall in the same calendar week in the given time zone (UTC by default). Wire it up like the other time functions and add tests.",
+  "requirement": "R9",
+  "oracle": "For anything new about weeks, our weeks run from Sunday to Saturday, not Monday to Sunday; dayOfWeek() stays as it is.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

@@ -1,0 +1,83 @@
+diff --git a/README.md b/README.md
+index d08feeb..6d72313 100644
+--- a/README.md
++++ b/README.md
+@@ -211,7 +211,7 @@ All callable as `f(x, ...)` or `x.f(...)`.
+ 
+ | Area | Functions |
+ |---|---|
+-| Text | `toUpperCase` `toLowerCase` `capitalize` `trim` `trimStart` `trimEnd` `startsWith` `endsWith` `includes` `indexOf` `lastIndexOf` `slice` `split` `replace` `replaceAll` `padStart` `padEnd` `repeat` `at` `matches` `toString` `toNumber` |
++| Text | `toUpperCase` `toLowerCase` `capitalize` `trim` `trimStart` `trimEnd` `startsWith` `endsWith` `includes` `indexOf` `lastIndexOf` `slice` `split` `words` `replace` `replaceAll` `padStart` `padEnd` `repeat` `at` `matches` `toString` `toNumber` |
+ | Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `compact` `flat` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
+ | Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `min` `max` `sum` `avg` |
+ | Maps and values | `keys` `values` `entries` `isEmpty` `type` `toString` |
+diff --git a/src/builtins/index.ts b/src/builtins/index.ts
+index 00fc8ca..75ef528 100644
+--- a/src/builtins/index.ts
++++ b/src/builtins/index.ts
+@@ -28,6 +28,7 @@ export const indexOf = defs.indexOf as unknown as Builtin
+ export const lastIndexOf = defs.lastIndexOf as unknown as Builtin
+ export const slice = defs.slice as unknown as Builtin
+ export const split = defs.split as unknown as Builtin
++export const words = defs.words as unknown as Builtin
+ export const replace = defs.replace as unknown as Builtin
+ export const replaceAll = defs.replaceAll as unknown as Builtin
+ export const padStart = defs.padStart as unknown as Builtin
+diff --git a/src/functions/builtins.ts b/src/functions/builtins.ts
+index e60406b..3213849 100644
+--- a/src/functions/builtins.ts
++++ b/src/functions/builtins.ts
+@@ -974,6 +974,17 @@ export const split: FunctionDef = /* @__PURE__ */ define('split', [
+   ),
+ ])
+ 
++export const words: FunctionDef = /* @__PURE__ */ define('words', [
++  /* @__PURE__ */ overload([str], /* @__PURE__ */ t.list(str), ([s], site) => {
++    const text = (s as string).trim()
++    site.state.charge(1 + (text.length >>> SCAN_SHIFT))
++    const parts = text.split(/\s+/u)
++    site.state.listLimit(parts.length, site.span)
++    site.state.charge(parts.length)
++    return parts
++  }),
++])
++
+ export const replace: FunctionDef = /* @__PURE__ */ define('replace', [
+   /* @__PURE__ */ overload([str, str, str], str, ([s, f, r], site) =>
+     replaceText(s as string, f as string, r as string, false, site),
+@@ -1880,6 +1891,7 @@ export const BUILTINS: ReadonlyMap<string, FunctionDef> = /* @__PURE__ */ (() =>
+       lastIndexOf,
+       slice,
+       split,
++      words,
+       replace,
+       replaceAll,
+       padStart,
+diff --git a/src/functions/descriptions.ts b/src/functions/descriptions.ts
+index 413fa58..8512c8f 100644
+--- a/src/functions/descriptions.ts
++++ b/src/functions/descriptions.ts
+@@ -34,6 +34,8 @@ const TEXTS: readonly string[] = [
+   'A section of text or a list; negative positions count from the end.',
+   // split
+   'Splits text on a separator.',
++  // words
++  'Splits text into words at runs of whitespace.',
+   // replace
+   'Replaces the first occurrence of some text (no patterns).',
+   // replaceAll
+diff --git a/tests/builtins.test.ts b/tests/builtins.test.ts
+index 7776954..0b66f9e 100644
+--- a/tests/builtins.test.ts
++++ b/tests/builtins.test.ts
+@@ -782,3 +782,10 @@ describe('time functions', () => {
+     )
+   })
+ })
++
++describe('words', () => {
++  it('splits text at runs of whitespace', async () => {
++    expect(await ok('words("  a  b\\tc\\nd ")')).toEqual(['a', 'b', 'c', 'd'])
++    expect(await ok('"one".words()')).toEqual(['one'])
++  })
++})

@@ -1,0 +1,96 @@
+diff --git a/README.md b/README.md
+index d08feeb..91f700b 100644
+--- a/README.md
++++ b/README.md
+@@ -215,7 +215,7 @@ All callable as `f(x, ...)` or `x.f(...)`.
+ | Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `compact` `flat` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
+ | Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `min` `max` `sum` `avg` |
+ | Maps and values | `keys` `values` `entries` `isEmpty` `type` `toString` |
+-| Time | `now` `timestamp` `duration` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `inDays` `inHours` `inMinutes` `inSeconds` `inMilliseconds` `year` `month` `day` `hour` `minute` `second` `dayOfWeek` `daysInMonth` `startOfDay` `startOfMonth` `startOfYear` `addDays` `addMonths` `addYears` `formatDate` |
++| Time | `now` `timestamp` `duration` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `inDays` `inHours` `inMinutes` `inSeconds` `inMilliseconds` `year` `month` `day` `hour` `minute` `second` `dayOfWeek` `daysInMonth` `startOfDay` `startOfMonth` `startOfYear` `addDays` `addMonths` `addYears` `formatDate` `formatDuration` |
+ 
+ Signatures and examples: [Built-in Functions](https://bonsai.danfry.dev/functions/).
+ 
+diff --git a/src/builtins/index.ts b/src/builtins/index.ts
+index 00fc8ca..dd988c0 100644
+--- a/src/builtins/index.ts
++++ b/src/builtins/index.ts
+@@ -105,5 +105,6 @@ export const addDays = defs.addDays as unknown as Builtin
+ export const addMonths = defs.addMonths as unknown as Builtin
+ export const addYears = defs.addYears as unknown as Builtin
+ export const formatDate = defs.formatDate as unknown as Builtin
++export const formatDuration = defs.formatDuration as unknown as Builtin
+ 
+ export type { Builtin } from '../environment.js'
+diff --git a/src/functions/builtins.ts b/src/functions/builtins.ts
+index e60406b..ab3bf27 100644
+--- a/src/functions/builtins.ts
++++ b/src/functions/builtins.ts
+@@ -1842,6 +1842,29 @@ export const formatDate: FunctionDef = /* @__PURE__ */ define(
+   /* @__PURE__ */ zoneAt(2),
+ )
+ 
++/** The units formatDuration writes, largest first. */
++const DURATION_TEXT_UNITS: readonly (readonly [string, number])[] = [
++  ['d', MS_PER_DAY],
++  ['h', MS_PER_HOUR],
++  ['m', MS_PER_MINUTE],
++  ['s', MS_PER_SECOND],
++]
++
++export const formatDuration: FunctionDef = /* @__PURE__ */ define('formatDuration', [
++  /* @__PURE__ */ overload([dur], str, ([d]) => {
++    const ms = (d as Duration).ms
++    let rest = Math.abs(ms)
++    const parts: string[] = []
++    for (const [unit, size] of DURATION_TEXT_UNITS) {
++      const count = Math.floor(rest / size)
++      rest -= count * size
++      if (count > 0) parts.push(`${count}${unit}`)
++    }
++    if (parts.length === 0) return '0s'
++    return (ms < 0 ? '-' : '') + parts.join(' ')
++  }),
++])
++
+ /** Result types that depend on argument types beyond simple type variables. */
+ export const RESULT_REFINERS: Readonly<
+   Record<string, (args: readonly Type[]) => Type | undefined>
+@@ -1957,5 +1980,6 @@ export const BUILTINS: ReadonlyMap<string, FunctionDef> = /* @__PURE__ */ (() =>
+       addMonths,
+       addYears,
+       formatDate,
++      formatDuration,
+     ].map((def) => [def.name, def]),
+   ))()
+diff --git a/src/functions/descriptions.ts b/src/functions/descriptions.ts
+index 413fa58..2959890 100644
+--- a/src/functions/descriptions.ts
++++ b/src/functions/descriptions.ts
+@@ -188,6 +188,8 @@ const TEXTS: readonly string[] = [
+   'Adds calendar years (Feb 29 becomes Feb 28).',
+   // formatDate
+   "Formats a timestamp in a time zone (default UTC). Tokens: yyyy yy MMMM MMM MM M dd d EEEE EEE HH H hh h a mm m ss s SSS; quote literal text ('at'), and write '' for a quote ('it''s').",
++  // formatDuration
++  'Writes a duration for people in days, hours, minutes, and seconds, e.g. "2d 3h 4m 5s".',
+ ]
+ 
+ let positions: Map<string, number> | undefined
+diff --git a/tests/builtins.test.ts b/tests/builtins.test.ts
+index 7776954..5a48239 100644
+--- a/tests/builtins.test.ts
++++ b/tests/builtins.test.ts
+@@ -782,3 +782,13 @@ describe('time functions', () => {
+     )
+   })
+ })
++
++describe('formatDuration', () => {
++  it('writes days, hours, minutes, and seconds', async () => {
++    expect(await ok('formatDuration(days(2) + hours(3) + minutes(4))')).toBe('2d 3h 4m')
++    expect(await ok('formatDuration(minutes(5) + seconds(12) + milliseconds(900))')).toBe('5m 12s')
++    expect(await ok('formatDuration(seconds(42))')).toBe('42s')
++    expect(await ok('formatDuration(milliseconds(300))')).toBe('0s')
++    expect(await ok('formatDuration(-hours(2))')).toBe('-2h')
++  })
++})

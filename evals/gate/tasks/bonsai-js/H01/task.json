@@ -1,0 +1,10 @@
+{
+  "id": "H01",
+  "repo": "bonsai-js",
+  "kind": "history",
+  "prompt": "Product names and headings in our templates come out in whatever case people typed them in. Please add a titleCase built-in next to capitalize that turns text into title case, and wire it up and test it like the other text functions.",
+  "requirement": "R1",
+  "oracle": "When we add titleCase, keep a, an, the, and, but, or, nor, of, in, on, at, to, for and by in lower case unless they are the first word.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

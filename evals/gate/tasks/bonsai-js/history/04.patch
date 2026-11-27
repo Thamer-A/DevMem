@@ -1,0 +1,92 @@
+diff --git a/README.md b/README.md
+index a773b1b..d08feeb 100644
+--- a/README.md
++++ b/README.md
+@@ -212,7 +212,7 @@ All callable as `f(x, ...)` or `x.f(...)`.
+ | Area | Functions |
+ |---|---|
+ | Text | `toUpperCase` `toLowerCase` `capitalize` `trim` `trimStart` `trimEnd` `startsWith` `endsWith` `includes` `indexOf` `lastIndexOf` `slice` `split` `replace` `replaceAll` `padStart` `padEnd` `repeat` `at` `matches` `toString` `toNumber` |
+-| Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `flat` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
++| Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `compact` `flat` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
+ | Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `min` `max` `sum` `avg` |
+ | Maps and values | `keys` `values` `entries` `isEmpty` `type` `toString` |
+ | Time | `now` `timestamp` `duration` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `inDays` `inHours` `inMinutes` `inSeconds` `inMilliseconds` `year` `month` `day` `hour` `minute` `second` `dayOfWeek` `daysInMonth` `startOfDay` `startOfMonth` `startOfYear` `addDays` `addMonths` `addYears` `formatDate` |
+diff --git a/src/builtins/index.ts b/src/builtins/index.ts
+index ad8d5a8..00fc8ca 100644
+--- a/src/builtins/index.ts
++++ b/src/builtins/index.ts
+@@ -66,6 +66,7 @@ export const reduce = defs.reduce as unknown as Builtin
+ export const sort = defs.sort as unknown as Builtin
+ export const reverse = defs.reverse as unknown as Builtin
+ export const unique = defs.unique as unknown as Builtin
++export const compact = defs.compact as unknown as Builtin
+ export const flat = defs.flat as unknown as Builtin
+ export const first = defs.first as unknown as Builtin
+ export const last = defs.last as unknown as Builtin
+diff --git a/src/functions/builtins.ts b/src/functions/builtins.ts
+index 1c8f4ff..e60406b 100644
+--- a/src/functions/builtins.ts
++++ b/src/functions/builtins.ts
+@@ -1509,6 +1509,20 @@ export const unique: FunctionDef = /* @__PURE__ */ define('unique', [
+   /* @__PURE__ */ overload([listT], listT, ([l], site) => uniqueOf(list(l), site)),
+ ])
+ 
++export const compact: FunctionDef = /* @__PURE__ */ define('compact', [
++  /* @__PURE__ */ overload([/* @__PURE__ */ t.list(optT)], listT, ([l], site) => {
++    const items = list(l)
++    site.state.charge(items.length)
++    const out: unknown[] = []
++    // oxlint-disable-next-line typescript/prefer-for-of -- indexing never runs a host list's iterator
++    for (let i = 0; i < items.length; i++) {
++      const value = items[i]
++      if (value !== null && value !== undefined) out.push(value)
++    }
++    return made(out, site)
++  }),
++])
++
+ export const flat: FunctionDef = /* @__PURE__ */ define('flat', [
+   /* @__PURE__ */ overload(
+     [/* @__PURE__ */ t.list(any)],
+@@ -1904,6 +1918,7 @@ export const BUILTINS: ReadonlyMap<string, FunctionDef> = /* @__PURE__ */ (() =>
+       sort,
+       reverse,
+       unique,
++      compact,
+       flat,
+       first,
+       last,
+diff --git a/src/functions/descriptions.ts b/src/functions/descriptions.ts
+index a1dd2cd..413fa58 100644
+--- a/src/functions/descriptions.ts
++++ b/src/functions/descriptions.ts
+@@ -110,6 +110,8 @@ const TEXTS: readonly string[] = [
+   'The items in reverse order.',
+   // unique
+   'The items without duplicates (by value), in first-seen order.',
++  // compact
++  'The items that are not null, in order.',
+   // flat
+   'Flattens nested lists one level.',
+   // first
+diff --git a/tests/builtins.test.ts b/tests/builtins.test.ts
+index 7853513..7776954 100644
+--- a/tests/builtins.test.ts
++++ b/tests/builtins.test.ts
+@@ -418,6 +418,16 @@ describe('list functions', () => {
+     expect(await ok('flat([])')).toEqual([])
+   })
+ 
++  it('drops nulls with compact', async () => {
++    expect(await ok('compact([1, null, 2, null])')).toEqual([1, 2])
++    expect(await ok('[false, 0, "", null, [], {}].compact()')).toEqual([false, 0, '', [], {}])
++    expect(await ok('compact(xs)', { xs: [undefined, 'a', null] })).toEqual(['a'])
++    expect(await ok('compact([])')).toEqual([])
++    expect(await fails('compact(x)', { x: 'abc' })).toBe('NO_OVERLOAD')
++    const typed = bonsai({ variables: { tags: t.list(t.optional(t.string())) } })
++    expect(typed.check('tags.compact().map(.toUpperCase())').ok).toBe(true)
++  })
++
+   it('bounds flattening by the list limit', async () => {
+     const small = bonsai({ limits: { maxListLength: 3 } })
+     expect(

@@ -1,0 +1,10 @@
+{
+  "id": "H08",
+  "repo": "bonsai-js",
+  "kind": "history",
+  "prompt": "Our async host functions all call other services, but each call is charged the same default step cost as a sync one. Please give async host functions their own, higher default cost. A cost a function declares itself still wins, sync functions keep 32, and listFunctions() should report the new default. Update the host function docs and add tests.",
+  "requirement": "R8",
+  "oracle": "When async host functions get their own default cost, it should be 250 steps, because nearly all of ours call other services over the network.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

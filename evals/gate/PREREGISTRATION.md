@@ -164,7 +164,7 @@ one re-run of arm D on all 24 scored tasks with two repeats (48 runs, owner's ye
   reveal (a rule or value for later work, not one the reference patches already implement); the grader's
   "plausible guess" is a solution that follows the code and the task prompt but not that requirement.
 
-**A2, 2026-11-27 (after the md2conf set was written and reviewed, before any freeze or run).**
+**A2, 2026-11-26 (after the md2conf set was written and reviewed, before any freeze or run).**
 - A grader whose own time limit cuts a subprocess short reports `grader_timeout`; such a run is a harness failure
   (section 10: "the working copy could not be ... graded"), re-run once like any other.
 - Stated limitations, recorded now so the report cannot choose them afterwards:
@@ -177,3 +177,17 @@ one re-run of arm D on all 24 scored tasks with two repeats (48 runs, owner's ye
     with a broken new test fails, in every arm alike.
   - Some requirement values remain guessable at a low rate (a date format, a file-name marker); the guess patches
     show the more likely wrong choice.
+
+**A3, 2026-11-26 (after the bonsai-js set was written and reviewed, before any freeze or run).**
+- bonsai-js ships only `bun.lock`; its dependencies are installed with `npm ci` from a `package-lock.json` made once
+  from its `package.json` (`npm install --package-lock-only --before=2026-11-15`), kept in its task folder and
+  frozen with the tasks. Its one test that runs the `bun` program is left out by name.
+- Its suite has a few wall-clock assertions (500 ms to 3 s). Graders run it with `--retry=2`, so that a slow
+  moment on the test machine does not fail a correct change; the hidden tests are deterministic, so a retry
+  cannot turn a wrong change into a pass.
+- Every Node working copy links one shared `node_modules`. When a run changes it (an agent's `npm install`, a
+  cache written through the link), the row records `deps_changed` and the install is rebuilt before the next run;
+  the run's own result stands, since the agent did it in its own session.
+- Stated limitations: H06 reads "the two largest non-zero units" literally (1 h 0 m 5 s is "1h 5s"), so an agent
+  that knows the requirement but reads it as "the largest unit and the next one" fails, in every arm alike.
+  H04's character (•) and R9/R10 (Sunday weeks, KiB) are guessable at a low rate.

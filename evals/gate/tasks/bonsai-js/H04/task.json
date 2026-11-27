@@ -1,0 +1,10 @@
+{
+  "id": "H04",
+  "repo": "bonsai-js",
+  "kind": "history",
+  "prompt": "Card and account numbers must never appear in full in our notification templates. Please add a mask(text) built-in that hides all but the end of a number, so a template can still show which card was charged. Wire it up like the other text functions and add tests.",
+  "requirement": "R4",
+  "oracle": "When we add a mask function for card and account numbers, every character except the last four becomes •, and spaces and dashes stay as they are.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

@@ -1,0 +1,96 @@
+diff --git a/README.md b/README.md
+index d08feeb..bf9bbc5 100644
+--- a/README.md
++++ b/README.md
+@@ -213,7 +213,7 @@ All callable as `f(x, ...)` or `x.f(...)`.
+ |---|---|
+ | Text | `toUpperCase` `toLowerCase` `capitalize` `trim` `trimStart` `trimEnd` `startsWith` `endsWith` `includes` `indexOf` `lastIndexOf` `slice` `split` `replace` `replaceAll` `padStart` `padEnd` `repeat` `at` `matches` `toString` `toNumber` |
+ | Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `compact` `flat` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
+-| Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `min` `max` `sum` `avg` |
++| Numbers | `round` `roundToNearest` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `min` `max` `sum` `avg` |
+ | Maps and values | `keys` `values` `entries` `isEmpty` `type` `toString` |
+ | Time | `now` `timestamp` `duration` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `inDays` `inHours` `inMinutes` `inSeconds` `inMilliseconds` `year` `month` `day` `hour` `minute` `second` `dayOfWeek` `daysInMonth` `startOfDay` `startOfMonth` `startOfYear` `addDays` `addMonths` `addYears` `formatDate` |
+ 
+diff --git a/src/builtins/index.ts b/src/builtins/index.ts
+index 00fc8ca..ef1a562 100644
+--- a/src/builtins/index.ts
++++ b/src/builtins/index.ts
+@@ -38,6 +38,7 @@ export const matches = defs.matches as unknown as Builtin
+ export const toString = defs.toString as unknown as Builtin
+ export const toNumber = defs.toNumber as unknown as Builtin
+ export const round = defs.round as unknown as Builtin
++export const roundToNearest = defs.roundToNearest as unknown as Builtin
+ export const floor = defs.floor as unknown as Builtin
+ export const ceil = defs.ceil as unknown as Builtin
+ export const trunc = defs.trunc as unknown as Builtin
+diff --git a/src/functions/builtins.ts b/src/functions/builtins.ts
+index e60406b..8d8cdb7 100644
+--- a/src/functions/builtins.ts
++++ b/src/functions/builtins.ts
+@@ -1093,6 +1093,24 @@ export const round: FunctionDef = /* @__PURE__ */ define('round', [
+   ),
+ ])
+ 
++export const roundToNearest: FunctionDef = /* @__PURE__ */ define('roundToNearest', [
++  /* @__PURE__ */ overload([num, num], num, ([n, s], site) => {
++    const value = finite(n as number, site)
++    const step = s as number
++    if (!Number.isFinite(step) || step <= 0)
++      throw site.state.error('INVALID_ARGUMENT', 'Step must be a positive number', site.span)
++    const steps = value / step
++    const below = Math.floor(steps)
++    const fraction = steps - below
++    // Halves round away from zero, as round() does.
++    let multiple = fraction > 0.5 ? below + 1 : below
++    if (fraction === 0.5) multiple = steps > 0 ? below + 1 : below
++    // Clear floating-point noise such as 0.15000000000000002.
++    const result = Number.parseFloat(finite(multiple * step, site).toPrecision(MAX_ROUND_DIGITS))
++    return result === 0 ? 0 : result
++  }),
++])
++
+ export const floor: FunctionDef = /* @__PURE__ */ math('floor', Math.floor)
+ 
+ export const ceil: FunctionDef = /* @__PURE__ */ math('ceil', Math.ceil)
+@@ -1890,6 +1908,7 @@ export const BUILTINS: ReadonlyMap<string, FunctionDef> = /* @__PURE__ */ (() =>
+       toString,
+       toNumber,
+       round,
++      roundToNearest,
+       floor,
+       ceil,
+       trunc,
+diff --git a/src/functions/descriptions.ts b/src/functions/descriptions.ts
+index 413fa58..d6910c4 100644
+--- a/src/functions/descriptions.ts
++++ b/src/functions/descriptions.ts
+@@ -54,6 +54,8 @@ const TEXTS: readonly string[] = [
+   'Parses decimal text as a number, e.g. "-12.5" or "1e3" (surrounding whitespace is ignored; 0x and other bases are not accepted).',
+   // round
+   'Rounds half away from zero, optionally to a number of decimal digits.',
++  // roundToNearest
++  'Rounds to the nearest multiple of a step, halves away from zero, e.g. roundToNearest(25, 10) is 30.',
+   // floor
+   'Rounds down.',
+   // ceil
+diff --git a/tests/builtins.test.ts b/tests/builtins.test.ts
+index 7776954..3cc7161 100644
+--- a/tests/builtins.test.ts
++++ b/tests/builtins.test.ts
+@@ -782,3 +782,16 @@ describe('time functions', () => {
+     )
+   })
+ })
++
++describe('roundToNearest', () => {
++  it('rounds to a multiple of the step', async () => {
++    expect(await ok('roundToNearest(12, 5)')).toBe(10)
++    expect(await ok('roundToNearest(13, 5)')).toBe(15)
++    expect(await ok('roundToNearest(1.3, 0.25)')).toBe(1.25)
++    expect(await ok('roundToNearest(0.16, 0.05)')).toBe(0.15)
++    expect(await ok('roundToNearest(25, 10)')).toBe(30)
++    expect(await ok('roundToNearest(-25, 10)')).toBe(-30)
++    expect(await fails('roundToNearest(5, s)', { s: 0 })).toBe('INVALID_ARGUMENT')
++    expect(await fails('roundToNearest(5, s)', { s: -1 })).toBe('INVALID_ARGUMENT')
++  })
++})

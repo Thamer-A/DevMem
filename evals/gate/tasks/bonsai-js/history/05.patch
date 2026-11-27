@@ -1,0 +1,128 @@
+diff --git a/src/compile/compiler.ts b/src/compile/compiler.ts
+index fe0e3ce..83c663e 100644
+--- a/src/compile/compiler.ts
++++ b/src/compile/compiler.ts
+@@ -3,6 +3,7 @@ import type { Analysis, CallPlan } from '../check/checker.js'
+ import { BonsaiLimitError, BonsaiRuntimeError, type BonsaiError, type Span } from '../errors.js'
+ import { guardDepth, isStackOverflow, tooDeep } from '../runtime/overflow.js'
+ import {
++  DEFAULT_HOST_COST,
+   conforms,
+   matchesKind,
+   Out,
+@@ -77,12 +78,6 @@ interface Scope {
+   readonly it: number | undefined
+ }
+ 
+-/**
+- * Steps charged per host function call unless the function declares its own
+- * `cost`. Host calls often do real I/O, so one evaluation cannot make more
+- * than maxSteps / cost of them.
+- */
+-const DEFAULT_HOST_CALL_COST = 32
+ /** Map literals with at most this many entries and no nested values skip value tracking. */
+ const SMALL_MAP_ENTRIES = 8
+ 
+@@ -764,7 +759,7 @@ function compileTree(
+     const def = plan.def
+     const overloads = plan.candidates.map((index) => def.overloads[index])
+     const host = def.host === true
+-    const hostCost = def.cost ?? DEFAULT_HOST_CALL_COST
++    const hostCost = def.cost ?? DEFAULT_HOST_COST
+     const span: Span = node
+ 
+     const callOverload = (
+diff --git a/src/environment.ts b/src/environment.ts
+index 098e193..ef39a11 100644
+--- a/src/environment.ts
++++ b/src/environment.ts
+@@ -12,6 +12,7 @@ import {
+ import { BUILTINS } from './functions/builtins.js'
+ import { descriptionOf } from './functions/descriptions.js'
+ import {
++  DEFAULT_HOST_COST,
+   assertHostSpec,
+   assertType,
+   builtinsOption,
+@@ -485,7 +486,7 @@ export interface FunctionInfo {
+   readonly async: boolean
+   /** Whether a host function receives a {@link HostCall} (declared `call: true`). */
+   readonly call: boolean
+-  /** Steps charged per call, when the host function declares a `cost` (otherwise 32). */
++  /** Host functions: steps charged per call, the declared `cost` or the default. Absent for built-ins. */
+   readonly cost?: number
+   readonly signatures: readonly {
+     readonly params: readonly Type[]
+@@ -1344,7 +1345,7 @@ function createEnvironment<Ctx>(settings: Settings): Environment<Ctx> {
+       host: def.host === true,
+       async: def.async === true,
+       call: def.call === true,
+-      ...(def.cost === undefined ? {} : { cost: def.cost }),
++      ...(def.host === true ? { cost: def.cost ?? DEFAULT_HOST_COST } : {}),
+       signatures: def.overloads.map((o) => ({
+         params: o.params,
+         required: o.required ?? o.params.length,
+diff --git a/src/functions/define.ts b/src/functions/define.ts
+index 0ff7427..64c023d 100644
+--- a/src/functions/define.ts
++++ b/src/functions/define.ts
+@@ -82,6 +82,13 @@ export interface ZoneParameter {
+   readonly warm: (zone: string | undefined) => void
+ }
+ 
++/**
++ * Steps charged per host function call unless the function declares its own
++ * `cost`. Host calls often do real I/O, so one evaluation cannot make more
++ * than maxSteps / cost of them.
++ */
++export const DEFAULT_HOST_COST = 32
++
+ export const T: TypeVar = Object.freeze({ kind: 'var', name: 'T' })
+ export const U: TypeVar = Object.freeze({ kind: 'var', name: 'U' })
+ export const K: TypeVar = Object.freeze({ kind: 'var', name: 'K' })
+diff --git a/tests/host-functions.test.ts b/tests/host-functions.test.ts
+index 6870f9f..8bffce0 100644
+--- a/tests/host-functions.test.ts
++++ b/tests/host-functions.test.ts
+@@ -500,6 +500,28 @@ describe('host declarations', () => {
+     expect(env.listFunctions()[0]?.name).toBe('trim')
+     expect(env.listFunctions().filter((f) => f.name === 'trim')).toHaveLength(1)
+   })
++
++  it('lists the cost of every host function, declared or default', () => {
++    const env = bonsai({
++      functions: {
++        cheap: fn({ params: [], returns: t.null(), cost: 1, run: () => null }),
++        free: fn({ params: [], returns: t.null(), cost: 0, run: () => null }),
++        plain: noop,
++        remote: fn({ params: [], returns: t.null(), async: true, run: async () => null }),
++      },
++    })
++    const costs = Object.fromEntries(env.listFunctions().map((f) => [f.name, f.cost]))
++    expect(costs.cheap).toBe(1)
++    expect(costs.free).toBe(0)
++    expect(costs.plain).toBe(32)
++    expect(costs.remote).toBe(32)
++    expect(env.describeFunction('plain')?.cost).toBe(32)
++    expect('cost' in (env.describeFunction('trim') ?? {})).toBe(false)
++    // The listed cost is what a call is charged against the step budget.
++    const steps = (maxSteps: number) => codeOf(() => env.evaluateSync('plain()', {}, { maxSteps }))
++    expect(steps(64)).toBe('OK')
++    expect(steps(16)).toBe('STEP_LIMIT')
++  })
+ })
+ 
+ describe('context validation', () => {
+diff --git a/website/api/environment.md b/website/api/environment.md
+index 2ec147f..a10c2be 100644
+--- a/website/api/environment.md
++++ b/website/api/environment.md
+@@ -199,7 +199,7 @@ interface FunctionInfo {
+   host: boolean // declared by the host rather than built in
+   async: boolean
+   call: boolean // a host function declared call: true
+-  cost?: number // steps per call, when a host function declares a cost
++  cost?: number // host functions: steps per call, the declared cost or the default 32
+   signatures: { params: Type[]; required: number; rest?: Type; returns: Type }[]
+ }
+ ```

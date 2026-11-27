@@ -1,0 +1,10 @@
+{
+  "id": "H07",
+  "repo": "bonsai-js",
+  "kind": "history",
+  "prompt": "Prices need rounding to steps such as the nearest 5 or the nearest 0.25. Please add roundToNearest(value, step) next to round(); a step that is not a positive number should be an INVALID_ARGUMENT error. Wire it up and add tests like the other number functions.",
+  "requirement": "R7",
+  "oracle": "Any new rounding function we add should round halves to the even neighbour (banker's rounding); round() itself stays as it is.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

@@ -1,0 +1,182 @@
+diff --git a/README.md b/README.md
+index d08feeb..c415a4d 100644
+--- a/README.md
++++ b/README.md
+@@ -168,7 +168,7 @@ await env.evaluate('hasRole("admin") || orders.map(fxRate(.currency) * .amount).
+ - A host function with the same name as a built-in replaces it for that environment, so new built-ins in future releases never change the meaning of your expressions.
+ - With `call: true`, `run` first receives `{ context, signal }`: the read-only evaluation context, and an `AbortSignal` that aborts when the evaluation times out or is cancelled while waiting on the call (pass it to `fetch`). `withContext<Ctx>()` returns a version of `fn` with the context typed: `withContext<Ctx>()({ params: [], returns: t.string(), run: (call) => call.context.tenant.id })`.
+ - Trailing parameters declared with `t.optional(...)` may be omitted, and arrive as `null`. Set `required` to choose the count of required leading parameters yourself.
+-- Each call is charged `cost` steps (default 32) against the step budget; set a lower `cost` for cheap pure helpers.
++- Each call is charged `cost` steps (default 32, or 250 for `async: true` functions) against the step budget; set a lower `cost` for cheap pure helpers.
+ - Bundle functions (and variables) into a `Library` (`{ name, functions, variables } satisfies Library`) and pass `libraries: [a, b]`; its variables join the context type, and a name defined twice is an error. `env.extend({...})` derives a new environment.
+ 
+ Context data is not validated against the declared types by default (it is your data, and validation costs time proportional to it). Pass `validateContext: true` to check it before every evaluation; a mismatch fails with `INVALID_CONTEXT` and the exact path, e.g. `user.created should be timestamp, got string "2026-01-01"`. Objects may carry more keys than their declared type lists (a database row with extra columns is fine); the checker accounts for that.
+diff --git a/src/compile/compiler.ts b/src/compile/compiler.ts
+index 83c663e..b6745bc 100644
+--- a/src/compile/compiler.ts
++++ b/src/compile/compiler.ts
+@@ -3,8 +3,8 @@ import type { Analysis, CallPlan } from '../check/checker.js'
+ import { BonsaiLimitError, BonsaiRuntimeError, type BonsaiError, type Span } from '../errors.js'
+ import { guardDepth, isStackOverflow, tooDeep } from '../runtime/overflow.js'
+ import {
+-  DEFAULT_HOST_COST,
+   conforms,
++  hostCost as costOf,
+   matchesKind,
+   Out,
+   signatureText,
+@@ -759,7 +759,7 @@ function compileTree(
+     const def = plan.def
+     const overloads = plan.candidates.map((index) => def.overloads[index])
+     const host = def.host === true
+-    const hostCost = def.cost ?? DEFAULT_HOST_COST
++    const hostCost = costOf(def)
+     const span: Span = node
+ 
+     const callOverload = (
+diff --git a/src/environment.ts b/src/environment.ts
+index ef39a11..fd5dbae 100644
+--- a/src/environment.ts
++++ b/src/environment.ts
+@@ -12,10 +12,10 @@ import {
+ import { BUILTINS } from './functions/builtins.js'
+ import { descriptionOf } from './functions/descriptions.js'
+ import {
+-  DEFAULT_HOST_COST,
+   assertHostSpec,
+   assertType,
+   builtinsOption,
++  hostCost,
+   isRecord,
+   overload,
+   type FunctionDef,
+@@ -1345,7 +1345,7 @@ function createEnvironment<Ctx>(settings: Settings): Environment<Ctx> {
+       host: def.host === true,
+       async: def.async === true,
+       call: def.call === true,
+-      ...(def.host === true ? { cost: def.cost ?? DEFAULT_HOST_COST } : {}),
++      ...(def.host === true ? { cost: hostCost(def) } : {}),
+       signatures: def.overloads.map((o) => ({
+         params: o.params,
+         required: o.required ?? o.params.length,
+diff --git a/src/functions/define.ts b/src/functions/define.ts
+index 64c023d..ca27e6f 100644
+--- a/src/functions/define.ts
++++ b/src/functions/define.ts
+@@ -67,7 +67,7 @@ export interface FunctionDef {
+   /** Host functions: receives a HostCall (context and signal) as its first argument. */
+   readonly call?: boolean
+   readonly host?: boolean
+-  /** Host functions: steps charged per call (default 32). */
++  /** Host functions: steps charged per call (default 32, or 250 for an async function). */
+   readonly cost?: number
+   /**
+    * Built-ins with a time zone parameter: its position, and the function that
+@@ -89,6 +89,17 @@ export interface ZoneParameter {
+  */
+ export const DEFAULT_HOST_COST = 32
+ 
++/**
++ * Steps charged per call of an async host function that declares no `cost`:
++ * an async function nearly always calls another service.
++ */
++export const DEFAULT_ASYNC_HOST_COST = 250
++
++/** Steps one call of a host function is charged: its declared `cost`, or the default for its kind. */
++export function hostCost(def: { readonly cost?: number; readonly async?: boolean }): number {
++  return def.cost ?? (def.async === true ? DEFAULT_ASYNC_HOST_COST : DEFAULT_HOST_COST)
++}
++
+ export const T: TypeVar = Object.freeze({ kind: 'var', name: 'T' })
+ export const U: TypeVar = Object.freeze({ kind: 'var', name: 'U' })
+ export const K: TypeVar = Object.freeze({ kind: 'var', name: 'K' })
+diff --git a/tests/hardening-limits.test.ts b/tests/hardening-limits.test.ts
+index 0e540b2..920129a 100644
+--- a/tests/hardening-limits.test.ts
++++ b/tests/hardening-limits.test.ts
+@@ -550,6 +550,7 @@ describe('values', () => {
+           params: [t.any()],
+           returns: t.any(),
+           async: true,
++          cost: 32,
+           run: (x) => Promise.resolve(x),
+         }),
+       },
+diff --git a/tests/host-functions.test.ts b/tests/host-functions.test.ts
+index 8bffce0..c1e1479 100644
+--- a/tests/host-functions.test.ts
++++ b/tests/host-functions.test.ts
+@@ -514,7 +514,7 @@ describe('host declarations', () => {
+     expect(costs.cheap).toBe(1)
+     expect(costs.free).toBe(0)
+     expect(costs.plain).toBe(32)
+-    expect(costs.remote).toBe(32)
++    expect(costs.remote).toBe(250)
+     expect(env.describeFunction('plain')?.cost).toBe(32)
+     expect('cost' in (env.describeFunction('trim') ?? {})).toBe(false)
+     // The listed cost is what a call is charged against the step budget.
+@@ -522,6 +522,30 @@ describe('host declarations', () => {
+     expect(steps(64)).toBe('OK')
+     expect(steps(16)).toBe('STEP_LIMIT')
+   })
++
++  it('charges async host functions more by default', () => {
++    const env = bonsai({
++      functions: {
++        remote: fn({ params: [], returns: t.null(), async: true, run: async () => null }),
++        pinned: fn({ params: [], returns: t.null(), async: true, cost: 3, run: async () => null }),
++        plain: noop,
++      },
++    })
++    expect(env.describeFunction('remote')?.cost).toBe(250)
++    expect(env.describeFunction('pinned')?.cost).toBe(3)
++    expect(env.describeFunction('plain')?.cost).toBe(32)
++  })
++
++  it('charges the async default against the step budget', async () => {
++    const env = bonsai({
++      functions: { remote: fn({ params: [], returns: t.null(), async: true, run: async () => null }) },
++    })
++    const program = env.compile('remote()')
++    await expect(program.evaluate({}, { maxSteps: 270 })).resolves.toBe(null)
++    await expect(program.evaluate({}, { maxSteps: 230 })).rejects.toMatchObject({
++      code: 'STEP_LIMIT',
++    })
++  })
+ })
+ 
+ describe('context validation', () => {
+diff --git a/website/api/environment.md b/website/api/environment.md
+index a10c2be..56b14c9 100644
+--- a/website/api/environment.md
++++ b/website/api/environment.md
+@@ -199,7 +199,7 @@ interface FunctionInfo {
+   host: boolean // declared by the host rather than built in
+   async: boolean
+   call: boolean // a host function declared call: true
+-  cost?: number // host functions: steps per call, the declared cost or the default 32
++  cost?: number // host functions: steps per call, the declared cost or the default (32, or 250 when async)
+   signatures: { params: Type[]; required: number; rest?: Type; returns: Type }[]
+ }
+ ```
+diff --git a/website/api/host-functions.md b/website/api/host-functions.md
+index 01ecd16..3407e3e 100644
+--- a/website/api/host-functions.md
++++ b/website/api/host-functions.md
+@@ -32,14 +32,14 @@ env.evaluateSync('(200).discount(0.25)') // => 150
+ | `async` | `boolean` | `run` returns a promise. The expression must be evaluated with `evaluate()`. |
+ | `call` | `boolean` | `run` receives a `{ context, signal }` call object before its arguments. See [The call](#the-call-context-and-cancellation). |
+ | `description` | `string` | Shown by `listFunctions()` and in editor completions and hover. |
+-| `cost` | `number` | Steps charged per call, a non-negative integer (default 32). Lower it for cheap pure helpers so they do not use up the budget; raise it for calls that reach a database or network. |
++| `cost` | `number` | Steps charged per call, a non-negative integer (default 32, or 250 for an `async` function). Lower it for cheap pure helpers so they do not use up the budget; raise it for calls that reach a database or network. |
+ 
+ ## What Bonsai guarantees around your function
+ 
+ - **Checked calls.** The checker rejects calls whose arguments do not match `params` (`NO_OVERLOAD`) before anything runs. At run time, arguments are checked against the declared kinds before `run` is called. Values the expression builds are always well formed; values read from a context that is not validated reach `run` as the host gave them, so a `t.number()` argument can be `NaN` or `Infinity`, and a list can hold `undefined` or holes. With `validateContext: true` such data is rejected before evaluation (`INVALID_CONTEXT`), and `run` only receives values of the declared types.
+ - **Checked results.** A result that does not match `returns` (checked deeply, through lists and maps) is a `HOST_CONTRACT` error, so a bug in your function cannot leak an unexpected value into the expression. That includes `NaN` and `Infinity` where `returns` declares a number, since the language cannot represent them. So is a promise returned by a function not declared `async`. `try(...)` never catches `HOST_CONTRACT`: it signals a bug in host code, not a condition the expression should hide.
+ - **Wrapped failures.** An exception thrown by `run` becomes a `BonsaiRuntimeError` with code `HOST_ERROR` and the original error as its `cause`, whatever was thrown, including a `BonsaiError` (for example a limit error from an evaluation `run` performs itself). Expressions can recover from it with `try(...)`.
+-- **A fixed cost per call.** Each call is charged `cost` steps (default 32) against the step budget, however long `run` takes. The budget therefore bounds how many calls one evaluation can make, not the time your function spends.
++- **A fixed cost per call.** Each call is charged `cost` steps (default 32, or 250 for an `async` function) against the step budget, however long `run` takes. The budget therefore bounds how many calls one evaluation can make, not the time your function spends.
+ 
+ <!-- continue -->
+ ```ts

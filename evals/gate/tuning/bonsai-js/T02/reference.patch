@@ -1,0 +1,101 @@
+diff --git a/README.md b/README.md
+index d08feeb..3c05506 100644
+--- a/README.md
++++ b/README.md
+@@ -213,7 +213,7 @@ All callable as `f(x, ...)` or `x.f(...)`.
+ |---|---|
+ | Text | `toUpperCase` `toLowerCase` `capitalize` `trim` `trimStart` `trimEnd` `startsWith` `endsWith` `includes` `indexOf` `lastIndexOf` `slice` `split` `replace` `replaceAll` `padStart` `padEnd` `repeat` `at` `matches` `toString` `toNumber` |
+ | Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `compact` `flat` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
+-| Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `min` `max` `sum` `avg` |
++| Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `formatBytes` `min` `max` `sum` `avg` |
+ | Maps and values | `keys` `values` `entries` `isEmpty` `type` `toString` |
+ | Time | `now` `timestamp` `duration` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `inDays` `inHours` `inMinutes` `inSeconds` `inMilliseconds` `year` `month` `day` `hour` `minute` `second` `dayOfWeek` `daysInMonth` `startOfDay` `startOfMonth` `startOfYear` `addDays` `addMonths` `addYears` `formatDate` |
+ 
+diff --git a/src/builtins/index.ts b/src/builtins/index.ts
+index 00fc8ca..8ca4056 100644
+--- a/src/builtins/index.ts
++++ b/src/builtins/index.ts
+@@ -47,6 +47,7 @@ export const clamp = defs.clamp as unknown as Builtin
+ export const toFixed = defs.toFixed as unknown as Builtin
+ export const formatNumber = defs.formatNumber as unknown as Builtin
+ export const formatCurrency = defs.formatCurrency as unknown as Builtin
++export const formatBytes = defs.formatBytes as unknown as Builtin
+ export const min = defs.min as unknown as Builtin
+ export const max = defs.max as unknown as Builtin
+ export const sum = defs.sum as unknown as Builtin
+diff --git a/src/functions/builtins.ts b/src/functions/builtins.ts
+index e60406b..55e99da 100644
+--- a/src/functions/builtins.ts
++++ b/src/functions/builtins.ts
+@@ -1189,6 +1189,31 @@ export const formatCurrency: FunctionDef = /* @__PURE__ */ define('formatCurrenc
+   ),
+ ])
+ 
++/** Units of 1,024 bytes, as formatBytes writes them. */
++const BYTE_UNITS: readonly string[] = ['KiB', 'MiB', 'GiB']
++const BYTES_PER_UNIT = 1024
++
++export const formatBytes: FunctionDef = /* @__PURE__ */ define('formatBytes', [
++  /* @__PURE__ */ overload([num], str, ([n], site) => {
++    const bytes = nonNegativeInteger(n, 'Bytes', site)
++    if (bytes < BYTES_PER_UNIT) return `${bytes} B`
++    let value = bytes / BYTES_PER_UNIT
++    let unit = 0
++    while (value >= BYTES_PER_UNIT && unit < BYTE_UNITS.length - 1) {
++      value /= BYTES_PER_UNIT
++      unit++
++    }
++    // One decimal place; a value halfway between two tenths goes to the even one.
++    const scaled = value * 10
++    const below = Math.floor(scaled)
++    const fraction = scaled - below
++    let whole = fraction > 0.5 ? below + 1 : below
++    if (fraction === 0.5) whole = below % 2 === 0 ? below : below + 1
++    const tenths = whole / 10
++    return `${tenths.toFixed(1)} ${BYTE_UNITS[unit]}`
++  }),
++])
++
+ export const min: FunctionDef = /* @__PURE__ */ define('min', /* @__PURE__ */ extremes(-1))
+ 
+ export const max: FunctionDef = /* @__PURE__ */ define('max', /* @__PURE__ */ extremes(1))
+@@ -1899,6 +1924,7 @@ export const BUILTINS: ReadonlyMap<string, FunctionDef> = /* @__PURE__ */ (() =>
+       toFixed,
+       formatNumber,
+       formatCurrency,
++      formatBytes,
+       min,
+       max,
+       sum,
+diff --git a/src/functions/descriptions.ts b/src/functions/descriptions.ts
+index 413fa58..71ca043 100644
+--- a/src/functions/descriptions.ts
++++ b/src/functions/descriptions.ts
+@@ -72,6 +72,8 @@ const TEXTS: readonly string[] = [
+   'Formats a number with grouping, e.g. 1,234.5, with optional decimals and locale (default "en-US"; an unsupported locale is an error).',
+   // formatCurrency
+   'Formats an amount in a currency (ISO 4217 code such as "EUR"; a code without a known symbol prints as the code), with an optional locale (default "en-US"; an unsupported locale is an error).',
++  // formatBytes
++  'Writes a byte count for people in 1,024-based units with one decimal, e.g. "1.5 KiB".',
+   // min
+   'The smallest value (nulls are skipped); null for an empty list.',
+   // max
+diff --git a/tests/builtins.test.ts b/tests/builtins.test.ts
+index 7776954..b632fbd 100644
+--- a/tests/builtins.test.ts
++++ b/tests/builtins.test.ts
+@@ -782,3 +782,14 @@ describe('time functions', () => {
+     )
+   })
+ })
++
++describe('formatBytes', () => {
++  it('writes sizes in 1,024-based units', async () => {
++    expect(await ok('formatBytes(0)')).toBe('0 B')
++    expect(await ok('formatBytes(1023)')).toBe('1023 B')
++    expect(await ok('formatBytes(1536)')).toBe('1.5 KiB')
++    expect(await ok('(5 * 1024 * 1024).formatBytes()')).toBe('5.0 MiB')
++    expect(await ok('formatBytes(3 * 1024 * 1024 * 1024)')).toBe('3.0 GiB')
++    expect(await fails('formatBytes(n)', { n: -1 })).toBe('INVALID_ARGUMENT')
++  })
++})

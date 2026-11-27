@@ -1,0 +1,90 @@
+diff --git a/README.md b/README.md
+index d08feeb..eb64305 100644
+--- a/README.md
++++ b/README.md
+@@ -212,7 +212,7 @@ All callable as `f(x, ...)` or `x.f(...)`.
+ | Area | Functions |
+ |---|---|
+ | Text | `toUpperCase` `toLowerCase` `capitalize` `trim` `trimStart` `trimEnd` `startsWith` `endsWith` `includes` `indexOf` `lastIndexOf` `slice` `split` `replace` `replaceAll` `padStart` `padEnd` `repeat` `at` `matches` `toString` `toNumber` |
+-| Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `compact` `flat` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
++| Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `compact` `flat` `zip` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
+ | Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `min` `max` `sum` `avg` |
+ | Maps and values | `keys` `values` `entries` `isEmpty` `type` `toString` |
+ | Time | `now` `timestamp` `duration` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `inDays` `inHours` `inMinutes` `inSeconds` `inMilliseconds` `year` `month` `day` `hour` `minute` `second` `dayOfWeek` `daysInMonth` `startOfDay` `startOfMonth` `startOfYear` `addDays` `addMonths` `addYears` `formatDate` |
+diff --git a/src/builtins/index.ts b/src/builtins/index.ts
+index 00fc8ca..2cb5570 100644
+--- a/src/builtins/index.ts
++++ b/src/builtins/index.ts
+@@ -68,6 +68,7 @@ export const reverse = defs.reverse as unknown as Builtin
+ export const unique = defs.unique as unknown as Builtin
+ export const compact = defs.compact as unknown as Builtin
+ export const flat = defs.flat as unknown as Builtin
++export const zip = defs.zip as unknown as Builtin
+ export const first = defs.first as unknown as Builtin
+ export const last = defs.last as unknown as Builtin
+ export const join = defs.join as unknown as Builtin
+diff --git a/src/functions/builtins.ts b/src/functions/builtins.ts
+index e60406b..d8fb6be 100644
+--- a/src/functions/builtins.ts
++++ b/src/functions/builtins.ts
+@@ -1531,6 +1531,22 @@ export const flat: FunctionDef = /* @__PURE__ */ define('flat', [
+   ),
+ ])
+ 
++export const zip: FunctionDef = /* @__PURE__ */ define('zip', [
++  /* @__PURE__ */ overload(
++    [listT, /* @__PURE__ */ t.list(U)],
++    /* @__PURE__ */ t.list(/* @__PURE__ */ t.list(any)),
++    ([a, b], site) => {
++      const left = list(a)
++      const right = list(b)
++      const length = Math.min(left.length, right.length)
++      site.state.charge(length)
++      const out = newList(length, site)
++      for (let i = 0; i < length; i++) out[i] = made([left[i] ?? null, right[i] ?? null], site)
++      return made(out, site)
++    },
++  ),
++])
++
+ export const first: FunctionDef = /* @__PURE__ */ define('first', [
+   /* @__PURE__ */ overload([listT], optT, ([l]) => list(l)[0] ?? null),
+ ])
+@@ -1920,6 +1936,7 @@ export const BUILTINS: ReadonlyMap<string, FunctionDef> = /* @__PURE__ */ (() =>
+       unique,
+       compact,
+       flat,
++      zip,
+       first,
+       last,
+       join,
+diff --git a/src/functions/descriptions.ts b/src/functions/descriptions.ts
+index 413fa58..0e663ab 100644
+--- a/src/functions/descriptions.ts
++++ b/src/functions/descriptions.ts
+@@ -114,6 +114,8 @@ const TEXTS: readonly string[] = [
+   'The items that are not null, in order.',
+   // flat
+   'Flattens nested lists one level.',
++  // zip
++  'Pairs up the items of two lists by position, stopping at the end of the shorter list.',
+   // first
+   'The first item, or null.',
+   // last
+diff --git a/tests/builtins.test.ts b/tests/builtins.test.ts
+index 7776954..d53cee2 100644
+--- a/tests/builtins.test.ts
++++ b/tests/builtins.test.ts
+@@ -782,3 +782,12 @@ describe('time functions', () => {
+     )
+   })
+ })
++
++describe('zip', () => {
++  it('pairs items by position', async () => {
++    expect(await ok('zip([1, 2, 3], ["a", "b", "c"])')).toEqual([[1, 'a'], [2, 'b'], [3, 'c']])
++    expect(await ok('zip([1, 2, 3], ["a"])')).toEqual([[1, 'a']])
++    expect(await ok('[1].zip([5, 6])')).toEqual([[1, 5]])
++    expect(await ok('zip([], [1])')).toEqual([])
++  })
++})

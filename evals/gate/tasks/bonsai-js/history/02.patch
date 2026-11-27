@@ -1,0 +1,54 @@
+diff --git a/src/functions/builtins.ts b/src/functions/builtins.ts
+index 907b7e2..e9d3250 100644
+--- a/src/functions/builtins.ts
++++ b/src/functions/builtins.ts
+@@ -1114,6 +1114,16 @@ export const clamp: FunctionDef = /* @__PURE__ */ define('clamp', [
+     finite(hi as number, site)
+     return finite(Math.min(Math.max(n as number, lo as number), hi as number), site)
+   }),
++  /* @__PURE__ */ overload([dur, dur, dur], dur, ([d, lo, hi], site) => {
++    const low = (lo as Duration).ms
++    const high = (hi as Duration).ms
++    if (low > high)
++      throw site.state.error('INVALID_ARGUMENT', 'clamp: min is greater than max', site.span)
++    const ms = (d as Duration).ms
++    if (ms < low) return lo
++    if (ms > high) return hi
++    return d
++  }),
+ ])
+ 
+ export const toFixed: FunctionDef = /* @__PURE__ */ define('toFixed', [
+diff --git a/src/functions/descriptions.ts b/src/functions/descriptions.ts
+index c9d9848..5368342 100644
+--- a/src/functions/descriptions.ts
++++ b/src/functions/descriptions.ts
+@@ -65,7 +65,7 @@ const TEXTS: readonly string[] = [
+   // sqrt
+   'Square root.',
+   // clamp
+-  'Limits a number to a range.',
++  'Limits a number or a duration to a range.',
+   // toFixed
+   'Formats a number with a fixed number of decimals.',
+   // formatNumber
+diff --git a/tests/builtins.test.ts b/tests/builtins.test.ts
+index 2ca552c..79686fc 100644
+--- a/tests/builtins.test.ts
++++ b/tests/builtins.test.ts
+@@ -279,6 +279,15 @@ describe('number functions', () => {
+     expect(await fails('clamp(5, 3, 1)')).toBe('INVALID_ARGUMENT')
+   })
+ 
++  it('clamps durations', async () => {
++    expect(await ok('clamp(minutes(1), minutes(5), hours(2))')).toEqual({ duration: 'PT5M' })
++    expect(await ok('clamp(hours(3), minutes(5), hours(2))')).toEqual({ duration: 'PT2H' })
++    expect(await ok('clamp(minutes(30), minutes(5), hours(2))')).toEqual({ duration: 'PT30M' })
++    expect(await ok('waited?.clamp(seconds(0), days(1))', { waited: null })).toBe(null)
++    expect(await fails('clamp(hours(1), hours(2), hours(1))')).toBe('INVALID_ARGUMENT')
++    expect(await fails('clamp(x, lo, hi)', { x: new Duration(60_000), lo: new Duration(0), hi: 5 })).toBe('NO_OVERLOAD')
++  })
++
+   it('formats fixed decimals consistently with round()', async () => {
+     expect(await ok('toFixed(1.005, 2)')).toBe('1.01')
+     expect(await ok('toFixed(2, 0)')).toBe('2')

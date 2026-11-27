@@ -1,0 +1,105 @@
+diff --git a/README.md b/README.md
+index 8909763..a773b1b 100644
+--- a/README.md
++++ b/README.md
+@@ -215,7 +215,7 @@ All callable as `f(x, ...)` or `x.f(...)`.
+ | Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `flat` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
+ | Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `min` `max` `sum` `avg` |
+ | Maps and values | `keys` `values` `entries` `isEmpty` `type` `toString` |
+-| Time | `now` `timestamp` `duration` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `inDays` `inHours` `inMinutes` `inSeconds` `inMilliseconds` `year` `month` `day` `hour` `minute` `second` `dayOfWeek` `startOfDay` `startOfMonth` `startOfYear` `addDays` `addMonths` `addYears` `formatDate` |
++| Time | `now` `timestamp` `duration` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `inDays` `inHours` `inMinutes` `inSeconds` `inMilliseconds` `year` `month` `day` `hour` `minute` `second` `dayOfWeek` `daysInMonth` `startOfDay` `startOfMonth` `startOfYear` `addDays` `addMonths` `addYears` `formatDate` |
+ 
+ Signatures and examples: [Built-in Functions](https://bonsai.danfry.dev/functions/).
+ 
+diff --git a/src/builtins/index.ts b/src/builtins/index.ts
+index 6c57324..ad8d5a8 100644
+--- a/src/builtins/index.ts
++++ b/src/builtins/index.ts
+@@ -96,6 +96,7 @@ export const hour = defs.hour as unknown as Builtin
+ export const minute = defs.minute as unknown as Builtin
+ export const second = defs.second as unknown as Builtin
+ export const dayOfWeek = defs.dayOfWeek as unknown as Builtin
++export const daysInMonth = defs.daysInMonth as unknown as Builtin
+ export const startOfDay = defs.startOfDay as unknown as Builtin
+ export const startOfMonth = defs.startOfMonth as unknown as Builtin
+ export const startOfYear = defs.startOfYear as unknown as Builtin
+diff --git a/src/functions/builtins.ts b/src/functions/builtins.ts
+index e9d3250..1c8f4ff 100644
+--- a/src/functions/builtins.ts
++++ b/src/functions/builtins.ts
+@@ -9,6 +9,7 @@ import {
+   checkDatePattern,
+   addDays as addDaysIn,
+   addMonths as addMonthsIn,
++  daysInMonth as monthLength,
+   formatTimestamp,
+   fromWallClock,
+   isoWeekday,
+@@ -1756,6 +1757,10 @@ export const second: FunctionDef = /* @__PURE__ */ field('second', (c) => c.seco
+ 
+ export const dayOfWeek: FunctionDef = /* @__PURE__ */ field('dayOfWeek', isoWeekday)
+ 
++export const daysInMonth: FunctionDef = /* @__PURE__ */ field('daysInMonth', (c) =>
++  monthLength(c.year, c.month),
++)
++
+ export const startOfDay: FunctionDef = /* @__PURE__ */ startOf('startOfDay', {})
+ 
+ export const startOfMonth: FunctionDef = /* @__PURE__ */ startOf('startOfMonth', { day: 1 })
+@@ -1929,6 +1934,7 @@ export const BUILTINS: ReadonlyMap<string, FunctionDef> = /* @__PURE__ */ (() =>
+       minute,
+       second,
+       dayOfWeek,
++      daysInMonth,
+       startOfDay,
+       startOfMonth,
+       startOfYear,
+diff --git a/src/functions/descriptions.ts b/src/functions/descriptions.ts
+index 5368342..a1dd2cd 100644
+--- a/src/functions/descriptions.ts
++++ b/src/functions/descriptions.ts
+@@ -170,6 +170,8 @@ const TEXTS: readonly string[] = [
+   'The second, in a time zone (default UTC).',
+   // dayOfWeek
+   'The ISO weekday (Monday 1 to Sunday 7), in a time zone (default UTC).',
++  // daysInMonth
++  'The number of days (28 to 31) in the month, in a time zone (default UTC).',
+   // startOfDay
+   'Midnight at the start of the day, in a time zone (default UTC).',
+   // startOfMonth
+diff --git a/src/runtime/time.ts b/src/runtime/time.ts
+index 1a19fc8..b7f13b9 100644
+--- a/src/runtime/time.ts
++++ b/src/runtime/time.ts
+@@ -386,7 +386,7 @@ export function checked(ms: number, site: CallSite): Date {
+   return date
+ }
+ 
+-function daysInMonth(year: number, month: number): number {
++export function daysInMonth(year: number, month: number): number {
+   return month === MONTHS_PER_YEAR
+     ? daysFromCivil(year + 1, 1) - daysFromCivil(year, month)
+     : daysFromCivil(year, month + 1) - daysFromCivil(year, month)
+diff --git a/tests/builtins.test.ts b/tests/builtins.test.ts
+index 79686fc..7853513 100644
+--- a/tests/builtins.test.ts
++++ b/tests/builtins.test.ts
+@@ -716,6 +716,18 @@ describe('time functions', () => {
+     expect(await fails('hour(at, "Mars/Olympus")', ctx)).toBe('INVALID_ARGUMENT')
+   })
+ 
++  it('counts the days in a month', async () => {
++    expect(await ok('daysInMonth(at)', ctx)).toBe(31)
++    expect(await ok('daysInMonth(timestamp("2024-02-10T00:00:00Z"))')).toBe(29)
++    expect(await ok('daysInMonth(timestamp("2023-02-10T00:00:00Z"))')).toBe(28)
++    expect(await ok('daysInMonth(timestamp("2100-02-10T00:00:00Z"))')).toBe(28)
++    expect(await ok('daysInMonth(timestamp("2026-11-30T12:00:00Z"))')).toBe(30)
++    // 30 November 23:30 UTC is already 1 December in Tokyo.
++    expect(await ok('daysInMonth(timestamp("2026-11-30T23:30:00Z"), "Asia/Tokyo")')).toBe(31)
++    expect(await ok('daysInMonth(at, z)', { at, z: null })).toBe(31)
++    expect(await fails('daysInMonth(at, "Mars/Olympus")', ctx)).toBe('INVALID_ARGUMENT')
++  })
++
+   it('finds the start of days, months, and years', async () => {
+     expect(await ok('startOfDay(at)', ctx)).toEqual({ iso: '2024-03-10T00:00:00.000Z' })
+     expect(await ok('startOfMonth(at)', ctx)).toEqual({ iso: '2024-03-01T00:00:00.000Z' })

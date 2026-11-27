@@ -1,0 +1,10 @@
+{
+  "id": "H03",
+  "repo": "bonsai-js",
+  "kind": "history",
+  "prompt": "Our admins find range checks that compare the same value twice hard to read. Please add between(value, low, high) for numbers and timestamps, so a rule can say between(order.total, 50, 100) or between(order.placedAt, start, end). Wire it up and add tests like the other built-ins.",
+  "requirement": "R3",
+  "oracle": "When we add between, the low end counts and the high end does not, so between(10, 0, 10) is false and between(0, 0, 10) is true.",
+  "max_turns": 30,
+  "timeout_s": 300
+}

@@ -1,0 +1,25 @@
+{
+  "name": "bonsai-js",
+  "url": "https://github.com/danfry1/bonsai-js",
+  "commit": "ffa6ef8afd6fa5fb65471af8fd816bfe0485a934",
+  "language": "typescript",
+  "license": "MIT",
+  "deps": {
+    "kind": "node",
+    "lock": "package-lock.json"
+  },
+  "test": [
+    "npx",
+    "vitest",
+    "run",
+    "--no-cache",
+    "--configLoader",
+    "runner",
+    "--maxWorkers=4",
+    "--retry=2",
+    "--testNamePattern",
+    "^(?!.*minified bundle)"
+  ],
+  "test_timeout_s": 300,
+  "test_note": "Whole unit suite, about 20 s with 4 workers. tests/query.servers.test.ts skips itself without QUERY_SERVERS (never set); the one test that runs the bun binary ('keeps the names in a minified bundle', tests/round6-api.test.ts) is left out by name. --retry=2 (as in every grader): the suite has wall-clock assertions (tests/limits.test.ts and tests/partial.test.ts < 500 ms, several 2,000-3,000 ms checks) that a loaded machine can miss by luck; a test that passes on a retry counts as passed, one that fails three attempts as failed. The repository ships only bun.lock, so deps.lock names a package-lock.json made once from its package.json with npm --package-lock-only --before=2026-11-15."
+}

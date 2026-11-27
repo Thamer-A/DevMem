@@ -1,0 +1,89 @@
+diff --git a/README.md b/README.md
+index 21e84d9..8909763 100644
+--- a/README.md
++++ b/README.md
+@@ -211,7 +211,7 @@ All callable as `f(x, ...)` or `x.f(...)`.
+ 
+ | Area | Functions |
+ |---|---|
+-| Text | `toUpperCase` `toLowerCase` `trim` `trimStart` `trimEnd` `startsWith` `endsWith` `includes` `indexOf` `lastIndexOf` `slice` `split` `replace` `replaceAll` `padStart` `padEnd` `repeat` `at` `matches` `toString` `toNumber` |
++| Text | `toUpperCase` `toLowerCase` `capitalize` `trim` `trimStart` `trimEnd` `startsWith` `endsWith` `includes` `indexOf` `lastIndexOf` `slice` `split` `replace` `replaceAll` `padStart` `padEnd` `repeat` `at` `matches` `toString` `toNumber` |
+ | Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `flat` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
+ | Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `min` `max` `sum` `avg` |
+ | Maps and values | `keys` `values` `entries` `isEmpty` `type` `toString` |
+diff --git a/src/builtins/index.ts b/src/builtins/index.ts
+index f85b048..6c57324 100644
+--- a/src/builtins/index.ts
++++ b/src/builtins/index.ts
+@@ -17,6 +17,7 @@ import * as defs from '../functions/builtins.js'
+ 
+ export const toUpperCase = defs.toUpperCase as unknown as Builtin
+ export const toLowerCase = defs.toLowerCase as unknown as Builtin
++export const capitalize = defs.capitalize as unknown as Builtin
+ export const trim = defs.trim as unknown as Builtin
+ export const trimStart = defs.trimStart as unknown as Builtin
+ export const trimEnd = defs.trimEnd as unknown as Builtin
+diff --git a/src/functions/builtins.ts b/src/functions/builtins.ts
+index e359a21..907b7e2 100644
+--- a/src/functions/builtins.ts
++++ b/src/functions/builtins.ts
+@@ -854,6 +854,17 @@ export const toLowerCase: FunctionDef = /* @__PURE__ */ define('toLowerCase', [
+   /* @__PURE__ */ overload([str], str, ([s]) => (s as string).toLowerCase()),
+ ])
+ 
++export const capitalize: FunctionDef = /* @__PURE__ */ define('capitalize', [
++  /* @__PURE__ */ overload([str], str, ([s]) => {
++    const text = s as string
++    const first = text.codePointAt(0)
++    if (first === undefined) return text
++    // The first code point, so a character outside the BMP is never split.
++    const head = String.fromCodePoint(first)
++    return head.toUpperCase() + text.slice(head.length)
++  }),
++])
++
+ export const trim: FunctionDef = /* @__PURE__ */ define('trim', [
+   /* @__PURE__ */ overload([str], str, ([s]) => (s as string).trim()),
+ ])
+@@ -1829,6 +1840,7 @@ export const BUILTINS: ReadonlyMap<string, FunctionDef> = /* @__PURE__ */ (() =>
+     [
+       toUpperCase,
+       toLowerCase,
++      capitalize,
+       trim,
+       trimStart,
+       trimEnd,
+diff --git a/src/functions/descriptions.ts b/src/functions/descriptions.ts
+index 0eb7dbb..c9d9848 100644
+--- a/src/functions/descriptions.ts
++++ b/src/functions/descriptions.ts
+@@ -12,6 +12,8 @@ const TEXTS: readonly string[] = [
+   'Upper-cases text.',
+   // toLowerCase
+   'Lower-cases text.',
++  // capitalize
++  'Upper-cases the first character of text and leaves the rest unchanged.',
+   // trim
+   'Removes leading and trailing whitespace.',
+   // trimStart
+diff --git a/tests/builtins.test.ts b/tests/builtins.test.ts
+index 38127ca..2ca552c 100644
+--- a/tests/builtins.test.ts
++++ b/tests/builtins.test.ts
+@@ -87,6 +87,16 @@ describe('string functions', () => {
+     expect(await ok('trimEnd("  a  ")')).toBe('  a')
+   })
+ 
++  it('capitalizes the first character only', async () => {
++    expect(await ok('capitalize("mcDonald")')).toBe('McDonald')
++    expect(await ok('"hello world".capitalize()')).toBe('Hello world')
++    expect(await ok('capitalize("élan")')).toBe('Élan')
++    expect(await ok('capitalize("")')).toBe('')
++    expect(await ok('capitalize("42 items")')).toBe('42 items')
++    expect(await ok('capitalize("\\u{1F600}x")')).toBe('\u{1F600}x')
++    expect(await fails('capitalize(x)', { x: 5 })).toBe('NO_OVERLOAD')
++  })
++
+   it('tests prefixes, suffixes, and substrings', async () => {
+     expect(await ok('startsWith("api-users", "api-")')).toBe(true)
+     expect(await ok('endsWith("file.ts", ".js")')).toBe(false)

@@ -1,0 +1,93 @@
+diff --git a/README.md b/README.md
+index d08feeb..f99fe1b 100644
+--- a/README.md
++++ b/README.md
+@@ -211,7 +211,7 @@ All callable as `f(x, ...)` or `x.f(...)`.
+ 
+ | Area | Functions |
+ |---|---|
+-| Text | `toUpperCase` `toLowerCase` `capitalize` `trim` `trimStart` `trimEnd` `startsWith` `endsWith` `includes` `indexOf` `lastIndexOf` `slice` `split` `replace` `replaceAll` `padStart` `padEnd` `repeat` `at` `matches` `toString` `toNumber` |
++| Text | `toUpperCase` `toLowerCase` `capitalize` `mask` `trim` `trimStart` `trimEnd` `startsWith` `endsWith` `includes` `indexOf` `lastIndexOf` `slice` `split` `replace` `replaceAll` `padStart` `padEnd` `repeat` `at` `matches` `toString` `toNumber` |
+ | Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `compact` `flat` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
+ | Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `min` `max` `sum` `avg` |
+ | Maps and values | `keys` `values` `entries` `isEmpty` `type` `toString` |
+diff --git a/src/builtins/index.ts b/src/builtins/index.ts
+index 00fc8ca..2cc83dd 100644
+--- a/src/builtins/index.ts
++++ b/src/builtins/index.ts
+@@ -18,6 +18,7 @@ import * as defs from '../functions/builtins.js'
+ export const toUpperCase = defs.toUpperCase as unknown as Builtin
+ export const toLowerCase = defs.toLowerCase as unknown as Builtin
+ export const capitalize = defs.capitalize as unknown as Builtin
++export const mask = defs.mask as unknown as Builtin
+ export const trim = defs.trim as unknown as Builtin
+ export const trimStart = defs.trimStart as unknown as Builtin
+ export const trimEnd = defs.trimEnd as unknown as Builtin
+diff --git a/src/functions/builtins.ts b/src/functions/builtins.ts
+index e60406b..6741d19 100644
+--- a/src/functions/builtins.ts
++++ b/src/functions/builtins.ts
+@@ -866,6 +866,24 @@ export const capitalize: FunctionDef = /* @__PURE__ */ define('capitalize', [
+   }),
+ ])
+ 
++/** How many characters mask leaves visible at the end. */
++const MASK_VISIBLE = 4
++/** What mask writes in place of each hidden character. */
++const MASK_CHARACTER = '•'
++
++export const mask: FunctionDef = /* @__PURE__ */ define('mask', [
++  /* @__PURE__ */ overload([str], str, ([s], site) => {
++    const text = s as string
++    site.state.charge(1 + (text.length >>> SCAN_SHIFT))
++    // By code point, so a character outside the BMP is hidden as one.
++    const chars = Array.from(text)
++    const visibleFrom = chars.length - MASK_VISIBLE
++    return chars
++      .map((ch, i) => (i >= visibleFrom || ch === ' ' || ch === '-' ? ch : MASK_CHARACTER))
++      .join('')
++  }),
++])
++
+ export const trim: FunctionDef = /* @__PURE__ */ define('trim', [
+   /* @__PURE__ */ overload([str], str, ([s]) => (s as string).trim()),
+ ])
+@@ -1870,6 +1888,7 @@ export const BUILTINS: ReadonlyMap<string, FunctionDef> = /* @__PURE__ */ (() =>
+       toUpperCase,
+       toLowerCase,
+       capitalize,
++      mask,
+       trim,
+       trimStart,
+       trimEnd,
+diff --git a/src/functions/descriptions.ts b/src/functions/descriptions.ts
+index 413fa58..4992d25 100644
+--- a/src/functions/descriptions.ts
++++ b/src/functions/descriptions.ts
+@@ -14,6 +14,8 @@ const TEXTS: readonly string[] = [
+   'Lower-cases text.',
+   // capitalize
+   'Upper-cases the first character of text and leaves the rest unchanged.',
++  // mask
++  'Hides all but the last four characters with •, keeping spaces and dashes, e.g. for card numbers.',
+   // trim
+   'Removes leading and trailing whitespace.',
+   // trimStart
+diff --git a/tests/builtins.test.ts b/tests/builtins.test.ts
+index 7776954..1bb2fbe 100644
+--- a/tests/builtins.test.ts
++++ b/tests/builtins.test.ts
+@@ -782,3 +782,13 @@ describe('time functions', () => {
+     )
+   })
+ })
++
++describe('mask', () => {
++  it('hides all but the last four characters', async () => {
++    expect(await ok('mask("4111 1111 1111 1234")')).toBe('•••• •••• •••• 1234')
++    expect(await ok('"12-34-5678".mask()')).toBe('••-••-5678')
++    expect(await ok('mask("123")')).toBe('123')
++    expect(await ok('mask("")')).toBe('')
++    expect(await fails('mask(x)', { x: 1234 })).toBe('NO_OVERLOAD')
++  })
++})

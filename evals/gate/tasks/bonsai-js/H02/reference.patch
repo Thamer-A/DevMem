@@ -1,0 +1,90 @@
+diff --git a/README.md b/README.md
+index d08feeb..91c12e3 100644
+--- a/README.md
++++ b/README.md
+@@ -215,7 +215,7 @@ All callable as `f(x, ...)` or `x.f(...)`.
+ | Lists | `map` `filter` `find` `findIndex` `some` `every` `none` `count` `flatMap` `reduce` `sort` `sortBy` `groupBy` `reverse` `unique` `compact` `flat` `first` `last` `join` `slice` `at` `includes` `indexOf` `lastIndexOf` `isEmpty` `min` `max` `sum` `avg` |
+ | Numbers | `round` `floor` `ceil` `trunc` `abs` `sqrt` `clamp` `toFixed` `formatNumber` `formatCurrency` `min` `max` `sum` `avg` |
+ | Maps and values | `keys` `values` `entries` `isEmpty` `type` `toString` |
+-| Time | `now` `timestamp` `duration` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `inDays` `inHours` `inMinutes` `inSeconds` `inMilliseconds` `year` `month` `day` `hour` `minute` `second` `dayOfWeek` `daysInMonth` `startOfDay` `startOfMonth` `startOfYear` `addDays` `addMonths` `addYears` `formatDate` |
++| Time | `now` `timestamp` `duration` `weeks` `days` `hours` `minutes` `seconds` `milliseconds` `inDays` `inHours` `inMinutes` `inSeconds` `inMilliseconds` `year` `month` `quarter` `day` `hour` `minute` `second` `dayOfWeek` `daysInMonth` `startOfDay` `startOfMonth` `startOfYear` `addDays` `addMonths` `addYears` `formatDate` |
+ 
+ Signatures and examples: [Built-in Functions](https://bonsai.danfry.dev/functions/).
+ 
+diff --git a/src/builtins/index.ts b/src/builtins/index.ts
+index 00fc8ca..84b7f9a 100644
+--- a/src/builtins/index.ts
++++ b/src/builtins/index.ts
+@@ -92,6 +92,7 @@ export const inSeconds = defs.inSeconds as unknown as Builtin
+ export const inMilliseconds = defs.inMilliseconds as unknown as Builtin
+ export const year = defs.year as unknown as Builtin
+ export const month = defs.month as unknown as Builtin
++export const quarter = defs.quarter as unknown as Builtin
+ export const day = defs.day as unknown as Builtin
+ export const hour = defs.hour as unknown as Builtin
+ export const minute = defs.minute as unknown as Builtin
+diff --git a/src/functions/builtins.ts b/src/functions/builtins.ts
+index e60406b..c9ae818 100644
+--- a/src/functions/builtins.ts
++++ b/src/functions/builtins.ts
+@@ -1761,6 +1761,16 @@ export const year: FunctionDef = /* @__PURE__ */ field('year', (c) => c.year)
+ 
+ export const month: FunctionDef = /* @__PURE__ */ field('month', (c) => c.month)
+ 
++/** The month our financial year starts in (April), so April to June is quarter 1. */
++const FINANCIAL_YEAR_START = 4
++
++export const quarter: FunctionDef = /* @__PURE__ */ field(
++  'quarter',
++  (c) =>
++    Math.floor((((c.month - FINANCIAL_YEAR_START) % MONTHS_PER_YEAR) + MONTHS_PER_YEAR) % MONTHS_PER_YEAR / 3) +
++    1,
++)
++
+ export const day: FunctionDef = /* @__PURE__ */ field('day', (c) => c.day)
+ 
+ export const hour: FunctionDef = /* @__PURE__ */ field('hour', (c) => c.hour)
+@@ -1944,6 +1954,7 @@ export const BUILTINS: ReadonlyMap<string, FunctionDef> = /* @__PURE__ */ (() =>
+       inMilliseconds,
+       year,
+       month,
++      quarter,
+       day,
+       hour,
+       minute,
+diff --git a/src/functions/descriptions.ts b/src/functions/descriptions.ts
+index 413fa58..cd98082 100644
+--- a/src/functions/descriptions.ts
++++ b/src/functions/descriptions.ts
+@@ -162,6 +162,8 @@ const TEXTS: readonly string[] = [
+   'The calendar year, in a time zone (default UTC).',
+   // month
+   'The month 1-12, in a time zone (default UTC).',
++  // quarter
++  'The quarter of the financial year (1 to 4; the year starts in April), in a time zone (default UTC).',
+   // day
+   'The day of the month, in a time zone (default UTC).',
+   // hour
+diff --git a/tests/builtins.test.ts b/tests/builtins.test.ts
+index 7776954..bc86cc4 100644
+--- a/tests/builtins.test.ts
++++ b/tests/builtins.test.ts
+@@ -782,3 +782,18 @@ describe('time functions', () => {
+     )
+   })
+ })
++
++describe('quarter', () => {
++  it('counts quarters of the financial year from April', async () => {
++    expect(await ok('quarter(timestamp("2026-04-01T00:00:00Z"))')).toBe(1)
++    expect(await ok('quarter(timestamp("2026-08-15T00:00:00Z"))')).toBe(2)
++    expect(await ok('quarter(timestamp("2026-12-31T23:59:59Z"))')).toBe(3)
++    expect(await ok('quarter(timestamp("2026-02-01T00:00:00Z"))')).toBe(4)
++    // 31 March 23:30 UTC is already 1 April in London (summer time).
++    expect(await ok('quarter(timestamp("2026-03-31T23:30:00Z"), "Europe/London")')).toBe(1)
++    expect(await ok('quarter(timestamp("2026-03-31T23:30:00Z"))')).toBe(4)
++    expect(await fails('quarter(timestamp("2026-03-31T23:30:00Z"), "Mars/Olympus")')).toBe(
++      'INVALID_ARGUMENT',
++    )
++  })
++})
