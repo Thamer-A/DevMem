@@ -40,7 +40,10 @@ def main(argv: list[str]) -> int:
     if "--version" in argv:
         print(VERSION)
         return 0
-    prompt = argv[argv.index("-p") + 1] if "-p" in argv else ""
+    if "--" in argv:                    # the runner puts the prompt last, after "--"
+        prompt = " ".join(argv[argv.index("--") + 1:])
+    else:
+        prompt = argv[argv.index("-p") + 1] if "-p" in argv else ""
     model = argv[argv.index("--model") + 1] if "--model" in argv else "fake"
     sid = str(uuid.uuid4())
     base = {"session_id": sid, "cwd": str(Path.cwd()), "transcript_path": str(Path.cwd() / "none.jsonl")}

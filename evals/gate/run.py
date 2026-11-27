@@ -209,9 +209,11 @@ def run_session(cmd: list[str], prompt: str, cur: Path, env: dict, max_turns: in
     _sys_path()
     from devmem import proc
     from devmem.claude_cli import parse_stream
-    argv = [*cmd, "-p", prompt, "--output-format", "stream-json", "--verbose", "--model", RUNNER["model"],
+    # The prompt goes last, after "--": a prompt that starts with a dash (md2conf R04 starts with
+    # "--skip-title-heading") would otherwise be read as an unknown option and the session would never start.
+    argv = [*cmd, "-p", "--output-format", "stream-json", "--verbose", "--model", RUNNER["model"],
             "--max-turns", str(max_turns), "--permission-mode", RUNNER["permission_mode"],
-            "--allowedTools", *RUNNER["allowed_tools"]]
+            "--allowedTools", *RUNNER["allowed_tools"], "--", prompt]
     out = cur / "logs" / "stream.jsonl"
     t0 = time.time()
     r = proc.run_to_file(argv, out, cwd=str(cur / "work"), stdin=subprocess.DEVNULL,

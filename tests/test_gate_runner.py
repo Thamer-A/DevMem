@@ -172,6 +172,28 @@ def test_the_token_file_reaches_the_session_and_no_saved_file(gate, monkeypatch)
                 assert secret.encode() not in p.read_bytes(), p
 
 
+def test_a_prompt_that_starts_with_a_dash_is_passed_after_the_end_of_options(tmp_path, monkeypatch):
+    R._sys_path()
+    from devmem import proc
+    from types import SimpleNamespace
+    seen = {}
+
+    def fake_run(argv, out, **_):
+        seen["argv"] = argv
+        Path(out).write_text("", encoding="utf-8")
+        return SimpleNamespace(returncode=0, stderr="", timed_out=False, interrupted=False)
+
+    monkeypatch.setattr(proc, "run_to_file", fake_run)
+    cur = tmp_path / "current"
+    (cur / "logs").mkdir(parents=True)
+    (cur / "work").mkdir()
+    prompt = "--skip-title-heading never removes the first heading. Fix it."    # md2conf R04 starts this way
+    R.run_session(["claude"], prompt, cur, {}, 5)
+    argv = seen["argv"]
+    assert argv[-2:] == ["--", prompt] and argv.count(prompt) == 1
+    assert argv.index("-p") < argv.index("--allowedTools") < argv.index("--")
+
+
 def test_the_oracle_arm_gets_the_requirement_in_its_prompt(gate):
     assert _run(gate, "--stage", "orc", "--arms", "S,O", "--kinds", "history", "--repeats", "1", "--confirm", "2") == 0
     by_arm = {r["arm"]: r for r in _rows(gate, "orc")}
