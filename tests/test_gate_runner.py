@@ -147,6 +147,7 @@ def test_no_api_key_reaches_a_session(gate):
     env = R.session_env(cfg, W.deps(cfg, gate["root"]), gate["root"] / "current", devmem=False)
     assert not [k for k in env if k.upper().startswith("ANTHROPIC_")]
     assert env["CLAUDE_CONFIG_DIR"].startswith(str(gate["root"] / "current"))
+    assert env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] == "0"          # automatic memory forced on in every arm
 
 
 def test_the_oracle_arm_gets_the_requirement_in_its_prompt(gate):

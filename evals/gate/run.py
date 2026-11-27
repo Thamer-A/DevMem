@@ -122,6 +122,9 @@ def session_env(cfg: dict, deps_dir: Path, cur: Path, devmem: bool) -> dict:
     if os.environ.get("CLAUDE_CODE_OAUTH_TOKEN"):
         env["CLAUDE_CODE_OAUTH_TOKEN"] = os.environ["CLAUDE_CODE_OAUTH_TOKEN"]
     tmp = cur / "tmp"
+    # automatic memory on in every arm (PREREGISTRATION.md section 3): "0" forces it on whatever a setting says
+    # (https://code.claude.com/docs/en/env-vars.md, read 2026-11-26)
+    env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "0"
     env.update(CLAUDE_CONFIG_DIR=str(cur / "config"), HOME=str(cur / "home"), USERPROFILE=str(cur / "home"),
                TEMP=str(tmp), TMP=str(tmp), TMPDIR=str(tmp), npm_config_cache=str(tmp / "npm-cache"),
                PIP_CACHE_DIR=str(tmp / "pip-cache"), XDG_CACHE_HOME=str(tmp / "xdg-cache"))
