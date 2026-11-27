@@ -13,7 +13,8 @@ earlier session? The question, arms, counts, measures, thresholds and stop rules
 | `validate.py` | every grader rejects the starting code and the plausible guess and accepts the reference |
 | `verify_freeze.py`, `MANIFEST.sha256` | the hash freeze of the task set; the runner refuses a changed set |
 | `run.py`, `runner.json` | the runner (pinned Claude Code version, model, flags) and the history replay |
-| `fake_claude.py` | a stand-in for `claude -p` used by `tests/test_gate_runner.py` and `--fake` dry runs |
+| `fake_claude.py` | a stand-in for `claude -p` used by `tests/test_gate_runner.py`, `tests/test_gate_calibrate.py` and `--fake` dry runs |
+| `calibrate.py`, `BASELINE-FACTS.md` | Task 2: the nine calibration sessions (a-i) with the runner's isolation in `<root>/calib/` (`--only a,b`, `--confirm N`), and what the documentation says next to what they showed |
 | `results/` | one JSON line per run (`<stage>.jsonl`); `results/raw/<run id>/` the stream, prompt, diff, grade and pack log of each run (kept locally, not committed) |
 
 Every command that starts real sessions needs `--confirm <number of sessions>`, and the owner's yes first.
