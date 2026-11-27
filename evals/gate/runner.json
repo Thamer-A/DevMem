@@ -1,0 +1,11 @@
+{
+  "claude_version": "2.1.332",
+  "model": "claude-haiku-5-5",
+  "permission_mode": "acceptEdits",
+  "allowed_tools": ["Bash", "Read", "Edit", "Write", "Glob", "Grep"],
+  "session_timeout_s": 1200,
+  "oracle_wrapper": "Earlier in this project the user said: \"{oracle}\"\n\n{prompt}",
+  "seed": 20261126,
+  "prices_per_mtok": {"model": "claude-haiku-5-5", "read_on": "2026-11-26", "input": 0.10, "output": 0.50,
+                      "cache_write_5m": 0.125, "cache_write_1h": 0.20, "cache_read": 0.01}
+}

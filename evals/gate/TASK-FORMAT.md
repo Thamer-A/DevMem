@@ -20,9 +20,16 @@ evals/gate/
   MANIFEST.sha256                     every file under tasks/ and tuning/, with its SHA-256 (verify_freeze)
 ```
 
-**repo.json**: `{"name", "url", "commit" (full SHA), "language", "license", "setup": [argv, ...], "test": [argv],
-"test_timeout_s"}`. `setup` installs dependencies into the working copy (for example `["npm", "ci"]`); `test` runs
-the repository's own suite offline (for example `["python", "-m", "pytest", "tests", "-q"]`).
+**repo.json**: `{"name", "url", "commit" (full SHA), "language", "license", "deps", "test": [argv],
+"test_timeout_s"}`. Dependencies are installed once per repository, outside every working copy
+(`evals/gate/workspace.py`):
+- `"deps": {"kind": "python", "requirements": ["pkg==1.2.3", ...]}`: a virtual environment with exactly these
+  (pinned) packages; the repository's own package is not installed, it is imported from the working copy.
+- `"deps": {"kind": "node"}`: `npm ci` from the repository's own `package.json` and lock file; each working copy
+  gets `node_modules` as a link (a junction on Windows) to that install.
+
+`test` runs the repository's own suite offline from the working copy, with the tool environment on `PATH` (for
+example `["python", "-m", "pytest", "tests", "-q", "-p", "no:cacheprovider"]` or `["npx", "vitest", "run"]`).
 
 **history.json**: `{"sessions": [{"n": 1, "prompt": "...", "patch": "01.patch", "requirements": [{"id": "R1",
 "text": "..."}]}]}`. `prompt` is the user's whole message for that session, exactly as it will be sent. Each
@@ -35,10 +42,12 @@ requirements in all, each with an exact value (a number, a name, a format, an or
 "oracle": "<the requirement's text, verbatim>" or null, "max_turns", "timeout_s"}`. `oracle` is set for history
 and tuning tasks that depend on a requirement, and null for ordinary ones.
 
-**grade.py**: defines `grade(work: Path) -> dict` returning at least `{"passed": bool, "checks": {name: bool}}`.
-It may run the repository's tests (with files from `hidden/` copied in first and removed after) and read files.
-It must not use the network, must finish within the task's `timeout_s`, and must not modify anything outside `work`.
-A grader that raises counts as a failed run.
+**grade.py**: defines `grade(work: Path, env: dict) -> dict` returning at least `{"passed": bool, "checks": {name:
+bool}}`. `env` is the process environment with the repository's tools first on `PATH` (pass it to `subprocess.run`).
+It may run the repository's tests (with files from `hidden/` copied in first and removed after; the folder of
+grade.py is `Path(__file__).parent`) and read files. Standard library only. It must not use the network, must finish
+within the task's `timeout_s`, and must not modify anything outside `work`. A grader that raises counts as a failed
+run.
 
 **Validation** (`python -m evals.gate.validate`): for every task, the starting code fails the grader, the starting
 code plus `reference.patch` passes it, and the starting code plus `guess.patch` fails it. A history task's guess
