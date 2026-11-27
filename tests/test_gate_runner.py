@@ -155,6 +155,22 @@ def test_no_api_key_reaches_a_session(gate):
     assert env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] == "0"          # automatic memory forced on in every arm
 
 
+def test_the_token_file_reaches_the_session_and_no_saved_file(gate, monkeypatch):
+    monkeypatch.delenv("CLAUDE_CODE_OAUTH_TOKEN", raising=False)
+    cfg = W.load_repo("mini")
+    assert "CLAUDE_CODE_OAUTH_TOKEN" not in R.session_env(cfg, W.deps(cfg, gate["root"]), gate["root"] / "current",
+                                                          devmem=False)
+    secret = "tok-made-up-for-the-test-7f3a"
+    (gate["root"] / R.TOKEN_FILE).write_text(f"﻿{secret}\r\n", encoding="utf-8")   # as Notepad might save it
+    env = R.session_env(cfg, W.deps(cfg, gate["root"]), gate["root"] / "current", devmem=False)
+    assert env["CLAUDE_CODE_OAUTH_TOKEN"] == secret
+    assert _run(gate, "--stage", "tok", "--arms", "S", "--tasks", "R01", "--repeats", "1", "--confirm", "1") == 0
+    for top in (gate["root"] / "runs", gate["results"]):
+        for p in top.rglob("*"):
+            if p.is_file():
+                assert secret.encode() not in p.read_bytes(), p
+
+
 def test_the_oracle_arm_gets_the_requirement_in_its_prompt(gate):
     assert _run(gate, "--stage", "orc", "--arms", "S,O", "--kinds", "history", "--repeats", "1", "--confirm", "2") == 0
     by_arm = {r["arm"]: r for r in _rows(gate, "orc")}

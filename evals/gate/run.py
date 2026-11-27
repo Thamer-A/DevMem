@@ -11,7 +11,7 @@ path, finds what the replay left for that path): `work/` (a fresh working copy o
 (TEMP, npm and pip caches), `userdata/` (DEVMEM_USER_DATA, DevMem arms) and `logs/`. Afterwards the folder is moved
 to `<root>/runs/<run id>/` and its logs are copied to `<results>/raw/<run id>/`; one JSON line per run goes to
 `<results>/<stage>.jsonl`. `ANTHROPIC_API_KEY` is never passed to a session (runs use the subscription); a
-`CLAUDE_CODE_OAUTH_TOKEN` in the environment is.
+`CLAUDE_CODE_OAUTH_TOKEN` in the environment is, or else the token in the file `<root>/oauth-token`.
 
 A run whose key (stage, repo, task, arm, repeat) already has a line is skipped, so an interrupted stage continues
 where it stopped; a harness failure is run once more (`attempt` 2), and a second one stays a harness failure.
@@ -119,13 +119,31 @@ def _copytree(src: Path, dest: Path) -> None:
         shutil.copytree(src, dest, dirs_exist_ok=True, symlinks=True)
 
 
+TOKEN_FILE = "oauth-token"
+
+
+def oauth_token(root: Path) -> str | None:
+    """The sign-in token for the runs (`claude setup-token`): CLAUDE_CODE_OAUTH_TOKEN, or else the file
+    `<root>/oauth-token`, which the owner writes in their own terminal so the token never passes through a session
+    or a log. It sits beside `current/` and `runs/`, never inside a folder that is archived or copied to results."""
+    if os.environ.get("CLAUDE_CODE_OAUTH_TOKEN"):
+        return os.environ["CLAUDE_CODE_OAUTH_TOKEN"]
+    f = Path(root) / TOKEN_FILE
+    try:
+        text = f.read_text(encoding="utf-8-sig").strip() if f.is_file() else ""
+    except OSError:
+        text = ""
+    return text or None
+
+
 def session_env(cfg: dict, deps_dir: Path, cur: Path, devmem: bool) -> dict:
     env = W.tool_env(cfg, deps_dir, cur / "work")
     for k in list(env):
         if k.upper().startswith("ANTHROPIC_"):     # never an API key: runs go through the subscription
             del env[k]
-    if os.environ.get("CLAUDE_CODE_OAUTH_TOKEN"):
-        env["CLAUDE_CODE_OAUTH_TOKEN"] = os.environ["CLAUDE_CODE_OAUTH_TOKEN"]
+    token = oauth_token(cur.parent)
+    if token:
+        env["CLAUDE_CODE_OAUTH_TOKEN"] = token
     tmp = cur / "tmp"
     # automatic memory on in every arm (PREREGISTRATION.md section 3): "0" forces it on whatever a setting says
     # (https://code.claude.com/docs/en/env-vars.md, read 2026-11-26)
