@@ -1483,9 +1483,63 @@ def _forget_files(store: Path, picked: list[dict], extra_ids: list[str]) -> list
     return sorted(set(files))
 
 
+PACK_LOG = "packs.jsonl"     # devmem.hooks.PACK_LOG: one line per prompt, what its pack carried
+
+
+def forget_pack_log(store: Path, ids: list[str]) -> dict:
+    """Remove forgotten sessions from the pack log (`<store>/packs.jsonl`): every line of a forgotten session, and from
+    the other lines every item a forgotten session supplied (its `sources` entry names that session; a line without
+    `sources` loses every `session:<id8>` key of a forgotten session), counted in the line's `forgotten_items`. The
+    rest is written back through the redactor. When the log cannot be read whole (past read_events' bound, or a line
+    too long to read), the whole file is deleted instead: nothing of a forgotten session may stay. A line a hook
+    appends while this runs can be lost (the file is replaced). {"lines_removed", "lines_changed", "deleted"}."""
+    store = Path(store)
+    path = store / PACK_LOG
+    out = {"lines_removed": 0, "lines_changed": 0, "deleted": False}
+    gone = {str(i) for i in ids if i}
+    if not gone or not path.is_file() or not _in_store(store, path):
+        return out
+    info: dict = {}
+    events = read_events(path, info)
+    if not info.get("complete", True) or info.get("skipped"):
+        out["deleted"] = bool(_remove([path], store))
+        return out
+    short = {i[:8] for i in gone}
+    kept = []
+    for e in events:
+        if str(e.get("session_id") or "") in gone:
+            out["lines_removed"] += 1
+            continue
+        keys = e.get("keys")
+        keys = keys if isinstance(keys, list) else []
+        sources = e.get("sources")
+        sources = sources if isinstance(sources, dict) else None
+
+        def from_gone(k) -> bool:
+            if sources is not None and str(sources.get(k) or "") in gone:
+                return True
+            return isinstance(k, str) and k.startswith("session:") and k[8:] in short
+        drop = [k for k in keys if from_gone(k)]
+        if drop:
+            e["keys"] = [k for k in keys if k not in drop]
+            if sources is not None:
+                e["sources"] = {k: v for k, v in sources.items() if k not in drop and str(v) not in gone}
+            before = e.get("forgotten_items")
+            before = before if isinstance(before, int) and not isinstance(before, bool) and before > 0 else 0
+            e["forgotten_items"] = before + len(drop)
+            out["lines_changed"] += 1
+        kept.append(e)
+    if out["lines_removed"] or out["lines_changed"]:
+        from .redact import Redactor
+        red = Redactor(store)
+        _atomic_write(path, "".join(json.dumps(red.record(e), ensure_ascii=False) + "\n" for e in kept))
+    return out
+
+
 def forget_session(store: Path, id_prefix: str) -> dict:
     """Delete one session (record, raw record, live log and state, also when its record no longer loads) by
-    session-id prefix, and the MCP call log. Raises ValueError if the prefix matches no session or more than one."""
+    session-id prefix, and the MCP call log; its lines and items leave the pack log (forget_pack_log). Raises
+    ValueError if the prefix matches no session or more than one."""
     id_prefix = (id_prefix or "").strip()
     if len(id_prefix) < 4:
         raise ValueError("give at least 4 characters of the session id")
@@ -1497,7 +1551,8 @@ def forget_session(store: Path, id_prefix: str) -> dict:
         raise ValueError(f"no session with id starting {id_prefix!r}")
     if len(ids) > 1:
         raise ValueError(f"{id_prefix!r} matches {len(ids)} sessions: {', '.join(i[:12] for i in ids)}")
-    return {"sessions": ids, "removed": _remove(_forget_files(store, matches, unloaded), store)}
+    return {"sessions": ids, "removed": _remove(_forget_files(store, matches, unloaded), store),
+            "pack_log": forget_pack_log(store, ids)}
 
 
 def forget_before(store: Path, before: str) -> dict:
@@ -1508,12 +1563,13 @@ def forget_before(store: Path, before: str) -> dict:
     picked = [s for s in loaded if s.get("started_at") and _parse_when(s["started_at"]) < cutoff]
     unloaded = [i for i, t in _unloaded_sessions(store, loaded).items() if t and t < cutoff.timestamp()]
     ids = sorted({str(s.get("session_id")) for s in picked} | set(unloaded))
-    return {"sessions": ids, "removed": _remove(_forget_files(store, picked, unloaded), store)}
+    return {"sessions": ids, "removed": _remove(_forget_files(store, picked, unloaded), store),
+            "pack_log": forget_pack_log(store, ids)}
 
 
 def forget_all(store: Path) -> dict:
-    """Delete all captured sessions (records, raw records, live logs and their state, pending begins) and the
-    MCP call log. The project map and settings stay; rebuild-able indexes are the caller's job."""
+    """Delete all captured sessions (records, raw records, live logs and their state, pending begins), the MCP call
+    log and the pack log. The project map and settings stay; rebuild-able indexes are the caller's job."""
     store = Path(store)
     sids = sorted({str(s.get("session_id")) for s in _load_all(store)})
     return {"sessions": sids, "removed": _remove(forget_all_files(store), store)}
@@ -1524,7 +1580,7 @@ def forget_all_files(store: Path) -> list[Path]:
     store = Path(store)
     files = list((store / "sessions").glob("*")) + list(_live_dir(store).glob("*"))
     files += list((store / "pending").glob("*")) if (store / "pending").exists() else []
-    for name in ("pending.json", "mcp_calls.jsonl"):
+    for name in ("pending.json", "mcp_calls.jsonl", PACK_LOG):
         if (store / name).exists():
             files.append(store / name)
     return sorted(f for f in set(files) if f.is_file())

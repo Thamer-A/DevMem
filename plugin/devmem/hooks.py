@@ -557,8 +557,10 @@ def on_user_prompt(payload: dict, project: Path, store: Path, red: Redactor) -> 
         if lk.held:
             _write_state(store, sid, st, red)
     if not S.config_bool(_config(store).get("deliver"), True):
+        _log_pack(store, red, payload, sid, st, mode=None, tokens_est=0, chars=0, keys=[], sources={},
+                  empty_reason=DELIVERY_OFF)
         return ""
-    return _deliver(payload, project, store, sid, prompt, st, red)
+    return _deliver(payload, project, store, sid, prompt, st, red, log=True)
 
 
 # Seconds the refresh on a prompt may take (devmem.refresh: a child process killed at this budget): a new or large
@@ -573,11 +575,38 @@ PROMPT_CAP = 100_000
 _RECORD_ONLY = False   # this event records but serves nothing: git cannot say, its last answer was clean (run)
 
 
+# .devmemory/packs.jsonl: one line per prompt of a recorded session, what its pack carried or why it had none
+# (`devmem packs`). Item keys (session:<id8>, req:<hash>, file:<path>, conventions), the session that supplied each
+# session or requirement item, estimated tokens, characters; never prompt or pack text. Through the redactor (_append).
+# `devmem forget` removes a forgotten session's lines and its items in other lines (devmem.sessions.forget_pack_log).
+PACK_LOG = "packs.jsonl"
+DELIVERY_OFF = "delivery is off (\"deliver\": false in config.json)"
+NOT_SERVED = "nothing served: this store is not known to be yours"
+
+
+def _log_pack(store: Path, red: Redactor | None, payload: dict, sid: str, st: dict, **fields) -> None:
+    """Append this prompt's line to the pack log. A failure is logged to hook_errors.log and never reaches the
+    session."""
+    try:
+        turns = st.get("turns") if isinstance(st, dict) else None
+        entry = {"ts": S.now_iso(), "session_id": sid,
+                 "turn": turns - 1 if isinstance(turns, int) and not isinstance(turns, bool) and turns > 0 else None,
+                 "prompt_id": payload.get("prompt_id"), **fields}
+        _append(store / PACK_LOG, entry, red or Redactor(store))
+    except Exception as exc:  # noqa: BLE001 - the pack log must never break or block a prompt
+        _log_error(store, "UserPromptSubmit:pack_log", exc)
+
+
 def _deliver(payload: dict, project: Path, store: Path, sid: str, prompt: str, st: dict,
-             red: Redactor | None = None) -> str:
+             red: Redactor | None = None, log: bool = False) -> str:
+    """The pack for this prompt (printed by the hook). log: also write its line to the pack log (recorded sessions;
+    with capture off nothing is logged)."""
     import inspect
     from .consent import recorded_refusal
     if recorded_refusal(project, store):   # not this user's store (run() asked store_refusal for this event already)
+        if log:     # reached only while the store records without serving (git cannot say: run's _RECORD_ONLY)
+            _log_pack(store, red, payload, sid, st, mode=None, tokens_est=0, chars=0, keys=[], sources={},
+                      empty_reason=NOT_SERVED)
         return ""
     from .pack import PACK_MODES, build_pack
     p = _paths(store, sid)
@@ -612,13 +641,22 @@ def _deliver(payload: dict, project: Path, store: Path, sid: str, prompt: str, s
     # `keys` names every item the pack carried (session:<id8>, file:<path>, req:<hash>, conventions), so the
     # next prompt of this session is not sent them again. An empty pack prints nothing at all.
     keys = [str(k) for k in info.get("keys") or []]
-    if len(text) > STDOUT_CAP:
+    trimmed = len(text) > STDOUT_CAP
+    if trimmed:
         cut = text.rfind("\n", 0, STDOUT_CAP - 80)
         text = text[: cut if cut > 0 else STDOUT_CAP - 80] + "\n[DevMemory: pack cut at the hook output limit]\n"
         keys = [k for k in keys if (k == "conventions" and "## Conventions" in text)
                 or (k.startswith("session:") and f"session {k[8:]}" in text)
                 or (k.startswith("file:") and f"`{k[5:]}`" in text)]   # what was cut off was not delivered
     files = [k[5:] for k in keys if k.startswith("file:")] if keys else list(info.get("files") or [])
+    if log:
+        sources = info.get("sources")
+        sources = sources if isinstance(sources, dict) else {}
+        _log_pack(store, red, payload, sid, st, mode=kwargs["mode"],
+                  tokens_est=(info.get("tokens_est") or 0) if text else 0, chars=len(text), keys=keys,
+                  sources={k: str(v) for k, v in sources.items() if k in keys},
+                  cut=True if trimmed else None,
+                  empty_reason=None if text else str(info.get("empty_reason") or "nothing matched"))
     with _Lock(p["lock"]) as lk:
         if not lk.held:
             return text
@@ -1707,7 +1745,8 @@ def _init_switched_on(project, event: str = "") -> bool:
 
 # Where the hooks write (or SQLite opens) in a store: checked with one lstat each on every event, instead of walking
 # the store. A link in any of them makes the hook write nothing (store_links_now).
-LINK_CHECKED = ("", "live", "sessions", "index", "pending", "hook_errors.log", "mcp_calls.jsonl", "hook_timing.log",
+LINK_CHECKED = ("", "live", "sessions", "index", "pending", "hook_errors.log", "mcp_calls.jsonl", "packs.jsonl",
+                "hook_timing.log",
                 "config.json", "PROJECT.md", "index/index.db", "index/index.db-wal", "index/index.db-shm",
                 "index/vectors.db", "index/map.json")
 

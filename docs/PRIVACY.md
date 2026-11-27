@@ -333,7 +333,7 @@ a lowercase word is not.
 - `.devmemory/.gitignore` ignores the whole store, and `devmem status` and `devmem doctor` tell you whether git
   would pick it up. The scan skips files git ignores, a built-in list of build and cache folders, `.claude/`, and
   secret-looking files; add patterns to `.devmemory/ignore`.
-- Switches in `.devmemory/config.json`: `"capture": false` records no prompts, tool calls or session records (the setting
+- Switches in `.devmemory/config.json`: `"capture": false` records no prompts, tool calls, session records or pack-log lines (the setting
   applies to the hooks; devmem itself sets `DEVMEM_NO_CAPTURE` for sessions it launches and records itself). The
   pack is still delivered unless `deliver` is also false, and for that devmem keeps a small per-session state
   file, `.devmemory/live/<session>.state.json`, with which context was already sent (no prompt or tool text), `"deliver": false` stops adding the
@@ -367,7 +367,10 @@ a lowercase word is not.
   raw records, live logs and their state files (also a record that no longer loads: a torn `.meta.json`, a raw record
   left without one, a state file without a log; files are matched by the session id in their names), and print every
   file deleted. All three also delete the MCP call log, if you switched it on: its lines carry no session id, so they
-  cannot be matched to a session. `--all` also deletes every pending `begin` snapshot.
+  cannot be matched to a session. From the pack log (`packs.jsonl`, one line per prompt) they remove the chosen
+  sessions' lines, and from other sessions' lines every item a chosen session supplied (the line then counts them in
+  `forgotten_items`); a pack log too long to read whole is deleted instead, and `--all` deletes it. A line a hook
+  appends while `forget` rewrites the log can be lost. `--all` also deletes every pending `begin` snapshot.
   Deleted sessions are removed from the search index, and the command then scrubs the index: `secure_delete` is on
   for every index connection, the first forget on an index written by an older version vacuums it once, and a
   truncating checkpoint clears the write-ahead log; the vector cache is vacuumed too. The scrub waits at most a few

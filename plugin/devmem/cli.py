@@ -707,7 +707,7 @@ def cmd_forget(a) -> int:
             else:
                 n_files = len(S.forget_all_files(store))
                 what = (f"delete all {len(existing)} captured sessions: {n_files} file(s) in {store} (records, raw "
-                        "records, live logs, `devmem begin` snapshots and the MCP call log)")
+                        "records, live logs, `devmem begin` snapshots, the MCP call log and the pack log)")
                 from .consent import store_refusal
                 if n_files and store_refusal(project, store):
                     what += ("; its sessions are not counted because the store is not known to be yours (`devmem "
@@ -731,8 +731,59 @@ def cmd_forget(a) -> int:
         _say(f"  session {sid}")
     for p in result["removed"]:
         _say(f"  deleted {p}")
+    pl = result.get("pack_log") or {}
+    if pl.get("deleted"):
+        _say("  deleted the pack log (packs.jsonl): it could not be read whole")
+    elif pl.get("lines_removed") or pl.get("lines_changed"):
+        _say(f"  pack log (packs.jsonl): {pl.get('lines_removed', 0)} line(s) removed, "
+             f"{pl.get('lines_changed', 0)} line(s) lost items of the forgotten session(s)")
     if not result["removed"]:
         _say("  (nothing matched)")
+    return 0
+
+
+def cmd_packs(a) -> int:
+    """The pack log: one row per prompt of a recorded session, what its pack carried or why it had none."""
+    from . import sessions as S
+    project = _project(a)
+    store = _lookup_store(a, project)
+    if store is None:
+        return _not_set_up(a, project)
+    info: dict = {}
+    rows = [e for e in S.read_events(store / S.PACK_LOG, info) if isinstance(e, dict)]
+    if a.session:
+        rows = [e for e in rows if str(e.get("session_id") or "").startswith(a.session)]
+    if a.json:
+        for e in rows[-a.limit:] if a.limit else rows:
+            term.raw(json.dumps(e, ensure_ascii=False) + "\n")
+        return 0
+    if not rows:
+        _say("no prompts in the pack log yet" + (f" for session {a.session}" if a.session else "")
+             + " (it is written by the hooks of a recorded session, one line per prompt)")
+        return 0
+    served = [e for e in rows if e.get("keys")]
+    tokens = sum(e["tokens_est"] for e in served if isinstance(e.get("tokens_est"), int))
+    _say(f"{len(rows)} prompt(s), {len(served)} with a pack ({100 * len(served) // len(rows)}%), "
+         f"about {tokens} tokens added in all")
+    shown = rows[-a.limit:] if a.limit else rows
+    if len(shown) < len(rows):
+        _say(f"the last {len(shown)} (--limit 0 for all):")
+    for e in shown:
+        when = str(e.get("ts") or "")[:19].replace("T", " ")
+        turn = e.get("turn")
+        head = f"{when}  {str(e.get('session_id') or '?')[:8]}  turn {turn + 1 if isinstance(turn, int) else '?'}"
+        keys = [str(k) for k in e.get("keys") or [] if isinstance(k, str)] if isinstance(e.get("keys"), list) else []
+        if keys:
+            line = f"{head}  ~{e.get('tokens_est', '?')} tokens, {len(keys)} item(s): {', '.join(keys)}"
+            if e.get("cut"):
+                line += " (cut at the hook output limit)"
+        else:
+            line = f"{head}  empty: {e.get('empty_reason') or 'no items'}"
+        if e.get("forgotten_items"):
+            line += f" [{e['forgotten_items']} item(s) of a forgotten session removed]"
+        _say(line)
+    if not info.get("complete", True):
+        _say("(the log is longer than devmem reads at once; the rows above are its beginning)")
     return 0
 
 
@@ -1414,6 +1465,11 @@ def build_parser() -> argparse.ArgumentParser:
     p = add("show", "print one recorded session turn by turn, each text labelled with who wrote it (what the MCP tool "
             "read_session returns)", "  devmem show 3f9a1c", plugin=True)
     p.add_argument("id", help="session id prefix (see `devmem sessions`)")
+    p = add("packs", "list what the context pack of each recorded prompt carried, or why it was empty (the pack log, "
+            ".devmemory/packs.jsonl)", "  devmem packs\n  devmem packs --session 3f9a1c --limit 0", plugin=True)
+    p.add_argument("--session", metavar="PREFIX", help="only this session (id prefix)")
+    p.add_argument("--limit", type=_ranged(0, 1_000_000), default=50, help="show the last N prompts (default 50; 0: all)")
+    p.add_argument("--json", action="store_true", help="print the log's lines as JSON, one per line")
 
     p = add("pack", "print the context pack for a task", '  devmem pack "add a dash cooldown"\n'
             '  devmem pack "fix the login bug" --budget 800 --out pack.md', plugin=True)

@@ -112,7 +112,7 @@ class NotAStoreError(StoreRefused):
 
 # what devmem itself puts at the top of a store (anything else means the folder is something else)
 STORE_ENTRIES = {".gitignore", "PROJECT.md", "config.json", "ignore", "redact", "hook_errors.log", "hook_timing.log",
-                 "mcp_calls.jsonl", "index", "live", "sessions", "pending", "pending.json", "connect-backups",
+                 "mcp_calls.jsonl", "packs.jsonl", "index", "live", "sessions", "pending", "pending.json", "connect-backups",
                  "init-backups"}
 
 

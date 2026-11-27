@@ -20,6 +20,14 @@ Captured, when the hooks are installed:
   continues, and SessionEnd, or finalising a session that ended without one, reads one more such part). Text left out (a very long reply at the end of a session, a
   single transcript line over 2 MB) is named in the record's `transcript_gaps`, which `devmem show` and the viewer
   display; each text is capped at 4,000 characters and flagged when cut.
+- for each prompt, one line in `.devmemory/packs.jsonl`, the pack log (`devmem packs` lists it): the time, session
+  id, turn and prompt id, the pack mode, the pack's estimated tokens and length in characters, the keys of the items
+  it carried (`session:<first 8 characters of a session id>`, `req:<first 10 hex digits of a SHA-256 of the
+  requirement's text>`, `file:<path>`, `conventions`) with the session that supplied each session and requirement
+  item, or the reason the pack was empty (no evidence in the prompt, everything already sent, delivery off, nothing
+  served because the store is not known to be yours). No prompt text and no pack text. It is written through the
+  same redaction step as everything else; with `"capture": false` no line is written, and `devmem pack` and the MCP
+  server do not write to it.
 
 Not captured:
 

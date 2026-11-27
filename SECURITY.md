@@ -70,7 +70,9 @@ is built to keep:
   keys of terminal tools, but not a name the command computes (`cat $(ls | grep env)`, `'.e' + 'nv'`) or a bare `*`;
   there, value redaction is the second layer.
 - **Everything else that is recorded passes a redaction step first**, at the point where it is written to the
-  store (every string of every record, whatever its field), and so do the project-file lines a context pack quotes.
+  store (every string of every record, whatever its field), and so do the project-file lines a context pack quotes
+  and the pack log (`packs.jsonl`: one line per prompt with the keys of the items its pack carried, never prompt or
+  pack text; `devmem forget` removes a forgotten session's lines and items from it).
   The rules also see JSON-serialised tool data as the plain text it holds (strings that sit next to each other, such
   as the lines of an Edit response's `structuredPatch` or a notebook's `source`, as one text, cut back into the
   strings by position so that no text moves from one string into another), lines as tools
