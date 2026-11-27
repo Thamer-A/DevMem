@@ -191,3 +191,15 @@ one re-run of arm D on all 24 scored tasks with two repeats (48 runs, owner's ye
 - Stated limitations: H06 reads "the two largest non-zero units" literally (1 h 0 m 5 s is "1h 5s"), so an agent
   that knows the requirement but reads it as "the largest unit and the next one" fails, in every arm alike.
   H04's character (•) and R9/R10 (Sunday weeks, KiB) are guessable at a low rate.
+
+**A4, 2026-11-27 (after Task 2's calibration sessions, before the replay and any run).**
+- `evals/gate/BASELINE-FACTS.md` records nine headless calibration sessions. Automatic memory is on in `-p`
+  sessions, is kept in each run's own configuration folder, and saves when the user asks for it outright; but in
+  the two sessions where the user stated a rule in passing, Claude saved nothing. The stop rule in section 10
+  ("automatic memory does not operate in headless sessions") was put to the owner, who chose to go on: the replay
+  runs as planned, and before Stage A the contents of the stock arm's replayed memory folder (which files, and which
+  requirement values they mention) are reported to the owner, who then decides on Stage A. Looking at the replayed
+  state shows no task result. Arm S stays "Claude Code as installed"; a stock arm told to save memory is not added.
+- Consequence, stated in the report: on this model and in headless sessions the stock arm's memory may hold few of
+  the history's requirements, so S may be close to a stock session without memory, and the room that threshold 1
+  measures may be larger than with interactive use.
