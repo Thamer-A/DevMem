@@ -23,3 +23,15 @@ harness is fixed and the stage restarts from its first run. Each entry says what
   model call, that Claude Code 2.1.332 then takes a dash-led prompt as the prompt. Only md2conf R04 starts with a
   dash, and it is an ordinary task, run first in Stage B: Stage A, the replay and the calibration sessions are not
   affected.
+
+## Stage B, attempt 2 (2026-11-27)
+
+- `B_bonsai-js_R03_D_r1_a1`: the session ended normally, then the runner crashed while taking the diff:
+  `git add -A -- . :(exclude).claude :(exclude).devmemory` fails with git 2.51 ("The following paths are ignored")
+  when `.claude` exists and a `.gitignore` lists it. bonsai-js's own `.gitignore` lists `.claude/`, and the DevMem
+  arm's settings create the folder, so every bonsai-js D run would have crashed there (Stage A's S and O runs have
+  no `.claude` folder in the working copy). The run is a harness failure (the working copy could not be graded),
+  logged on the next call and re-run once. 1 of 64 so far (1.6%), under the limit; the stage goes on.
+- Fix: `diff_against_start` adds everything and then resets `.claude` and `.devmemory` in the index to the starting
+  commit, which leaves them out of the diff as before; checked in scratch repositories with `.claude` ignored or
+  not, with a tracked file under it, and absent.

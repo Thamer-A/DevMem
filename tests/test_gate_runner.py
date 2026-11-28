@@ -194,6 +194,27 @@ def test_a_prompt_that_starts_with_a_dash_is_passed_after_the_end_of_options(tmp
     assert argv.index("-p") < argv.index("--allowedTools") < argv.index("--")
 
 
+@pytest.mark.parametrize("ignored", [True, False])
+def test_the_diff_leaves_out_claude_and_devmemory_even_when_the_repo_ignores_them(tmp_path, ignored):
+    work = tmp_path / "work"
+    (work / ".claude").mkdir(parents=True)
+    (work / "a.txt").write_text("a\n", encoding="utf-8")
+    (work / ".gitignore").write_text(".claude/\n" if ignored else "x\n", encoding="utf-8")   # bonsai-js lists .claude/
+    (work / ".claude" / "tracked.md").write_text("keep\n", encoding="utf-8")
+    _git(work, "init", "-q")
+    _git(work, "add", "-A", "-f")
+    _git(work, "-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-qm", "init")
+    (work / "a.txt").write_text("a\nb\n", encoding="utf-8")
+    (work / "new.txt").write_text("new\n", encoding="utf-8")
+    (work / ".claude" / "settings.local.json").write_text("{}\n", encoding="utf-8")   # a DevMem arm's hooks
+    (work / ".claude" / "tracked.md").write_text("changed\n", encoding="utf-8")
+    (work / ".devmemory").mkdir()
+    (work / ".devmemory" / "x.json").write_text("{}\n", encoding="utf-8")
+    diff = R.diff_against_start(work)
+    assert "a/a.txt" in diff and "b/new.txt" in diff
+    assert ".claude" not in diff and ".devmemory" not in diff
+
+
 def test_the_oracle_arm_gets_the_requirement_in_its_prompt(gate):
     assert _run(gate, "--stage", "orc", "--arms", "S,O", "--kinds", "history", "--repeats", "1", "--confirm", "2") == 0
     by_arm = {r["arm"]: r for r in _rows(gate, "orc")}

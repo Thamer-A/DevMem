@@ -269,9 +269,12 @@ def harness_failure(m: dict) -> str | None:
 
 
 def diff_against_start(work: Path) -> str:
-    # node_modules is left out by .git/info/exclude (workspace.base); naming it in an exclude pathspec as well makes
-    # `git add` fail ("paths are ignored", exit 1, git 2.51) whenever the link is there, as in every Node run.
-    W.git(work, "add", "-A", "--", ".", ":(exclude).claude", ":(exclude).devmemory")
+    # No exclude pathspecs: git 2.51 fails `git add` ("paths are ignored", exit 1) when one names a path that exists
+    # and that a .gitignore ignores: node_modules (left out by .git/info/exclude, workspace.base) and .claude, which
+    # bonsai-js's own .gitignore lists and a DevMem arm's settings create. Everything is added, then .claude and
+    # .devmemory are put back to the starting commit in the index, so the diff leaves them out as before.
+    W.git(work, "add", "-A", "--", ".")
+    W.git(work, "reset", "-q", "--", ".claude", ".devmemory")
     return W.git(work, "diff", "--cached", "HEAD")
 
 
