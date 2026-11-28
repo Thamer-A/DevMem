@@ -375,6 +375,21 @@ def test_preregistered_run_counts(tmp_path, monkeypatch):
     assert a1 == a2 and [r["arm"] for r in a1[:8]] != ["S"] * 8      # seeded, interleaved
 
 
+def test_a_tuning_stage_runs_the_tuning_tasks_and_never_a_scored_one(tmp_path, monkeypatch):
+    tasks, tuning = tmp_path / "tasks", tmp_path / "tuning"
+    for top, tid, kind in ((tasks, "H01", "history"), (tasks, "R01", "ordinary"), (tuning, "T01", "tuning"),
+                           (tuning, "T02", "tuning")):
+        (top / "one" / tid).mkdir(parents=True)
+        (top / "one" / tid / "task.json").write_text(json.dumps({"id": tid, "kind": kind}))
+    monkeypatch.setattr(W, "TASKS", tasks)
+    monkeypatch.setattr(W, "TUNING", tuning)
+    runs = R.plan("tuning1", ["one"], 2, arms=["S", "D"])
+    assert sorted({r["task"] for r in runs}) == ["T01", "T02"] and len(runs) == 8
+    assert all(R.task_dir(r) == tuning / "one" / r["task"] for r in runs)
+    assert {r["task"] for r in R.plan("retry", ["one"], 2)} == {"H01", "R01"}
+    assert R.task_dir({"stage": "retry", "repo": "one", "task": "H01"}) == tasks / "one" / "H01"
+
+
 @pytest.mark.parametrize("m, why", [
     ({"has_result": True, "is_error": False, "subtype": "success"}, None),
     ({"has_result": True, "is_error": True, "subtype": "error_max_turns"}, None),

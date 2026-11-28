@@ -86,15 +86,26 @@ def repos_present() -> list[str]:
     return sorted(p.parent.name for p in W.TASKS.glob("*/repo.json"))
 
 
+def is_tuning(stage: str) -> bool:
+    """A stage named tuning... runs the tuning tasks (evals/gate/tuning), never the scored ones: the one retry's fixes
+    are developed on them (PREREGISTRATION.md section 9). Their rows are not part of any analysis."""
+    return stage.startswith("tuning")
+
+
+def task_dir(spec: dict) -> Path:
+    return (W.TUNING if is_tuning(spec["stage"]) else W.TASKS) / spec["repo"] / spec["task"]
+
+
 def plan(stage: str, repos: list[str], repeats: int, arms: list[str] | None = None,
          kinds: list[str] | None = None, tasks: list[str] | None = None, seed: int | None = None) -> list[dict]:
     """Every run of a stage, in the pre-registered order (a seeded shuffle that interleaves arms)."""
-    pairs = STAGES.get(stage) or [(a, k) for a in (arms or ["S"]) for k in (kinds or ["history", "ordinary"])]
+    default_kinds = ["tuning"] if is_tuning(stage) else ["history", "ordinary"]
+    pairs = STAGES.get(stage) or [(a, k) for a in (arms or ["S"]) for k in (kinds or default_kinds)]
     if arms:
         pairs = [(a, k) for a, k in pairs if a in arms] if stage in STAGES else pairs
     runs = []
     for repo in repos:
-        for d in W.task_dirs(repo):
+        for d in W.task_dirs(repo, tuning=is_tuning(stage)):
             t = W.load_task(d)
             if tasks and t["id"] not in tasks:
                 continue
@@ -305,7 +316,7 @@ def deps_changed(deps_dir: Path, before: str | None) -> bool | None:
 def one_run(spec: dict, root: Path, results: Path, cmd: list[str], version: str, frozen: bool, fake: bool,
             attempt: int, keep_work: bool) -> dict:
     cfg = W.load_repo(spec["repo"])
-    task = W.load_task(W.TASKS / spec["repo"] / spec["task"])
+    task = W.load_task(task_dir(spec))
     arm = ARMS[spec["arm"]]
     run_id = f"{spec['stage']}_{spec['repo']}_{spec['task']}_{spec['arm']}_r{spec['repeat']}_a{attempt}"
     deps_dir = W.deps(cfg, root)
@@ -393,7 +404,7 @@ def recover_interrupted(root: Path, results: Path, out: Path, runs: list[dict], 
     elif (logs / "prompt.txt").is_file():
         nxt = next((r for r in runs if run_key(r) not in done), None)
         if nxt is not None:
-            task = W.load_task(W.TASKS / nxt["repo"] / nxt["task"])
+            task = W.load_task(task_dir(nxt))
             want = RUNNER["oracle_wrapper"].format(oracle=task["oracle"], prompt=task["prompt"]) \
                 if ARMS[nxt["arm"]]["oracle"] else task["prompt"]
             if (logs / "prompt.txt").read_text(encoding="utf-8") == want:
@@ -404,7 +415,7 @@ def recover_interrupted(root: Path, results: Path, out: Path, runs: list[dict], 
     prev = done.get(run_key(spec))
     if prev is not None and prev.get("attempt", 1) >= spec["attempt"]:
         return None                       # that run finished; the folder is only a leftover
-    task = W.load_task(W.TASKS / spec["repo"] / spec["task"])
+    task = W.load_task(task_dir(spec))
     row = {**{k: spec.get(k) for k in ("stage", "repo", "task", "arm", "repeat", "order")},
            "attempt": spec["attempt"], "run_id": spec["run_id"], "ts": now(), "kind": task["kind"], "passed": False,
            "harness_failure": INTERRUPTED, "recovered": True, "model_requested": RUNNER["model"]}
