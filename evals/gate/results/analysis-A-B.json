@@ -1,0 +1,149 @@
+{
+  "stages": {
+    "A": {
+      "planned": 64,
+      "runs": 64,
+      "harness_failures": 1,
+      "unresolved": 0,
+      "harness_share": 0.015625,
+      "over_limit": false
+    },
+    "B": {
+      "planned": 64,
+      "runs": 64,
+      "harness_failures": 1,
+      "unresolved": 0,
+      "harness_share": 0.015625,
+      "over_limit": false
+    }
+  },
+  "pass_rates": {
+    "D/history": {
+      "tasks": 16,
+      "runs": 32,
+      "passed": 28,
+      "rate": 0.875,
+      "ci95": [
+        0.6875,
+        1.0
+      ],
+      "median_price_weighted": 301163.8
+    },
+    "D/ordinary": {
+      "tasks": 8,
+      "runs": 16,
+      "passed": 16,
+      "rate": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ],
+      "median_price_weighted": 224226.05
+    },
+    "O/history": {
+      "tasks": 16,
+      "runs": 32,
+      "passed": 32,
+      "rate": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ],
+      "median_price_weighted": 363601.35
+    },
+    "S/history": {
+      "tasks": 16,
+      "runs": 32,
+      "passed": 23,
+      "rate": 0.7188,
+      "ci95": [
+        0.5,
+        0.9062
+      ],
+      "median_price_weighted": 355628.6
+    },
+    "S/ordinary": {
+      "tasks": 8,
+      "runs": 16,
+      "passed": 16,
+      "rate": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ],
+      "median_price_weighted": 244791.95
+    }
+  },
+  "paired": {
+    "O": {
+      "arm": "O",
+      "kind": "history",
+      "tasks": 16,
+      "gain_points": 28.12,
+      "p": 0.0625,
+      "d": {
+        "bonsai-js/H01": 0,
+        "bonsai-js/H02": 0.5,
+        "bonsai-js/H03": 0,
+        "bonsai-js/H04": 0,
+        "bonsai-js/H05": 0,
+        "bonsai-js/H06": 0,
+        "bonsai-js/H07": 0,
+        "bonsai-js/H08": 1,
+        "md2conf/H01": 1,
+        "md2conf/H02": 0,
+        "md2conf/H03": 0,
+        "md2conf/H04": 1,
+        "md2conf/H05": 1,
+        "md2conf/H06": 0,
+        "md2conf/H07": 0,
+        "md2conf/H08": 0
+      }
+    },
+    "D": {
+      "arm": "D",
+      "kind": "history",
+      "tasks": 16,
+      "gain_points": 15.62,
+      "p": 0.453125,
+      "d": {
+        "bonsai-js/H01": 0,
+        "bonsai-js/H02": 0.5,
+        "bonsai-js/H03": 0,
+        "bonsai-js/H04": 0,
+        "bonsai-js/H05": 0,
+        "bonsai-js/H06": 0,
+        "bonsai-js/H07": 0,
+        "bonsai-js/H08": 1,
+        "md2conf/H01": 1,
+        "md2conf/H02": 0,
+        "md2conf/H03": -1,
+        "md2conf/H04": 1,
+        "md2conf/H05": 1,
+        "md2conf/H06": 0,
+        "md2conf/H07": -1,
+        "md2conf/H08": 0
+      }
+    }
+  },
+  "thresholds": {
+    "1_room": {
+      "holds": true,
+      "rule": "O beats S by at least 20 points on the history tasks",
+      "O_gain_points": 28.12
+    },
+    "2_delivery": {
+      "holds": false,
+      "size": true,
+      "share_of_O": false,
+      "p_below_alpha": false,
+      "D_gain_points": 15.62,
+      "p": 0.453125
+    },
+    "3_no_harm": {
+      "holds": true,
+      "S_minus_D_passes": 0,
+      "tokens_ratio": 0.916
+    }
+  }
+}
